@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "module": "system",
+        "target": "es3",
+        "noImplicitAny": false,
+        "sourceMap": false,
+        "sourceRoot": "${workspaceRoot}/src",
+        "outDir": "dist"
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}
