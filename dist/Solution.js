@@ -15,7 +15,7 @@ var Solution = (function () {
     }
     Solution.prototype.inlineCheckers = function () {
         // 面板处理器，使用Solution中的解决方案
-        this.regPanelChecker(new ComWillCheck(ExportType.Container, /^ui[.].*?[.].*?(Panel|Dele)$/, this.getPanelData));
+        this.regPanelChecker(new ComWillCheck(ExportType.Container, /^ui[.].*?[.].*?(Panel|Dele)$/, this.getPanelData.bind(this)));
     };
     /**
      * 注册控件检查器
