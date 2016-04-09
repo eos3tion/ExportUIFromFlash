@@ -17,6 +17,7 @@ var ComWillCheck = (function () {
         this.parseHandler = parseHandler;
         this.dict = {};
         this.classNames = [];
+        this.sizes = [];
         this.idx = 0;
         this.componentName = componentName;
     }
@@ -35,12 +36,13 @@ var ComWillCheck = (function () {
      *
      * @param {FlashItem} item
      */
-    ComWillCheck.prototype.add = function (item) {
+    ComWillCheck.prototype.add = function (item, size) {
         this.dict[item.name] = item;
         var idx = this.idx++;
         item.$idx = idx;
         item.$key = this.key;
         this.classNames[idx] = item.linkageClassName;
+        this.sizes[idx] = size;
     };
     /**
      * 遍历当前类型所有的控件

@@ -12,6 +12,8 @@ var FLExternal = (function () {
         var command = "cd /d " + path + "\n" + "pngquant.exe " + name + " -f --ext .png";
         FLfile.write(cwd + "tmp.bat", command);
         FLfile.runCommandLine(path + "tmp.bat");
+        // 删除临时文件
+        FLfile.remove(cwd + "tmp.bat");
         Log.trace(cwd + "tmp.bat");
         Log.trace(command);
     };

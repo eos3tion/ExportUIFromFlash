@@ -36,7 +36,7 @@ class JunyouH5Generator implements IPanelGenerator {
     /**
      * 生成面板代码
      */
-    generateOnePanel(className: string, pInfo: any[]) {
+    generateOnePanel(className: string, pInfo: any[], size: number[]) {
         let result = /^ui[.](.*?)[.](.*?(Panel|Dele))$/.exec(className);
 		// /^ui[.](.*?)[.]((.*?)(Panel|Dele))$/.exec("ui.ShangCheng.ShangChengPanel")
 		// ["ui.ShangCheng.ShangChengPanel", "ShangCheng", "ShangChengPanel", "ShangCheng", "Panel"]
@@ -68,7 +68,7 @@ class JunyouH5Generator implements IPanelGenerator {
             let classStr = classes[panelName];
             delete classes[panelName];
             classStr = classStr.replace("@className@", className)
-            .replace("@otherDepends@", otherDepends);
+            .replace("@otherDepends@", otherDepends).replace("@baseRect@", size.join(","));
             let str = "module " + moduleName + "{\r\nimport sui = junyou.sui;\r\n" + classStr + "\r\n";
             for (let className in classes) {
                 str += classes[className] + "\r\n";

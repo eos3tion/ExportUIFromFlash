@@ -35,7 +35,7 @@ var Solution = (function () {
         for (var ckey in checkers) {
             var checker = checkers[ckey];
             if (checker.check(item)) {
-                checker.add(item);
+                checker.add(item, this.getItemSize(item));
                 break;
             }
         }
@@ -85,7 +85,7 @@ var Solution = (function () {
                 var list = [];
                 // 0 类名字的数组
                 // 1 对应索引的数据
-                data[ckey] = [checker.classNames, list];
+                data[ckey] = [checker.classNames, list, checker.sizes];
                 checker.forEach(checker.parseHandler, this, list);
             }
         }
@@ -266,6 +266,7 @@ var Solution = (function () {
             depthEles[idx] = item.data;
         });
         if (list) {
+            // 在 0 号位增加FlashItem的宽度和高度数据，方便在未加载到底图时候渲染
             list.push(depthEles);
         }
         return depthEles;
@@ -286,13 +287,34 @@ var Solution = (function () {
             var pData = panelsData[type];
             var panelsName = pData[0];
             var panelsInfo = pData[1];
+            var panelsSize = pData[2];
             var len = panelsName.length;
             for (var i = 0; i < len; i++) {
                 var name_1 = panelsName[i];
                 var pInfo = panelsInfo[i];
-                generator.generateOnePanel(name_1, pInfo);
+                var sizeInfo = panelsSize[i];
+                generator.generateOnePanel(name_1, pInfo, sizeInfo);
             }
         }
+    };
+    /**
+     * 获取元件大小，方便在未加载到图片之前，先用绘图指令渲染一个底
+     *
+     * @private
+     * @param {FlashItem} item
+     * @returns {number[]} [0] 宽度  [1] 高度
+     */
+    Solution.prototype.getItemSize = function (item) {
+        // 无法直接得到Item大小，先将Item加入到舞台，选中获取大小
+        // 测量物品大小
+        lib.editItem(item.name);
+        dom.selectAll();
+        var rect = dom.getSelectionRect();
+        var w = rect.right - rect.left;
+        var h = rect.bottom - rect.top;
+        // 将加入到舞台的临时元件删除
+        dom.exitEditMode();
+        return [rect.left, rect.top, w, h];
     };
     /**
      * 尝试运行

@@ -58,7 +58,7 @@ class Solution {
         for (let ckey in checkers) {
             let checker = checkers[ckey];
             if (checker.check(item)) {
-                checker.add(item);
+                checker.add(item, this.getItemSize(item));
                 break;
             }
         }
@@ -112,7 +112,7 @@ class Solution {
                 let list = [];
                 // 0 类名字的数组
                 // 1 对应索引的数据
-                data[ckey] = [checker.classNames, list];
+                data[ckey] = [checker.classNames, list, checker.sizes];
                 checker.forEach(checker.parseHandler, this, list);
             }
         }
@@ -258,7 +258,7 @@ class Solution {
         let timeline = item.timeline;
         let layers = timeline.layers;
         let name = item.name;
-        let depthEles:DepthEleData[] = [];
+        let depthEles: DepthEleData[] = [];
         let pi = 0;
         lib.editItem(name); // 坑爹的，不进入编辑模式，无法取得depth
         // 从最底层往上遍历
@@ -297,7 +297,8 @@ class Solution {
             depthEles[idx] = item.data;
         });
         if (list) {
-            list.push(depthEles);
+            // 在 0 号位增加FlashItem的宽度和高度数据，方便在未加载到底图时候渲染
+            list.push( depthEles);
         }
         return depthEles;
     }
@@ -317,14 +318,35 @@ class Solution {
             let pData = panelsData[type];
             let panelsName = pData[0];
             let panelsInfo = pData[1];
-
+            let panelsSize = pData[2];
             let len = panelsName.length;
             for (let i = 0; i < len; i++) {
                 let name: string = panelsName[i];
                 let pInfo: any[] = panelsInfo[i];
-                generator.generateOnePanel(name, pInfo);
+                let sizeInfo: number[] = panelsSize[i];
+                generator.generateOnePanel(name, pInfo, sizeInfo);
             }
         }
+    }
+
+    /**
+     * 获取元件大小，方便在未加载到图片之前，先用绘图指令渲染一个底
+     * 
+     * @private
+     * @param {FlashItem} item 
+     * @returns {number[]} [0] 宽度  [1] 高度
+     */
+    private getItemSize(item: FlashItem): number[] {
+        // 无法直接得到Item大小，先将Item加入到舞台，选中获取大小
+        // 测量物品大小
+        lib.editItem(item.name);
+        dom.selectAll();
+        let rect = dom.getSelectionRect();
+        let w = rect.right - rect.left;
+        let h = rect.bottom - rect.top;
+        // 将加入到舞台的临时元件删除
+        dom.exitEditMode();
+        return [rect.left, rect.top, w, h];
     }
 
 

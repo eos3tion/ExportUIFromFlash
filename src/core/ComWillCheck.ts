@@ -30,6 +30,10 @@ class ComWillCheck {
      */
     public classNames: string[];
     /**
+     * 控件大小的数组
+     */
+    public sizes: number[][];
+    /**
      * 当前索引
      */
     public idx: number;
@@ -51,6 +55,7 @@ class ComWillCheck {
         this.parseHandler = parseHandler;
         this.dict = {};
         this.classNames = [];
+        this.sizes = [];
         this.idx = 0;
         this.componentName = componentName;
     }
@@ -70,12 +75,13 @@ class ComWillCheck {
      * 
      * @param {FlashItem} item
      */
-    public add(item: FlashItem) {
+    public add(item: FlashItem , size: number[]) {
         this.dict[item.name] = item;
         let idx = this.idx++;
         item.$idx = idx;
         item.$key = this.key;
         this.classNames[idx] = item.linkageClassName;
+        this.sizes[idx] = size;
     }
     /**
      * 遍历当前类型所有的控件

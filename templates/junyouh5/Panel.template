@@ -14,6 +14,7 @@ export class @panelName@ extends sui.Panel {
     protected init() {
         this._key = "@lib@";
         this._className = "@className@";
+        this._baseRect = new egret.Rectangle(@baseRect@);
         @otherDepends@
     }
 

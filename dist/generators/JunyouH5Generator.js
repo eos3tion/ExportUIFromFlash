@@ -16,7 +16,7 @@ var JunyouH5Generator = (function () {
     /**
      * 生成面板代码
      */
-    JunyouH5Generator.prototype.generateOnePanel = function (className, pInfo) {
+    JunyouH5Generator.prototype.generateOnePanel = function (className, pInfo, size) {
         var result = /^ui[.](.*?)[.](.*?(Panel|Dele))$/.exec(className);
         // /^ui[.](.*?)[.]((.*?)(Panel|Dele))$/.exec("ui.ShangCheng.ShangChengPanel")
         // ["ui.ShangCheng.ShangChengPanel", "ShangCheng", "ShangChengPanel", "ShangCheng", "Panel"]
@@ -47,7 +47,7 @@ var JunyouH5Generator = (function () {
             var classStr = classes[panelName];
             delete classes[panelName];
             classStr = classStr.replace("@className@", className)
-                .replace("@otherDepends@", otherDepends);
+                .replace("@otherDepends@", otherDepends).replace("@baseRect@", size.join(","));
             var str = "module " + moduleName + "{\r\nimport sui = junyou.sui;\r\n" + classStr + "\r\n";
             for (var className_1 in classes) {
                 str += classes[className_1] + "\r\n";

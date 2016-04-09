@@ -9,6 +9,7 @@ interface IPanelGenerator {
        data[1] BaseData         基础数据
        data[2] ComponentData    组件数据
        data[3] lib              组件对应的库
+       @param {number[]} sizes size大小
      */
-    generateOnePanel(className: string, data: any[]);
+    generateOnePanel(className: string, data: any[], sizes: number[]);
 }
