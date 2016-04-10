@@ -11,6 +11,7 @@ class @panelName@ extends egret.Sprite {
     constructor() {
         super();
         this.init();
+        this.bindComponents();
     }
 
     protected init() {
