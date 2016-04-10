@@ -117,6 +117,7 @@ class JunyouH5Generator implements IPanelGenerator {
                     let cName = panelName + "_" + idx;
                     this.generateClass(this._containerTmp, cName, data[2], classInfo);
                     comps.push("dis = new " + cName + "();");
+                    comps.push("sui.SuiResManager.initBaseData(dis, " + JSON.stringify(baseData) + ");");
                     comps.push("this.addChild(dis);");
                     if (instanceName) {
                         pros.push("public " + instanceName + ":" + cName + ";");
