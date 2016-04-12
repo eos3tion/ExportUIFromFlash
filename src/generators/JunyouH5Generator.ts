@@ -60,6 +60,7 @@ class JunyouH5Generator implements IPanelGenerator {
             // template;
             let classInfo = {classes: {}, depends: []};
             let classes = classInfo.classes;
+            let createtime = new Date().format("yyyy-MM-dd HH:mm:ss");
             this.generateClass(this._panelTmp, panelName, pInfo, classInfo);
             let otherDepends = "";
             if (classInfo.depends.length) {
@@ -74,11 +75,11 @@ class JunyouH5Generator implements IPanelGenerator {
                 str += classes[className] + "\r\n";
             }
             str += "\r\n}\r\n";
-            FLfile.write(modFolder + "/" + panelName + ".ts", str);
+            FLfile.write(modFolder + "/" + panelName + ".ts", str.replace(/@createTime@/g,createtime));
             // 生成mediator
             let mediatorName = panelName + "Mediator";
             str = "module " + moduleName + "{\r\n" + this._mediatorTmp.replace("@mediatorName@", mediatorName)
-            .replace(/@panelName@/g, panelName) + "\r\n}\r\n";
+            .replace(/@panelName@/g, panelName).replace(/@createTime@/g,createtime) + "\r\n}\r\n";
             let mediatorOut = modFolder + "/" + mediatorName  + ".ts";
             let flag = true;
             if (FLfile.exists(mediatorOut)) {

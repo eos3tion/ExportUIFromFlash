@@ -39,6 +39,7 @@ var JunyouH5Generator = (function () {
             // template;
             var classInfo = { classes: {}, depends: [] };
             var classes = classInfo.classes;
+            var createtime = new Date().format("yyyy-MM-dd HH:mm:ss");
             this.generateClass(this._panelTmp, panelName, pInfo, classInfo);
             var otherDepends = "";
             if (classInfo.depends.length) {
@@ -53,11 +54,11 @@ var JunyouH5Generator = (function () {
                 str += classes[className_1] + "\r\n";
             }
             str += "\r\n}\r\n";
-            FLfile.write(modFolder + "/" + panelName + ".ts", str);
+            FLfile.write(modFolder + "/" + panelName + ".ts", str.replace(/@createTime@/g, createtime));
             // 生成mediator
             var mediatorName = panelName + "Mediator";
             str = "module " + moduleName + "{\r\n" + this._mediatorTmp.replace("@mediatorName@", mediatorName)
-                .replace(/@panelName@/g, panelName) + "\r\n}\r\n";
+                .replace(/@panelName@/g, panelName).replace(/@createTime@/g, createtime) + "\r\n}\r\n";
             var mediatorOut = modFolder + "/" + mediatorName + ".ts";
             var flag = true;
             if (FLfile.exists(mediatorOut)) {
