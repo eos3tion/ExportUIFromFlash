@@ -16,7 +16,6 @@ function zeroize(value, length) {
     }
     return zeros + str;
 }
-;
 /**
  * 替换字符串中{0}{1}{2}{a} {b}这样的数据，用obj对应key替换，或者是数组中对应key的数据替换
  */

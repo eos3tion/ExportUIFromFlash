@@ -15,7 +15,7 @@ function zeroize(value: number|string , length: number = 2): string {
         zeros += "0";
     }
     return zeros + str;
-};
+}
 /****************************************扩展String****************************************/
 interface String {
     /**
