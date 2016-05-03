@@ -10,4 +10,13 @@ class ExportType {
     public static Container = 2;
     /**按钮 */
     public static Button = 3;
+    
+    /**分页控件 */
+    
+    public static PageControll = 4;
+    
+    /****九宫图片 */
+    public static ScaleBmp = 5;
+    
+    public static ShapeNumber = 6;
 }
