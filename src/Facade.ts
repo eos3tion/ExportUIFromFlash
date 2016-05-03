@@ -15,6 +15,7 @@ let sol = new Solution();
 Script.runFolderScripts("parsers/junyouh5");
 //九宫元件
 sol.regComChecker(new ScaleBitmapParser());
+
 // 绑定按钮
 sol.regComChecker(new ButtonParser());
 //绑定分页控件

@@ -45,6 +45,7 @@ class ScaleBitmapParser extends ComWillCheck{
                 var gr=Math.round(gridRect.right);
                 var gb=Math.round(gridRect.bottom);
                 data[1]=[gx,gy,gr-gx,gb-gy];
+                
             }
     }
 }
