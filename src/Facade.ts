@@ -22,10 +22,17 @@ sol.regComChecker(new ButtonParser());
 //sol.regComChecker(new PageControlerParser());
 
 sol.regComChecker(new ShapeNumberParser());
+
+sol.regComChecker(new NumericStepperParser());
+
+sol.regComChecker(new SliderParser());
+
+sol.regComChecker(new ScrollBarParser());
 // 加载代码生成器
 Script.runScript("generators/JunyouH5Generator");
 // 注册生成器
 sol.generator = new JunyouH5Generator(sol);
+
 
 sol.run();
 

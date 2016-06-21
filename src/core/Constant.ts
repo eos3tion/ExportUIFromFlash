@@ -18,5 +18,12 @@ class ExportType {
     /****九宫图片 */
     public static ScaleBmp = 5;
     
-    public static ShapeNumber = 6;
+    public static ArtText = 6;
+    
+    public static NumericStepper = 7;
+    
+    public static Slider = 8;
+    
+    public static Scroll = 9;
+    
 }
