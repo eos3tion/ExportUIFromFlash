@@ -3,7 +3,7 @@
  */
 class ShapeNumberParser extends ComWillCheck {
     constructor() {
-       super(ExportType.ShapeNumber,/^bmd[.](number)/,null,"ShapeNumber");
+       super(ExportType.ArtText,/^bmd[.](arttext)/,null,"ArtText");
         this.parseHandler = this.shapeNumberParser;
     }
     
@@ -15,43 +15,52 @@ class ShapeNumberParser extends ComWillCheck {
         
         list[item.$idx]=data;
         
-        if(llen!=2)
+        if(llen>1)
         {
-            Log.throwError("shapenumber必须且只能有2个图层", item.name);
+            Log.throwError("ArtText必须且只能有1个图层", item.name);
             return;
         }
-        for(let i =0;i<llen;i++)
+  
+        let layer = layers[0];
+        let lname = layer.name;
+
+        let tempkey:string = "";
+        let flen = layer.frames.length;
+
+        let frame = layer.frames[0];
+        data[1]=0;
+
+        let elements = frame.elements;
+        let elen = elements.length;
+        for(let ei=0;ei<elen;ei++)
         {
-            let layer = layers[i];
-            let lname = layer.name;
-            if(lname ==="tf")
+            let ele = elements[ei];
+            let tempName:string;
+            if(ele && ele.elementType ==="instance" && ele.instanceType === "bitmap")
             {
-                let tf:FlashText = layer.frames[0].elements[0];
-                data[0] = tf.getTextString();
-            }
-            else
-            {
-                let flen = layer.frames.length;
-                for(let fi=0;fi<flen;fi++)
+                data[ei+1] = solution.getElementData(ele);
+                tempName = ele.libraryItem.name;
+                if(tempName.indexOf("/")!=-1)
                 {
-                    let frame = layer.frames[fi];
-                    data[fi+1]=0;
-                    if(frame.startFrame!=fi)
-                    {
-                        continue;
-                    }
-                    let elements = frame.elements;
-                    let elen = elements.length;
-                    for(let ei=0;ei<elen;ei++)
-                    {
-                        let ele = elements[ei];
-                        if(ele && ele.elementType ==="instance" && ele.instanceType === "bitmap")
-                        {
-                            data[fi+1] = solution.getElementData(ele);
-                        }
-                    }
+                    let arr = tempName.split("/");
+                    tempName = arr[arr.length-1];
                 }
+                if(tempName.indexOf(".")!=-1)
+                {
+                    tempName = tempName.split(".")[0];
+                }
+                if(tempName.length>1)
+                {
+                    Log.throwError("ArtText所引用的png的名字只能为单个字符", item.name,tempName);
+                }
+                else{
+                    tempkey += tempName;
+                }
+                
             }
         }
+
+        data[0] = tempkey;
+        
     }
 }

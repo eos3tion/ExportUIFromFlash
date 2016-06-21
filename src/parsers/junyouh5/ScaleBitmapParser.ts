@@ -1,7 +1,7 @@
 class ScaleBitmapParser extends ComWillCheck{
     constructor()
     {
-        super(ExportType.ScaleBmp,/^bmd[.](scb)/,null,"ScaleBitmap");
+        super(ExportType.ScaleBmp,/^bmd[.](scale9)/,null,"ScaleBitmap");
         this.parseHandler = this.scaleBitmapParser;
     }
     
