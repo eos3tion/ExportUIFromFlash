@@ -12,7 +12,6 @@ class ExportType {
     public static Button = 3;
 
     /**分页控件 */
-
     public static PageControll = 4;
 
     /****九宫图片 */
