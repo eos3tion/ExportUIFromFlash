@@ -39,7 +39,7 @@ class ProgressBarParser extends ComWillCheck {
                 if (barData)
                     barWidth = barData[1][3];
                 else
-                    Log.throwError("进度条宽度未设置，请确认", item.name);
+                    Log.throwError("进度条宽度未设置，请确认.", item.name);
             }
             else if (name === "bg") {
                 frame = layer.frames[0];
