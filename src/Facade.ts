@@ -28,6 +28,9 @@ sol.regComChecker(new NumericStepperParser());
 sol.regComChecker(new SliderParser());
 
 sol.regComChecker(new ScrollBarParser());
+
+// 绑定进度条
+sol.regComChecker(new ProgressBarParser());
 // 加载代码生成器
 Script.runScript("generators/JunyouH5Generator");
 // 注册生成器
