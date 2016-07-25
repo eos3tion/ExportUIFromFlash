@@ -25,5 +25,7 @@ class ExportType {
     public static Slider = 8;
     
     public static Scroll = 9;
+
+    public static SlotBg = 11;
     
 }
