@@ -382,4 +382,5 @@ class DepthEleData {
         this.idx = layerIdx * 10000 + (1000 - depth);
         this.data = data;
     }
+    
 }

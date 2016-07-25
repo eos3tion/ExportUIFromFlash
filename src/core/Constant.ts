@@ -28,4 +28,5 @@ class ExportType {
 
     public static SlotBg = 11;
     
+    
 }

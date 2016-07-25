@@ -30,6 +30,7 @@ sol.regComChecker(new SliderParser());
 sol.regComChecker(new ScrollBarParser());
 
 sol.regComChecker(new SlotBgParser());
+
 // 加载代码生成器
 Script.runScript("generators/JunyouH5Generator");
 // 注册生成器
