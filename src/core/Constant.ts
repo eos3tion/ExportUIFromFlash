@@ -25,8 +25,10 @@ class ExportType {
     public static Slider = 8;
     
     public static Scroll = 9;
-
-    public static SlotBg = 11;
+    /**进度条**/
+    public static ProgressBar = 10;
     
+    public static SlotBg = 11;
+
     
 }
