@@ -1,4 +1,4 @@
-interface ComWillCheckParser {(data: ComWillCheck, item: FlashItem, params: any[], solution: Solution): void; }
+interface ComWillCheckParser { (data: ComWillCheck, item: FlashItem, params: any[], solution: Solution): void; }
 
 /**
  * 带检测的控件的数据
@@ -22,7 +22,7 @@ class ComWillCheck {
      * Key      {string}        控件lib中的名字
      * Value    {FlashItem}     控件数据
      */
-    public dict: {[index: string]: FlashItem};
+    public dict: { [index: string]: FlashItem };
     /**
      * 导出名列表
      * Key      {number}        导出名的索引
@@ -32,7 +32,7 @@ class ComWillCheck {
     /**
      * 控件大小的数组
      */
-    public sizes: number[][];
+    public sizes: number[][] | number;
     /**
      * 当前索引
      */
@@ -49,7 +49,7 @@ class ComWillCheck {
      * @param {ComWillCheckParser} parseHandler 处理函数
      * @param {string} [componentName] 导出时的控件名称(控件有此值，面板没有)
      */
-    constructor(key: number, reg: RegExp, parseHandler: ComWillCheckParser , componentName?: string) {
+    constructor(key: number, reg: RegExp, parseHandler: ComWillCheckParser, componentName?: string) {
         this.key = key;
         this.reg = reg;
         this.parseHandler = parseHandler;
@@ -75,13 +75,13 @@ class ComWillCheck {
      * 
      * @param {FlashItem} item
      */
-    public add(item: FlashItem , size: number[]) {
+    public add(item: FlashItem, size: number[]) {
         this.dict[item.name] = item;
         let idx = this.idx++;
         item.$idx = idx;
         item.$key = this.key;
         this.classNames[idx] = item.linkageClassName;
-        this.sizes[idx] = size;
+        this.sizes[idx] = size || 0;
     }
     /**
      * 遍历当前类型所有的控件
@@ -94,7 +94,11 @@ class ComWillCheck {
         let dict = this.dict;
         for (let name in dict) {
             let item = dict[name];
-            handler(this, item, param, solution);
+            //Log.trace("try parse "+item.name);
+            if (!item.linkageImportForRS) {
+                //Log.trace("try parsing "+item.name);
+                handler(this, item, param, solution);
+            }
         }
     }
 }

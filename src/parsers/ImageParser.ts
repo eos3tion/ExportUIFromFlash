@@ -22,6 +22,9 @@ class ImageParser {
      * @param {ImageInfo[]} blocks 用于传出的ImageInfo对象
      */
     public checkItem(libItem: FlashItem, blocks: ImageInfo[]) {
+        if(libItem.linkageImportForRS){//原件是导入的，不检查 
+            return;
+        }
         let bitmaps = this.bitmaps;
         // 遍历timeline
         let timeline = libItem.timeline;
@@ -80,6 +83,9 @@ class ImageParser {
     public parse(packer: IBlockPacker, blocks: ImageInfo[]) {
         let results: Result[] = [];
         let len = blocks.length;
+        if(!len){//增加没有导出图片的情况
+            return undefined;
+        }
         // 先打乱顺序
         for (let ki = 0; ki < len; ki++) {
             let nb = this.idxHandler(ki, blocks);
