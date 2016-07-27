@@ -27,8 +27,8 @@ class ExportType {
     public static Scroll = 9;
     /**进度条**/
     public static ProgressBar = 10;
-    
+
     public static SlotBg = 11;
 
-    
+    public static ShareBmp = 12;
 }

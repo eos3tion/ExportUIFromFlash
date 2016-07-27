@@ -34,6 +34,8 @@ sol.regComChecker(new SlotBgParser());
 // 绑定进度条
 sol.regComChecker(new ProgressBarParser());
 
+sol.regComChecker(new ShareBitmapParser());
+
 // 加载代码生成器
 Script.runScript("generators/JunyouH5Generator");
 // 注册生成器
