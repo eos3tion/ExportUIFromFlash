@@ -35,16 +35,16 @@ class SlotBgParser extends ComWillCheck{
                  return;
             }
             let ele = elements[0];
-            if(ele.elementType ==="instance" && ele.instanceType ==="bitmap")
+            data[0]=0;
+            if(ele&&ele.elementType ==="instance" && ele.instanceType ==="bitmap")
             {
                 data[0] = solution.getElementData(ele);
-                let gridRect = item.scalingGridRect;
-                var gx=Math.round(gridRect.left);
-                var gy=Math.round(gridRect.top);
-                var gr=Math.round(gridRect.right);
-                var gb=Math.round(gridRect.bottom);
-                data[1]=[gx,gy,gr-gx,gb-gy];
-                
             }
+            let gridRect = item.scalingGridRect;
+            var gx=Math.round(gridRect.left);
+            var gy=Math.round(gridRect.top);
+            var gr=Math.round(gridRect.right);
+            var gb=Math.round(gridRect.bottom);
+            data[1]=[gx,gy,gr-gx,gb-gy];
     }
 }
