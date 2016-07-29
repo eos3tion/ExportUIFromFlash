@@ -1,6 +1,6 @@
 class ScrollBarParser extends ComWillCheck{
     constructor(){
-        super(ExportType.Scroll,/^ui[.](scroll)/,null,"ScrollBar");
+        super(ExportType.Scroll,/^ui[.](scroll)/,null,"sui.ScrollBar");
         this.parseHandler = this.scrollBarParser;
     }
     

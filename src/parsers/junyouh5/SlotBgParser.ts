@@ -1,6 +1,6 @@
 class SlotBgParser extends ComWillCheck{
     constructor(){
-        super(ExportType.SlotBg,/^bmd[.](slotbg)/,null,"SlotBg");
+        super(ExportType.SlotBg,/^bmd[.](slotbg)/,null,"egret.Bitmap");
         this.parseHandler = this.slotBgParser;
     }
 

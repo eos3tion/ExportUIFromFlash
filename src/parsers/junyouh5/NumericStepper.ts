@@ -1,6 +1,6 @@
 class NumericStepperParser extends ComWillCheck{
     constructor(){
-        super(ExportType.NumericStepper,/^ui[.](numstep)/,null,"NumericStepper");
+        super(ExportType.NumericStepper,/^ui[.](numstep)/,null,"sui.NumericStepper");
         this.parseHandler = this.NumericStepperParser;
     }
     

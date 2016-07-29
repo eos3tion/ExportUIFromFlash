@@ -1,6 +1,6 @@
 class ShareBitmapParser extends ComWillCheck{
     constructor(){
-        super(ExportType.ShareBmp,/^bmd[.](share)/,null,"ShareBitmap");
+        super(ExportType.ShareBmp,/^bmd[.](share)/,null,"egret.Bitmap");
         this.parseHandler = this.shareParser;
     }
 

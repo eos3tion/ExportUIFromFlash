@@ -1,6 +1,6 @@
 class ButtonParser extends ComWillCheck {
     constructor() {
-        super(ExportType.Button, /^ui[.](btn|tab|checkbox|radiobox)/, null, "Button");
+        super(ExportType.Button, /^ui[.](btn|tab|checkbox|radiobox)/, null, "sui.Button");
         this.parseHandler = this.buttonParser;
     }
     /**

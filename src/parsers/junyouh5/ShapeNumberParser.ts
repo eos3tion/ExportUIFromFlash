@@ -3,7 +3,7 @@
  */
 class ShapeNumberParser extends ComWillCheck {
     constructor() {
-       super(ExportType.ArtText,/^bmd[.](arttext)/,null,"ArtText");
+       super(ExportType.ArtText,/^bmd[.](arttext)/,null,"sui.ArtText");
         this.parseHandler = this.shapeNumberParser;
     }
     

@@ -147,7 +147,7 @@ class JunyouH5Generator implements IPanelGenerator {
                             comps.push("dis = manager.createDisplayObject(" + strKey + ", \"" + className + "\", " + JSON.stringify(baseData) + ");");
                             comps.push("this.addChild(dis);");
                             if(instanceName){
-                                pros.push("public " + instanceName + ": sui." + c.componentName + ";");
+                                pros.push("public " + instanceName + ": " + c.componentName + ";");
                                 comps.push("this." + instanceName + " = dis;");
                             }
                         }else {
