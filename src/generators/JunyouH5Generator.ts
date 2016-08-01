@@ -37,7 +37,7 @@ class JunyouH5Generator implements IPanelGenerator {
      * 生成面板代码
      */
     generateOnePanel(className: string, pInfo: any[], size: number[]) {
-        let result = /^ui[.](.*?)[.](.*?(Panel|Dele))$/.exec(className);
+        let result = /^ui[.](.*?)[.](.*?(Panel|Dele|render|View|"))$/.exec(className);
 		// /^ui[.](.*?)[.]((.*?)(Panel|Dele))$/.exec("ui.ShangCheng.ShangChengPanel")
 		// ["ui.ShangCheng.ShangChengPanel", "ShangCheng", "ShangChengPanel", "ShangCheng", "Panel"]
         if (result) {
@@ -61,7 +61,12 @@ class JunyouH5Generator implements IPanelGenerator {
             let classInfo = {classes: {}, depends: []};
             let classes = classInfo.classes;
             let createtime = new Date().format("yyyy-MM-dd HH:mm:ss");
-            this.generateClass(this._panelTmp, panelName, pInfo, classInfo);
+            if(panelName.indexOf("View")==-1){
+                this.generateClass(this._panelTmp, panelName, pInfo, classInfo);
+            }else{
+                this.generateClass(this._containerTmp, panelName, pInfo, classInfo);
+            }
+            
             let otherDepends = "";
             if (classInfo.depends.length) {
                 otherDepends = "this._otherDepends = [" + classInfo.depends.join(",") + "];";
@@ -82,12 +87,15 @@ class JunyouH5Generator implements IPanelGenerator {
             .replace(/@panelName@/g, panelName).replace(/@createTime@/g,createtime) + "\r\n}\r\n";
             let mediatorOut = modFolder + "/" + mediatorName  + ".ts";
             let flag = true;
-            if (FLfile.exists(mediatorOut)) {
-                flag = confirm("指定目录下，已经有：" + FLfile.uriToPlatformPath(mediatorOut) + "，是否要重新生成，并覆盖？");
+            if(panelName.indexOf("View")==1){
+                if (FLfile.exists(mediatorOut)) {
+                    flag = confirm("指定目录下，已经有：" + FLfile.uriToPlatformPath(mediatorOut) + "，是否要重新生成，并覆盖？");
+                }
+                if (flag) {
+                    FLfile.write(mediatorOut, str);
+                }
             }
-            if (flag) {
-                FLfile.write(mediatorOut, str);
-            }
+            
         } else {
             Log.throwError("面板名字有误！", name);
         }
@@ -115,16 +123,30 @@ class JunyouH5Generator implements IPanelGenerator {
                     }
                     break;
                 case ExportType.Container:
-                    let cName = panelName + "_" + idx;
-                    this.generateClass(this._containerTmp, cName, data[2], classInfo);
-                    comps.push("dis = new " + cName + "();");
-                    comps.push("sui.SuiResManager.initBaseData(dis, " + JSON.stringify(baseData) + ");");
-                    comps.push("this.addChild(dis);");
-                    if (instanceName) {
-                        pros.push("public " + instanceName + ":" + cName + ";");
-                        comps.push("this." + instanceName + " = dis;");
+                    alert(instanceName);
+                    if(instanceName.indexOf("$")==-1){
+                        let cName = panelName + "_" + idx;
+                        this.generateClass(this._containerTmp, cName, data[2], classInfo);
+                        comps.push("dis = new " + cName + "();");
+                        comps.push("sui.SuiResManager.initBaseData(dis, " + JSON.stringify(baseData) + ");");
+                        comps.push("this.addChild(dis);");
+                        if (instanceName) {
+                            pros.push("public " + instanceName + ":" + cName + ";");
+                            comps.push("this." + instanceName + " = dis;");
+                        }
+                        idx++;
+                    }else{
+                        let tmpname = instanceName.split("$")[1];
+                        pros.push("public " + tmpname + ":egret.Bitmap;");
+                        let tmpd = data[2][0];
+                        tmpd[1][0]=tmpname;
+                        tmpd[1][1]=data[1][1];
+                        tmpd[1][2]=data[1][2];
+                        comps.push("dis=manager.createBitmapByData(this._key, " + JSON.stringify(tmpd) + ");");
+                        comps.push("this.addChild(dis);");
+                        comps.push("this."+tmpname+"=dis");
                     }
-                    idx++;
+                    
                     break;
                 default: // 控件
                     let strKey = "this._key";

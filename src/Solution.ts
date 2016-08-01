@@ -34,7 +34,7 @@ class Solution {
 
     private inlineCheckers() {
         // 面板处理器，使用Solution中的解决方案
-        this.regPanelChecker(new ComWillCheck(ExportType.Container, /^ui[.].*?[.].*?(Panel|Dele)$/, this.getPanelData.bind(this)));
+        this.regPanelChecker(new ComWillCheck(ExportType.Container, /^ui[.].*?[.].*?(Panel|Dele|render|View)$/, this.getPanelData.bind(this)));
     }
 
     /**
@@ -331,7 +331,7 @@ class Solution {
                 let name: string = panelsName[i];
                 let pInfo: any[] = panelsInfo[i];
                 let sizeInfo: number[] = panelsSize[i];
-                generator.generateOnePanel(name, pInfo, sizeInfo);
+                    generator.generateOnePanel(name, pInfo, sizeInfo);
             }
         }
     }
