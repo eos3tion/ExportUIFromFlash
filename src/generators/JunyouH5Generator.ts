@@ -61,7 +61,7 @@ class JunyouH5Generator implements IPanelGenerator {
             let classInfo = {classes: {}, depends: []};
             let classes = classInfo.classes;
             let createtime = new Date().format("yyyy-MM-dd HH:mm:ss");
-            if(panelName.indexOf("View")==-1){
+            if(panelName.indexOf("View")==-1||panelName.indexOf("render")==-1){
                 this.generateClass(this._panelTmp, panelName, pInfo, classInfo);
             }else{
                 this.generateClass(this._containerTmp, panelName, pInfo, classInfo);
@@ -123,7 +123,6 @@ class JunyouH5Generator implements IPanelGenerator {
                     }
                     break;
                 case ExportType.Container:
-                    alert(instanceName);
                     if(instanceName.indexOf("$")==-1){
                         let cName = panelName + "_" + idx;
                         this.generateClass(this._containerTmp, cName, data[2], classInfo);
@@ -137,14 +136,21 @@ class JunyouH5Generator implements IPanelGenerator {
                         idx++;
                     }else{
                         let tmpname = instanceName.split("$")[1];
-                        pros.push("public " + tmpname + ":egret.Bitmap;");
+                        pros.push("public " + tmpname + ":egret.Sprite;");
                         let tmpd = data[2][0];
-                        tmpd[1][0]=tmpname;
-                        tmpd[1][1]=data[1][1];
-                        tmpd[1][2]=data[1][2];
+                        //tmpd[1][0]=tmpname;
+                        tmpd[1][1]=0;
+                        tmpd[1][2]=0;
+                        comps.push("this."+tmpname+"=new egret.Sprite()");
                         comps.push("dis=manager.createBitmapByData(this._key, " + JSON.stringify(tmpd) + ");");
-                        comps.push("this.addChild(dis);");
-                        comps.push("this."+tmpname+"=dis");
+                        comps.push("this."+tmpname+".addChild(dis);");
+                        if(data[1][1]!=0){
+                            comps.push("this."+tmpname+".x="+data[1][1]+";");
+                        }
+                        if(data[1][2]!=0){
+                            comps.push("this."+tmpname+".y="+data[1][2]+";");
+                        }
+                        comps.push("this.addChild(this."+tmpname+")");
                     }
                     
                     break;
