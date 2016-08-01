@@ -64,6 +64,11 @@ class ImageParser {
                                 if (!~aaa.indexOf(libItem)) {
                                     aaa.push(libItem);
                                 }
+                            }else if(instanceType === "symbol"){
+                                let bItem = ele.libraryItem;
+                                if(!bItem.linkageClassName){
+                                    this.checkItem(bItem,blocks);
+                                }
                             }
                         }
                     }
