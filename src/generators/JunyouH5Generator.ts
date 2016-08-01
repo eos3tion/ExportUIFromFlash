@@ -61,10 +61,10 @@ class JunyouH5Generator implements IPanelGenerator {
             let classInfo = {classes: {}, depends: []};
             let classes = classInfo.classes;
             let createtime = new Date().format("yyyy-MM-dd HH:mm:ss");
-            if(panelName.indexOf("View")==-1||panelName.indexOf("render")==-1){
-                this.generateClass(this._panelTmp, panelName, pInfo, classInfo);
-            }else{
+            if(panelName.indexOf("View")!=-1||panelName.indexOf("render")!=-1){
                 this.generateClass(this._containerTmp, panelName, pInfo, classInfo);
+            }else{
+                this.generateClass(this._panelTmp, panelName, pInfo, classInfo);
             }
             
             let otherDepends = "";
@@ -187,10 +187,21 @@ class JunyouH5Generator implements IPanelGenerator {
         }
         let properties = pros.join("\r\n\t");
         let cops = comps.join("\r\n\t\t");
-        let classStr = tempate.replace("@panelName@", panelName)
-        .replace("@properties@", properties)
-        .replace("@bindComponents@", cops)
-        .replace("@lib@", flaname);
+        let classStr;
+        if(panelName.indexOf("View")!=-1||panelName.indexOf("render")!=-1){
+            classStr = tempate.replace("@class@", "export class ")
+            .replace("@panelName@", panelName)
+            .replace("@properties@", properties)
+            .replace("@bindComponents@", cops)
+            .replace("@lib@", flaname);
+        }else{
+            classStr = tempate.replace("@class@", "class ")
+            .replace("@panelName@", panelName)
+            .replace("@properties@", properties)
+            .replace("@bindComponents@", cops)
+            .replace("@lib@", flaname);
+        }
+        
         classInfo.classes[panelName] = classStr;
     }
 }
