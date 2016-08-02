@@ -34,7 +34,7 @@ class Solution {
 
     private inlineCheckers() {
         // 面板处理器，使用Solution中的解决方案
-        this.regPanelChecker(new ComWillCheck(ExportType.Container, /^ui[.].*?[.].*?(Panel|Dele|render|View)$/, this.getPanelData.bind(this)));
+        this.regPanelChecker(new ComWillCheck(ExportType.Container, /^ui[.].*?[.].*?(Panel|Dele|Render|View)$/, this.getPanelData.bind(this)));
     }
 
     /**
