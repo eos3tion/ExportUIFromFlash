@@ -88,16 +88,16 @@ class JunyouH5Generator implements IPanelGenerator {
             let mediatorOut = modFolder + "/" + mediatorName  + ".ts";
             let flag = true;
             if(panelName.indexOf("Panel")!=-1||panelName.indexOf("Dele")!=-1){
-                if (!FLfile.exists(mediatorOut)) {
-                    FLfile.write(mediatorOut, str);
-                    // flag = confirm("指定目录下，已经有：" + FLfile.uriToPlatformPath(mediatorOut) + "，是否要重新生成，并覆盖？");
-                }
-                // if (FLfile.exists(mediatorOut)) {
-                //     flag = confirm("指定目录下，已经有：" + FLfile.uriToPlatformPath(mediatorOut) + "，是否要重新生成，并覆盖？");
-                // }
-                // if (flag) {
+                // if (!FLfile.exists(mediatorOut)) {
                 //     FLfile.write(mediatorOut, str);
+                    // flag = confirm("指定目录下，已经有：" + FLfile.uriToPlatformPath(mediatorOut) + "，是否要重新生成，并覆盖？");
                 // }
+                if (FLfile.exists(mediatorOut)) {
+                    flag = confirm("指定目录下，已经有：" + FLfile.uriToPlatformPath(mediatorOut) + "，是否保留原先的代码？？？");
+                }
+                if (!flag) {
+                    FLfile.write(mediatorOut, str);
+                }
             }
             
         } else {
