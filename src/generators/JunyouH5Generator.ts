@@ -90,7 +90,7 @@ class JunyouH5Generator implements IPanelGenerator {
             if(panelName.indexOf("Panel")!=-1||panelName.indexOf("Dele")!=-1){
                 // if (!FLfile.exists(mediatorOut)) {
                 //     FLfile.write(mediatorOut, str);
-                    // flag = confirm("指定目录下，已经有：" + FLfile.uriToPlatformPath(mediatorOut) + "，是否要重新生成，并覆盖？");
+                //     // flag = confirm("指定目录下，已经有：" + FLfile.uriToPlatformPath(mediatorOut) + "，是否要重新生成，并覆盖？");
                 // }
                 if (FLfile.exists(mediatorOut)) {
                     flag = confirm("指定目录下，已经有：" + FLfile.uriToPlatformPath(mediatorOut) + "，是否保留原先的代码？？？");
@@ -139,19 +139,24 @@ class JunyouH5Generator implements IPanelGenerator {
                         }
                         idx++;
                     }else{
+                        let tp = instanceName.split("$")[0];
                         let tmpname = instanceName.split("$")[1];
                         pros.push("public " + tmpname + ":egret.Sprite;");
                         let tmpd = data[2][0];
                         //tmpd[1][0]=tmpname;
-                        if(tmpd){
-                            tmpd[1][1]=0;
-                            tmpd[1][2]=0;
-                        }
+       
+                            if(tmpd){
+                                tmpd[1][1]=0;
+                                tmpd[1][2]=0;
+                            }
+                        
                         
                         comps.push("this."+tmpname+"=new egret.Sprite();");
-                        if(tmpd){
-                            comps.push("dis=manager.createBitmapByData(this._key, " + JSON.stringify(tmpd) + ");");
-                            comps.push("this."+tmpname+".addChild(dis);");
+                        if(tp!="con"){
+                            if(tmpd){
+                                comps.push("dis=manager.createBitmapByData(this._key, " + JSON.stringify(tmpd) + ");");
+                                comps.push("this."+tmpname+".addChild(dis);");
+                            }
                         }
                         
                         if(data[1][1]!=0){
@@ -160,7 +165,16 @@ class JunyouH5Generator implements IPanelGenerator {
                         if(data[1][2]!=0){
                             comps.push("this."+tmpname+".y="+data[1][2]+";");
                         }
-                        comps.push("this.addChild(this."+tmpname+")");
+                        if(tp=="con"){
+                            if(tmpd){
+                                comps.push("this."+tmpname+".graphics.clear();");
+                                comps.push("this."+tmpname+".graphics.beginFill(0,0);");
+                                comps.push("this."+tmpname+".graphics.drawRect(0,0,"+data[1][3]+","+data[1][4]+");");
+                                comps.push("this."+tmpname+".graphics.endFill();");
+                            }
+                            
+                        }
+                        comps.push("this.addChild(this."+tmpname+");");
                     }
                     
                     break;
