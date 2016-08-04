@@ -143,11 +143,17 @@ class JunyouH5Generator implements IPanelGenerator {
                         pros.push("public " + tmpname + ":egret.Sprite;");
                         let tmpd = data[2][0];
                         //tmpd[1][0]=tmpname;
-                        tmpd[1][1]=0;
-                        tmpd[1][2]=0;
-                        comps.push("this."+tmpname+"=new egret.Sprite()");
-                        comps.push("dis=manager.createBitmapByData(this._key, " + JSON.stringify(tmpd) + ");");
-                        comps.push("this."+tmpname+".addChild(dis);");
+                        if(tmpd){
+                            tmpd[1][1]=0;
+                            tmpd[1][2]=0;
+                        }
+                        
+                        comps.push("this."+tmpname+"=new egret.Sprite();");
+                        if(tmpd){
+                            comps.push("dis=manager.createBitmapByData(this._key, " + JSON.stringify(tmpd) + ");");
+                            comps.push("this."+tmpname+".addChild(dis);");
+                        }
+                        
                         if(data[1][1]!=0){
                             comps.push("this."+tmpname+".x="+data[1][1]+";");
                         }
