@@ -156,7 +156,7 @@ class Solution {
         data[2] = ["left", "center", "right", "justify"].indexOf(ele.getTextAttr("alignment"));
         data[3] = ele.getTextAttr("fillColor");
         data[4] = +ele.getTextAttr("size");
-        data[5] = +ele.getTextAttr("letterSpacing");
+        data[5] = +ele.getTextAttr("lineSpacing");
         data[6] = +ele.getTextAttr("bold");
         data[7] = +ele.getTextAttr("italic");
         // 文本框只允许加一个滤镜，并且只处理GlowFilter，视为描边
