@@ -4,16 +4,47 @@
  * 装箱接口
  */
 interface IBlockPacker {
-    fit(blocks: IBlock[]);
+
+    /**
+     * 
+     * 如果是需要初始固定一个宽度的装箱处理器，装箱时，设置宽度
+     * 固定高度或者宽度没有区别
+     */
+    setWidth?: (w?: number) => void;
+
+    /**
+     * 
+     * 处理箱子数据，对blocks进行重新排序，调整block的坐标信息
+     * @param {IBlock[]} blocks 
+     * @return {IBlock[]} 结果集
+     */
+    fit(blocks: IBlock[]): IBlock[];
 }
 
+/**
+ * 
+ * 计算后的结果
+ * @interface IFit
+ */
+interface IFit {
+    x: number;
+    y: number;
+}
+
+/**
+ * 
+ * 准备被处理的方块
+ * @interface IBlock
+ */
 interface IBlock {
     w: number;
     h: number;
     getArea(): number;
+    fit?: IFit;
+    clone(): IBlock;
 }
 
-interface GrowingPacker extends IBlockPacker {}
+interface GrowingPacker extends IBlockPacker { }
 
 interface GrowingPackerConstructor {
     new (): GrowingPacker;

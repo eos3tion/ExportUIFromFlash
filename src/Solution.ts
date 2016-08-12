@@ -331,7 +331,7 @@ class Solution {
                 let name: string = panelsName[i];
                 let pInfo: any[] = panelsInfo[i];
                 let sizeInfo: number[] = panelsSize[i];
-                    generator.generateOnePanel(name, pInfo, sizeInfo);
+                generator.generateOnePanel(name, pInfo, sizeInfo);
             }
         }
     }

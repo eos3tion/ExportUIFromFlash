@@ -4,12 +4,12 @@
  * @class ImageParser
  */
 class ImageParser {
-     /**
-     * 图片数据的字典
-     * Key      {string}        图片在库中的名字
-     * Value    {ImageInfo}     图片信息
-     */
-    public bitmaps: {[index: string]: ImageInfo};
+    /**
+    * 图片数据的字典
+    * Key      {string}        图片在库中的名字
+    * Value    {ImageInfo}     图片信息
+    */
+    public bitmaps: { [index: string]: ImageInfo };
 
     constructor() {
         this.bitmaps = {};
@@ -22,7 +22,7 @@ class ImageParser {
      * @param {ImageInfo[]} blocks 用于传出的ImageInfo对象
      */
     public checkItem(libItem: FlashItem, blocks: ImageInfo[]) {
-        if(libItem.linkageImportForRS){//原件是导入的，不检查 
+        if (libItem.linkageImportForRS) {//原件是导入的，不检查 
             return;
         }
         let bitmaps = this.bitmaps;
@@ -64,10 +64,10 @@ class ImageParser {
                                 if (!~aaa.indexOf(libItem)) {
                                     aaa.push(libItem);
                                 }
-                            }else if(instanceType === "symbol"){
+                            } else if (instanceType === "symbol") {
                                 let bItem = ele.libraryItem;
-                                if(!bItem.linkageClassName){
-                                    this.checkItem(bItem,blocks);
+                                if (!bItem.linkageClassName) {
+                                    this.checkItem(bItem, blocks);
                                 }
                             }
                         }
@@ -88,38 +88,57 @@ class ImageParser {
     public parse(packer: IBlockPacker, blocks: ImageInfo[]) {
         let results: Result[] = [];
         let len = blocks.length;
-        if(!len){//增加没有导出图片的情况
+        if (!len) {//增加没有导出图片的情况
             return undefined;
         }
-        // 先打乱顺序
-        for (let ki = 0; ki < len; ki++) {
-            let nb = this.idxHandler(ki, blocks);
-            this.doPacking(nb, "areaI" + ki, packer, results);
-        }
+        if (typeof packer.setWidth == "function") {//需要预设大小的装箱处理解析器
+            //得到图片的最大宽度
+            let maxWidth = 0;
+            let total = 0;
+            for (let i = 0; i < len; i++) {
+                let block = blocks[i];
+                let w = block.w;
+                total += w;
+                if (w > maxWidth) {
+                    maxWidth = w;
+                }
+            }
+            //从最宽的一个 到总宽度的 进行遍历设置
+            for (let w = maxWidth; w <= total; w++) {
+                packer.setWidth(w);
+                Log.trace("正在使用宽度：", w);
+                this.doPacking(blocks, "setWidth:" + w, packer, results);
+            }
 
-        // 使用基础排序尝试
-        let baseSorts = sort.baseSorts,
-        bi = 0,
-        blen = baseSorts.length;
-        for (; bi < blen; bi++) {
-            let skey = baseSorts[bi];
-            let sHandler = sort[skey];
-            blocks.sort(sHandler);
-            this.doPacking(blocks, skey, packer, results);
-        }
+        } else {
+            // 先打乱顺序
+            for (let ki = 0; ki < len; ki++) {
+                let nb = this.idxHandler(ki, blocks);
+                this.doPacking(nb, "areaI" + ki, packer, results);
+            }
 
-        // 再来20次乱序
-        for (let t = 0; t < 20; t++) {
-            blocks.sort(sort.random);
-            this.doPacking(blocks, "random" + t, packer, results);
-        }
+            // 使用基础排序尝试
+            let baseSorts = sort.baseSorts,
+                bi = 0,
+                blen = baseSorts.length;
+            for (; bi < blen; bi++) {
+                let skey = baseSorts[bi];
+                let sHandler = sort[skey];
+                blocks.sort(sHandler);
+                this.doPacking(blocks, skey, packer, results);
+            }
 
+            // 再来100次乱序
+            for (let t = 0; t < 100; t++) {
+                blocks.sort(sort.random);
+                this.doPacking(blocks, "random" + t, packer, results);
+            }
+        }
         results.sort(function (a, b) {
             return a.fit - b.fit;
         });
-
         // 得到面积最小的结果
-        let result: Result = results[0];
+        let result = results[0];
 
         return this.exportImage(result.blocks);
     }
@@ -174,8 +193,8 @@ class ImageParser {
         bitmap.exportToFile(exname);
         // 删除临时文件
         // 图片导出之前，删除操作会失败，所以加了while
-        while (!lib.deleteItem(bitmap.name)) {}
-        while (!lib.deleteItem(tname)) {}
+        while (!lib.deleteItem(bitmap.name)) { }
+        while (!lib.deleteItem(tname)) { }
 
         FLExternal.pngquant(exname);
 
@@ -208,33 +227,50 @@ class ImageParser {
     /**
      * 进行装箱
      * 
-     * @param {ImageInfo[]} blocks 要装箱的图片数据
+     * @param {ImageInfo[]} inputs 要装箱的图片数据
      * @param {string} key 排序算法的标识
      * @param {IBlockPacker} packer 装箱算法
      * @param {Result[]} results 结果集合
      */
-    private doPacking(blocks: ImageInfo[], key: string, packer: IBlockPacker, results: Result[]) {
-        let len = blocks.length;
+    private doPacking(inputs: ImageInfo[], key: string, packer: IBlockPacker, results: Result[]) {
+        let len = inputs.length;
+        let blocks = <ImageInfo[]>packer.fit(inputs);
+        if (!blocks) {
+            return;
+        }
+        if (len != blocks.length) {
+            Log.trace("装箱时，有Block没被装箱，请检查！", len, blocks.length);
+            return;
+        }
+        Log.trace("开始添加结果集");
         let result: Result = {
             key: key,
             blocks: [],
             fit: 0
         };
-        packer.fit(blocks);
-        let fit = 0,
-            block: ImageInfo, n;
+        let block: ImageInfo, n;
         let noFit = false;
+        let width = 0;
+        let height = 0;
         for (n = 0; n < len; n++) {
             block = blocks[n];
             if (block.fit) {
                 result.blocks.push(block.clone());
-                fit += block.getArea();
+                //fit += block.getArea();
+                let right = block.fit.x + block.w;
+                if (right > width) {
+                    width = right;
+                }
+                let bottom = block.fit.y + block.h;
+                if (bottom > height) {
+                    height = bottom;
+                }
             } else {
                 noFit = true;
                 break;
             }
         }
-        result.fit = fit;
+        result.fit = width * height;
         if (noFit) {
             Log.trace(result.key + "noFit");
         } else {
@@ -285,7 +321,7 @@ let sort = {
         for (n = 0; n < criteria.length; n++) {
             diff = sort[criteria[n]](a, b);
             if (diff !== 0)
-            return diff;
+                return diff;
         }
         return 0;
     }
