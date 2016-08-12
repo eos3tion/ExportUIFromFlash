@@ -38,8 +38,8 @@ class JunyouH5Generator implements IPanelGenerator {
      */
     generateOnePanel(className: string, pInfo: any[], size: number[]) {
         let result = /^ui[.](.*?)[.](.*?(Panel|Dele|Render|View|"))$/.exec(className);
-		// /^ui[.](.*?)[.]((.*?)(Panel|Dele))$/.exec("ui.ShangCheng.ShangChengPanel")
-		// ["ui.ShangCheng.ShangChengPanel", "ShangCheng", "ShangChengPanel", "ShangCheng", "Panel"]
+        // /^ui[.](.*?)[.]((.*?)(Panel|Dele))$/.exec("ui.ShangCheng.ShangChengPanel")
+        // ["ui.ShangCheng.ShangChengPanel", "ShangCheng", "ShangChengPanel", "ShangCheng", "Panel"]
         if (result) {
             let mod = result[1];
             let modFolder = classRoot + mod;
@@ -58,15 +58,15 @@ class JunyouH5Generator implements IPanelGenerator {
             // [3, ["btn4", 103.5, 133.45, 79, 28, 0], 0, 0], 
             // [3, ["btn1", 24.5, 121.55, 79, 28, 0], 0, 0]]
             // template;
-            let classInfo = {classes: {}, depends: []};
+            let classInfo = { classes: {}, depends: [] };
             let classes = classInfo.classes;
             let createtime = new Date().format("yyyy-MM-dd HH:mm:ss");
-            if(panelName.indexOf("View")!=-1||panelName.indexOf("render")!=-1){
+            if (panelName.indexOf("View") != -1 || panelName.indexOf("render") != -1) {
                 this.generateClass(this._containerTmp, panelName, pInfo, classInfo);
-            }else{
+            } else {
                 this.generateClass(this._panelTmp, panelName, pInfo, classInfo);
             }
-            
+
             let otherDepends = "";
             if (classInfo.depends.length) {
                 otherDepends = "this._otherDepends = [" + classInfo.depends.join(",") + "];";
@@ -74,38 +74,41 @@ class JunyouH5Generator implements IPanelGenerator {
             let classStr = classes[panelName];
             delete classes[panelName];
             classStr = classStr.replace("@className@", className)
-            .replace("@otherDepends@", otherDepends).replace("@baseRect@", size.join(","));
+                .replace("@otherDepends@", otherDepends).replace("@baseRect@", size.join(","));
             let str = "module " + moduleName + "{\r\nimport sui = junyou.sui;\r\n" + classStr + "\r\n";
             for (let className in classes) {
                 str += classes[className] + "\r\n";
             }
             str += "\r\n}\r\n";
-            FLfile.write(modFolder + "/" + panelName + ".ts", str.replace(/@createTime@/g,createtime));
+            FLfile.write(modFolder + "/" + panelName + ".ts", str.replace(/@createTime@/g, createtime));
             // 生成mediator
             let mediatorName = panelName + "Mediator";
             str = "module " + moduleName + "{\r\n" + this._mediatorTmp.replace("@mediatorName@", mediatorName)
-            .replace(/@panelName@/g, panelName).replace(/@createTime@/g,createtime) + "\r\n}\r\n";
-            let mediatorOut = modFolder + "/" + mediatorName  + ".ts";
+                .replace(/@panelName@/g, panelName).replace(/@createTime@/g, createtime) + "\r\n}\r\n";
+            let mediatorOut = modFolder + "/" + mediatorName + ".ts";
             let flag = true;
-            if(panelName.indexOf("Panel")!=-1||panelName.indexOf("Dele")!=-1){
+            if (panelName.indexOf("Panel") != -1 || panelName.indexOf("Dele") != -1) {
                 // if (!FLfile.exists(mediatorOut)) {
                 //     FLfile.write(mediatorOut, str);
                 //     // flag = confirm("指定目录下，已经有：" + FLfile.uriToPlatformPath(mediatorOut) + "，是否要重新生成，并覆盖？");
                 // }
                 if (FLfile.exists(mediatorOut)) {
                     flag = confirm("指定目录下，已经有：" + FLfile.uriToPlatformPath(mediatorOut) + "，是否保留原先的代码？？？");
+                    if (!flag) {
+                        FLfile.write(mediatorOut, str);
+                    }
                 }
-                if (!flag) {
+                else{
                     FLfile.write(mediatorOut, str);
                 }
             }
-            
+
         } else {
             Log.throwError("面板名字有误！", name);
         }
     }
 
-    private generateClass(tempate: string, panelName: string, pInfo: any[], classInfo: {classes: any, depends: any[]}) {
+    private generateClass(tempate: string, panelName: string, pInfo: any[], classInfo: { classes: any, depends: any[] }) {
         let comps = [], pros = [];
         let idx = 0;
         let compCheckers = this._solution.compCheckers;
@@ -127,7 +130,7 @@ class JunyouH5Generator implements IPanelGenerator {
                     }
                     break;
                 case ExportType.Container:
-                    if(instanceName.indexOf("$")==-1){
+                    if (instanceName.indexOf("$") == -1) {
                         let cName = panelName + "_" + idx;
                         this.generateClass(this._containerTmp, cName, data[2], classInfo);
                         comps.push("dis = new " + cName + "();");
@@ -138,45 +141,45 @@ class JunyouH5Generator implements IPanelGenerator {
                             comps.push("this." + instanceName + " = dis;");
                         }
                         idx++;
-                    }else{
+                    } else {
                         let tp = instanceName.split("$")[0];
                         let tmpname = instanceName.split("$")[1];
                         pros.push("public " + tmpname + ":egret.Sprite;");
                         let tmpd = data[2][0];
                         //tmpd[1][0]=tmpname;
-       
-                            if(tmpd){
-                                tmpd[1][1]=0;
-                                tmpd[1][2]=0;
-                            }
-                        
-                        
-                        comps.push("this."+tmpname+"=new egret.Sprite();");
-                        if(tp!="con"){
-                            if(tmpd){
+
+                        if (tmpd) {
+                            tmpd[1][1] = 0;
+                            tmpd[1][2] = 0;
+                        }
+
+
+                        comps.push("this." + tmpname + "=new egret.Sprite();");
+                        if (tp != "con") {
+                            if (tmpd) {
                                 comps.push("dis=manager.createBitmapByData(this._key, " + JSON.stringify(tmpd) + ");");
-                                comps.push("this."+tmpname+".addChild(dis);");
+                                comps.push("this." + tmpname + ".addChild(dis);");
                             }
                         }
-                        
-                        if(data[1][1]!=0){
-                            comps.push("this."+tmpname+".x="+data[1][1]+";");
+
+                        if (data[1][1] != 0) {
+                            comps.push("this." + tmpname + ".x=" + data[1][1] + ";");
                         }
-                        if(data[1][2]!=0){
-                            comps.push("this."+tmpname+".y="+data[1][2]+";");
+                        if (data[1][2] != 0) {
+                            comps.push("this." + tmpname + ".y=" + data[1][2] + ";");
                         }
-                        if(tp=="con"){
-                            if(tmpd){
-                                comps.push("this."+tmpname+".graphics.clear();");
-                                comps.push("this."+tmpname+".graphics.beginFill(0,0);");
-                                comps.push("this."+tmpname+".graphics.drawRect(0,0,"+data[1][3]+","+data[1][4]+");");
-                                comps.push("this."+tmpname+".graphics.endFill();");
+                        if (tp == "con") {
+                            if (tmpd) {
+                                comps.push("this." + tmpname + ".graphics.clear();");
+                                comps.push("this." + tmpname + ".graphics.beginFill(0,0);");
+                                comps.push("this." + tmpname + ".graphics.drawRect(0,0," + data[1][3] + "," + data[1][4] + ");");
+                                comps.push("this." + tmpname + ".graphics.endFill();");
                             }
-                            
+
                         }
-                        comps.push("this.addChild(this."+tmpname+");");
+                        comps.push("this.addChild(this." + tmpname + ");");
                     }
-                    
+
                     break;
                 default: // 控件
                     let strKey = "this._key";
@@ -198,11 +201,11 @@ class JunyouH5Generator implements IPanelGenerator {
                             // public createDisplayObject(uri:string,className:string,data:any):egret.DisplayObject
                             comps.push("dis = manager.createDisplayObject(" + strKey + ", \"" + className + "\", " + JSON.stringify(baseData) + ");");
                             comps.push("this.addChild(dis);");
-                            if(instanceName){
+                            if (instanceName) {
                                 pros.push("public " + instanceName + ": " + c.componentName + ";");
                                 comps.push("this." + instanceName + " = dis;");
                             }
-                        }else {
+                        } else {
                             Log.throwError("面板进行生成代码，无法找到类名:", JSON.stringify(data));
                         }
                     }
@@ -212,20 +215,20 @@ class JunyouH5Generator implements IPanelGenerator {
         let properties = pros.join("\r\n\t");
         let cops = comps.join("\r\n\t\t");
         let classStr;
-        if(panelName.indexOf("View")!=-1||panelName.indexOf("render")!=-1){
+        if (panelName.indexOf("View") != -1 || panelName.indexOf("render") != -1) {
             classStr = tempate.replace("@class@", "export class ")
-            .replace("@panelName@", panelName)
-            .replace("@properties@", properties)
-            .replace("@bindComponents@", cops)
-            .replace("@lib@", flaname);
-        }else{
+                .replace("@panelName@", panelName)
+                .replace("@properties@", properties)
+                .replace("@bindComponents@", cops)
+                .replace("@lib@", flaname);
+        } else {
             classStr = tempate.replace("@class@", "class ")
-            .replace("@panelName@", panelName)
-            .replace("@properties@", properties)
-            .replace("@bindComponents@", cops)
-            .replace("@lib@", flaname);
+                .replace("@panelName@", panelName)
+                .replace("@properties@", properties)
+                .replace("@bindComponents@", cops)
+                .replace("@lib@", flaname);
         }
-        
+
         classInfo.classes[panelName] = classStr;
     }
 }
