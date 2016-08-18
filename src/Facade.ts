@@ -30,11 +30,12 @@ sol.regComChecker(new SliderParser());
 sol.regComChecker(new ScrollBarParser());
 
 sol.regComChecker(new SlotBgParser());
-
-// 绑定进度条
+//绑定进度条
 sol.regComChecker(new ProgressBarParser());
 
 sol.regComChecker(new ShareBitmapParser());
+//绑定格位
+sol.regComChecker(new SlotParser());
 
 // 加载代码生成器
 Script.runScript("generators/JunyouH5Generator");

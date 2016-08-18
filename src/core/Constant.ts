@@ -31,4 +31,6 @@ class ExportType {
     public static SlotBg = 11;
 
     public static ShareBmp = 12;
+
+    public static Slot = 13;
 }
