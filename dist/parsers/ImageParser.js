@@ -14,6 +14,9 @@ var ImageParser = (function () {
      * @param {ImageInfo[]} blocks 用于传出的ImageInfo对象
      */
     ImageParser.prototype.checkItem = function (libItem, blocks) {
+        if (libItem.linkageImportForRS) {
+            return;
+        }
         var bitmaps = this.bitmaps;
         // 遍历timeline
         var timeline = libItem.timeline;
@@ -54,6 +57,12 @@ var ImageParser = (function () {
                                     aaa.push(libItem);
                                 }
                             }
+                            else if (instanceType === "symbol") {
+                                var bItem = ele.libraryItem;
+                                if (!bItem.linkageClassName) {
+                                    this.checkItem(bItem, blocks);
+                                }
+                            }
                         }
                     }
                 }
@@ -71,23 +80,47 @@ var ImageParser = (function () {
     ImageParser.prototype.parse = function (packer, blocks) {
         var results = [];
         var len = blocks.length;
-        // 先打乱顺序
-        for (var ki = 0; ki < len; ki++) {
-            var nb = this.idxHandler(ki, blocks);
-            this.doPacking(nb, "areaI" + ki, packer, results);
+        if (!len) {
+            return undefined;
         }
-        // 使用基础排序尝试
-        var baseSorts = sort.baseSorts, bi = 0, blen = baseSorts.length;
-        for (; bi < blen; bi++) {
-            var skey = baseSorts[bi];
-            var sHandler = sort[skey];
-            blocks.sort(sHandler);
-            this.doPacking(blocks, skey, packer, results);
+        if (typeof packer.setWidth == "function") {
+            //得到图片的最大宽度
+            var maxWidth = 0;
+            var total = 0;
+            for (var i = 0; i < len; i++) {
+                var block = blocks[i];
+                var w = block.w;
+                total += w;
+                if (w > maxWidth) {
+                    maxWidth = w;
+                }
+            }
+            //从最宽的一个 到总宽度的 进行遍历设置
+            for (var w = maxWidth; w <= total; w++) {
+                packer.setWidth(w);
+                Log.trace("正在使用宽度：", w);
+                this.doPacking(blocks, "setWidth:" + w, packer, results);
+            }
         }
-        // 再来20次乱序
-        for (var t = 0; t < 20; t++) {
-            blocks.sort(sort.random);
-            this.doPacking(blocks, "random" + t, packer, results);
+        else {
+            // 先打乱顺序
+            for (var ki = 0; ki < len; ki++) {
+                var nb = this.idxHandler(ki, blocks);
+                this.doPacking(nb, "areaI" + ki, packer, results);
+            }
+            // 使用基础排序尝试
+            var baseSorts = sort.baseSorts, bi = 0, blen = baseSorts.length;
+            for (; bi < blen; bi++) {
+                var skey = baseSorts[bi];
+                var sHandler = sort[skey];
+                blocks.sort(sHandler);
+                this.doPacking(blocks, skey, packer, results);
+            }
+            // 再来100次乱序
+            for (var t = 0; t < 100; t++) {
+                blocks.sort(sort.random);
+                this.doPacking(blocks, "random" + t, packer, results);
+            }
         }
         results.sort(function (a, b) {
             return a.fit - b.fit;
@@ -176,33 +209,51 @@ var ImageParser = (function () {
     /**
      * 进行装箱
      *
-     * @param {ImageInfo[]} blocks 要装箱的图片数据
+     * @param {ImageInfo[]} inputs 要装箱的图片数据
      * @param {string} key 排序算法的标识
      * @param {IBlockPacker} packer 装箱算法
      * @param {Result[]} results 结果集合
      */
-    ImageParser.prototype.doPacking = function (blocks, key, packer, results) {
-        var len = blocks.length;
+    ImageParser.prototype.doPacking = function (inputs, key, packer, results) {
+        var len = inputs.length;
+        var blocks = packer.fit(inputs);
+        if (!blocks) {
+            return;
+        }
+        if (len != blocks.length) {
+            Log.trace("装箱时，有Block没被装箱，请检查！", len, blocks.length);
+            return;
+        }
+        Log.trace("开始添加结果集");
         var result = {
             key: key,
             blocks: [],
             fit: 0
         };
-        packer.fit(blocks);
-        var fit = 0, block, n;
+        var block, n;
         var noFit = false;
+        var width = 0;
+        var height = 0;
         for (n = 0; n < len; n++) {
             block = blocks[n];
             if (block.fit) {
                 result.blocks.push(block.clone());
-                fit += block.getArea();
+                //fit += block.getArea();
+                var right = block.fit.x + block.w;
+                if (right > width) {
+                    width = right;
+                }
+                var bottom = block.fit.y + block.h;
+                if (bottom > height) {
+                    height = bottom;
+                }
             }
             else {
                 noFit = true;
                 break;
             }
         }
-        result.fit = fit;
+        result.fit = width * height;
         if (noFit) {
             Log.trace(result.key + "noFit");
         }

@@ -17,7 +17,7 @@ var JunyouH5Generator = (function () {
      * 生成面板代码
      */
     JunyouH5Generator.prototype.generateOnePanel = function (className, pInfo, size) {
-        var result = /^ui[.](.*?)[.](.*?(Panel|Dele))$/.exec(className);
+        var result = /^ui[.](.*?)[.](.*?(Panel|Dele|Render|View|"))$/.exec(className);
         // /^ui[.](.*?)[.]((.*?)(Panel|Dele))$/.exec("ui.ShangCheng.ShangChengPanel")
         // ["ui.ShangCheng.ShangChengPanel", "ShangCheng", "ShangChengPanel", "ShangCheng", "Panel"]
         if (result) {
@@ -40,7 +40,12 @@ var JunyouH5Generator = (function () {
             var classInfo = { classes: {}, depends: [] };
             var classes = classInfo.classes;
             var createtime = new Date().format("yyyy-MM-dd HH:mm:ss");
-            this.generateClass(this._panelTmp, panelName, pInfo, classInfo);
+            if (panelName.indexOf("View") != -1 || panelName.indexOf("render") != -1) {
+                this.generateClass(this._containerTmp, panelName, pInfo, classInfo);
+            }
+            else {
+                this.generateClass(this._panelTmp, panelName, pInfo, classInfo);
+            }
             var otherDepends = "";
             if (classInfo.depends.length) {
                 otherDepends = "this._otherDepends = [" + classInfo.depends.join(",") + "];";
@@ -61,11 +66,20 @@ var JunyouH5Generator = (function () {
                 .replace(/@panelName@/g, panelName).replace(/@createTime@/g, createtime) + "\r\n}\r\n";
             var mediatorOut = modFolder + "/" + mediatorName + ".ts";
             var flag = true;
-            if (FLfile.exists(mediatorOut)) {
-                flag = confirm("指定目录下，已经有：" + FLfile.uriToPlatformPath(mediatorOut) + "，是否要重新生成，并覆盖？");
-            }
-            if (flag) {
-                FLfile.write(mediatorOut, str);
+            if (panelName.indexOf("Panel") != -1 || panelName.indexOf("Dele") != -1) {
+                // if (!FLfile.exists(mediatorOut)) {
+                //     FLfile.write(mediatorOut, str);
+                //     // flag = confirm("指定目录下，已经有：" + FLfile.uriToPlatformPath(mediatorOut) + "，是否要重新生成，并覆盖？");
+                // }
+                if (FLfile.exists(mediatorOut)) {
+                    flag = confirm("指定目录下，已经有：" + FLfile.uriToPlatformPath(mediatorOut) + "，是否保留原先的代码？？？");
+                    if (!flag) {
+                        FLfile.write(mediatorOut, str);
+                    }
+                }
+                else {
+                    FLfile.write(mediatorOut, str);
+                }
             }
         }
         else {
@@ -94,16 +108,51 @@ var JunyouH5Generator = (function () {
                     }
                     break;
                 case ExportType.Container:
-                    var cName = panelName + "_" + idx;
-                    this.generateClass(this._containerTmp, cName, data[2], classInfo);
-                    comps.push("dis = new " + cName + "();");
-                    comps.push("sui.SuiResManager.initBaseData(dis, " + JSON.stringify(baseData) + ");");
-                    comps.push("this.addChild(dis);");
-                    if (instanceName) {
-                        pros.push("public " + instanceName + ":" + cName + ";");
-                        comps.push("this." + instanceName + " = dis;");
+                    if (instanceName.indexOf("$") == -1) {
+                        var cName = panelName + "_" + idx;
+                        this.generateClass(this._containerTmp, cName, data[2], classInfo);
+                        comps.push("dis = new " + cName + "();");
+                        comps.push("sui.SuiResManager.initBaseData(dis, " + JSON.stringify(baseData) + ");");
+                        comps.push("this.addChild(dis);");
+                        if (instanceName) {
+                            pros.push("public " + instanceName + ":" + cName + ";");
+                            comps.push("this." + instanceName + " = dis;");
+                        }
+                        idx++;
                     }
-                    idx++;
+                    else {
+                        var tp = instanceName.split("$")[0];
+                        var tmpname = instanceName.split("$")[1];
+                        pros.push("public " + tmpname + ":egret.Sprite;");
+                        var tmpd = data[2][0];
+                        //tmpd[1][0]=tmpname;
+                        if (tmpd) {
+                            tmpd[1][1] = 0;
+                            tmpd[1][2] = 0;
+                        }
+                        comps.push("this." + tmpname + "=new egret.Sprite();");
+                        if (tp != "con") {
+                            if (tmpd) {
+                                comps.push("dis=manager.createBitmapByData(this._key, " + JSON.stringify(tmpd) + ");");
+                                comps.push("this." + tmpname + ".addChild(dis);");
+                            }
+                        }
+                        if (data[1][1] != 0) {
+                            comps.push("this." + tmpname + ".x=" + data[1][1] + ";");
+                        }
+                        if (data[1][2] != 0) {
+                            comps.push("this." + tmpname + ".y=" + data[1][2] + ";");
+                        }
+                        if (tp == "con") {
+                            if (tmpd) {
+                                comps.push("this." + tmpname + ".graphics.clear();");
+                                comps.push("this." + tmpname + ".graphics.beginFill(0,0);");
+                                comps.push("this." + tmpname + ".graphics.drawRect(0,0," + data[1][3] + "," + data[1][4] + ");");
+                                comps.push("this." + tmpname + ".graphics.endFill();");
+                            }
+                        }
+                        comps.push("this.addChild(this." + tmpname + ");");
+                    }
                     break;
                 default:
                     var strKey = "this._key";
@@ -127,7 +176,7 @@ var JunyouH5Generator = (function () {
                             comps.push("dis = manager.createDisplayObject(" + strKey + ", \"" + className + "\", " + JSON.stringify(baseData) + ");");
                             comps.push("this.addChild(dis);");
                             if (instanceName) {
-                                pros.push("public " + instanceName + ": sui." + c.componentName + ";");
+                                pros.push("public " + instanceName + ": " + c.componentName + ";");
                                 comps.push("this." + instanceName + " = dis;");
                             }
                         }
@@ -140,10 +189,21 @@ var JunyouH5Generator = (function () {
         }
         var properties = pros.join("\r\n\t");
         var cops = comps.join("\r\n\t\t");
-        var classStr = tempate.replace("@panelName@", panelName)
-            .replace("@properties@", properties)
-            .replace("@bindComponents@", cops)
-            .replace("@lib@", flaname);
+        var classStr;
+        if (panelName.indexOf("View") != -1 || panelName.indexOf("render") != -1) {
+            classStr = tempate.replace("@class@", "export class ")
+                .replace("@panelName@", panelName)
+                .replace("@properties@", properties)
+                .replace("@bindComponents@", cops)
+                .replace("@lib@", flaname);
+        }
+        else {
+            classStr = tempate.replace("@class@", "class ")
+                .replace("@panelName@", panelName)
+                .replace("@properties@", properties)
+                .replace("@bindComponents@", cops)
+                .replace("@lib@", flaname);
+        }
         classInfo.classes[panelName] = classStr;
     };
     return JunyouH5Generator;

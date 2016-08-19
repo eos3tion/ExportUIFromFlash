@@ -18,9 +18,9 @@ cwd = cwd.substring(0, cwd.lastIndexOf("/") + 1);
 // 测试期间设置为cwd
 var outputBase = "file:///d|/EgretProjects/Test/skin/"; //cwd;
 // 模块前缀
-var moduleName = "junyou.ttyx";
+var moduleName = "junyou.hqg";
 // 代码输出根目录
-var classRoot = "file:///d|/EgretProjects/Test/src/junyou/ttyx/modules/";
+var classRoot = "file:///d|/EgretProjects/Test/src/junyou/hqg/modules/";
 
 
 // 输出目录

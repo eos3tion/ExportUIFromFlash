@@ -15,7 +15,7 @@ var Solution = (function () {
     }
     Solution.prototype.inlineCheckers = function () {
         // 面板处理器，使用Solution中的解决方案
-        this.regPanelChecker(new ComWillCheck(ExportType.Container, /^ui[.].*?[.].*?(Panel|Dele)$/, this.getPanelData.bind(this)));
+        this.regPanelChecker(new ComWillCheck(ExportType.Container, /^ui[.].*?[.].*?(Panel|Dele|Render|View)$/, this.getPanelData.bind(this)));
     };
     /**
      * 注册控件检查器
@@ -125,7 +125,7 @@ var Solution = (function () {
         data[2] = ["left", "center", "right", "justify"].indexOf(ele.getTextAttr("alignment"));
         data[3] = ele.getTextAttr("fillColor");
         data[4] = +ele.getTextAttr("size");
-        data[5] = +ele.getTextAttr("letterSpacing");
+        data[5] = +ele.getTextAttr("lineSpacing");
         data[6] = +ele.getTextAttr("bold");
         data[7] = +ele.getTextAttr("italic");
         // 文本框只允许加一个滤镜，并且只处理GlowFilter，视为描边
@@ -159,6 +159,7 @@ var Solution = (function () {
      */
     Solution.prototype.getElementData = function (ele, errPrefix) {
         if (errPrefix === void 0) { errPrefix = ""; }
+        //alert("getElementData:" + ele.name);
         var type = ele.elementType;
         var data = [];
         // 处理基础数据
@@ -186,6 +187,7 @@ var Solution = (function () {
                             var iurl = item.linkageURL;
                             if (iurl) {
                                 if (iurl === "lib") {
+                                    //alert(item.name + ":" + iurl + " １");
                                     data[3] = 1;
                                 }
                                 else {
@@ -227,6 +229,10 @@ var Solution = (function () {
      * 面板必须是单帧
      */
     Solution.prototype.getPanelData = function (checker, item, list) {
+        //alert("getPanelData " + item.name)
+        if (item.linkageImportForRS) {
+            return undefined;
+        }
         var timeline = item.timeline;
         var layers = timeline.layers;
         var name = item.name;
@@ -262,7 +268,7 @@ var Solution = (function () {
         }); // 从小到大排列，最终可以顺序addChild
         // 生成面板代码
         depthEles.forEach(function (item, idx) {
-            // fl.trace("lllll:"+item.name+"|"+item.idx);
+            //fl.trace("lllll:"+item.data.toString()+"|"+item.idx);
             depthEles[idx] = item.data;
         });
         if (list) {
@@ -305,6 +311,9 @@ var Solution = (function () {
      * @returns {number[]} [0] 宽度  [1] 高度
      */
     Solution.prototype.getItemSize = function (item) {
+        if (item.linkageImportForRS) {
+            return undefined;
+        }
         // 无法直接得到Item大小，先将Item加入到舞台，选中获取大小
         // 测量物品大小
         lib.editItem(item.name);

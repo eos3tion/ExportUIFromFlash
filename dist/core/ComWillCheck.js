@@ -42,7 +42,7 @@ var ComWillCheck = (function () {
         item.$idx = idx;
         item.$key = this.key;
         this.classNames[idx] = item.linkageClassName;
-        this.sizes[idx] = size;
+        this.sizes[idx] = size || 0;
     };
     /**
      * 遍历当前类型所有的控件
@@ -55,7 +55,11 @@ var ComWillCheck = (function () {
         var dict = this.dict;
         for (var name_1 in dict) {
             var item = dict[name_1];
-            handler(this, item, param, solution);
+            //Log.trace("try parse "+item.name);
+            if (!item.linkageImportForRS) {
+                //Log.trace("try parsing "+item.name);
+                handler(this, item, param, solution);
+            }
         }
     };
     return ComWillCheck;
