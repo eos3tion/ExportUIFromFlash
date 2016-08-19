@@ -9,6 +9,7 @@ class SlotParser extends ComWillCheck {
     constructor() {
         super(ExportType.Slot, /^ui[.](slot)/, null, "sui.Slot");
         this.parseHandler = this.slotParser;
+        
     }
     /**
      * 用于处理格位
