@@ -6,7 +6,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 var ButtonParser = (function (_super) {
     __extends(ButtonParser, _super);
     function ButtonParser() {
-        _super.call(this, ExportType.Button, /^ui[.](btn|tab|checkbox|radiobox)/, null, "Button");
+        _super.call(this, ExportType.Button, /^ui[.](btn|tab|checkbox|radiobox)/, null, "sui.Button");
         this.parseHandler = this.buttonParser;
     }
     /**

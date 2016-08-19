@@ -61,7 +61,7 @@ class JunyouH5Generator implements IPanelGenerator {
             let classInfo = { classes: {}, depends: [] };
             let classes = classInfo.classes;
             let createtime = new Date().format("yyyy-MM-dd HH:mm:ss");
-            if (panelName.indexOf("View") != -1 || panelName.indexOf("render") != -1) {
+            if (panelName.indexOf("View") != -1 || panelName.indexOf("Render") != -1) {
                 this.generateClass(this._containerTmp, panelName, pInfo, classInfo);
             } else {
                 this.generateClass(this._panelTmp, panelName, pInfo, classInfo);
@@ -144,40 +144,58 @@ class JunyouH5Generator implements IPanelGenerator {
                     } else {
                         let tp = instanceName.split("$")[0];
                         let tmpname = instanceName.split("$")[1];
-                        pros.push("public " + tmpname + ":egret.Sprite;");
+                       
+                        
                         let tmpd = data[2][0];
+                         if(tp=="con"){
+                             if(tmpd){
+                                 pros.push("public " + tmpname + ":egret.Rectangle;");
+                                 comps.push("this."+tmpname+"=new egret.Rectangle();");
+                             }else{
+                                 pros.push("public " + tmpname + ":egret.Sprite;");
+                                 comps.push("this."+tmpname+"=new egret.Sprite();");
+                             }
+                        }else{
+                            pros.push("public " + tmpname + ":egret.Sprite;");
+                            comps.push("this."+tmpname+"=new egret.Sprite();");
+                        }
                         //tmpd[1][0]=tmpname;
-
-                        if (tmpd) {
-                            tmpd[1][1] = 0;
-                            tmpd[1][2] = 0;
-                        }
-
-
-                        comps.push("this." + tmpname + "=new egret.Sprite();");
-                        if (tp != "con") {
-                            if (tmpd) {
+       
+                            if(tmpd){
+                                tmpd[1][1]=0;
+                                tmpd[1][2]=0;
+                            }
+                        
+                        
+                        
+                        if(tp!="con"){
+                            if(tmpd){
                                 comps.push("dis=manager.createBitmapByData(this._key, " + JSON.stringify(tmpd) + ");");
-                                comps.push("this." + tmpname + ".addChild(dis);");
+                                comps.push("this."+tmpname+".addChild(dis);");
                             }
                         }
-
-                        if (data[1][1] != 0) {
-                            comps.push("this." + tmpname + ".x=" + data[1][1] + ";");
+                        
+                        if(data[1][1]!=0){
+                            comps.push("this."+tmpname+".x="+data[1][1]+";");
                         }
-                        if (data[1][2] != 0) {
-                            comps.push("this." + tmpname + ".y=" + data[1][2] + ";");
+                        if(data[1][2]!=0){
+                            comps.push("this."+tmpname+".y="+data[1][2]+";");
                         }
-                        if (tp == "con") {
-                            if (tmpd) {
-                                comps.push("this." + tmpname + ".graphics.clear();");
-                                comps.push("this." + tmpname + ".graphics.beginFill(0,0);");
-                                comps.push("this." + tmpname + ".graphics.drawRect(0,0," + data[1][3] + "," + data[1][4] + ");");
-                                comps.push("this." + tmpname + ".graphics.endFill();");
+                        if(tp=="con"){
+                            if(tmpd){
+                                comps.push("this."+tmpname+".width="+data[1][3]+";");
+                                comps.push("this."+tmpname+".height="+data[1][4]+";");
                             }
-
+                            
                         }
-                        comps.push("this.addChild(this." + tmpname + ");");
+                        if(tp=="con"){
+                            if(!tmpd){
+                                comps.push("this.addChild(this."+tmpname+");");
+                            }
+                            
+                        }else{
+                            comps.push("this.addChild(this."+tmpname+");");
+                        }
                     }
 
                     break;
@@ -215,7 +233,7 @@ class JunyouH5Generator implements IPanelGenerator {
         let properties = pros.join("\r\n\t");
         let cops = comps.join("\r\n\t\t");
         let classStr;
-        if (panelName.indexOf("View") != -1 || panelName.indexOf("render") != -1) {
+        if (panelName.indexOf("View") != -1 || panelName.indexOf("Render") != -1) {
             classStr = tempate.replace("@class@", "export class ")
                 .replace("@panelName@", panelName)
                 .replace("@properties@", properties)
