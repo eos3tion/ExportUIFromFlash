@@ -21,7 +21,7 @@ class ButtonParser extends ComWillCheck {
             let layer = layers[li];
             let lname = layer.name;
             // 默认无文本框
-            data[0] = 0;
+            //data[0] = 0;
             if (lname === "tf") {
                 let frame = layer.frames[0];
                 let elements = frame.elements;
