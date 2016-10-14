@@ -224,7 +224,7 @@ var ImageParser = (function () {
             Log.trace("装箱时，有Block没被装箱，请检查！", len, blocks.length);
             return;
         }
-        Log.trace("开始添加结果集");
+        //Log.trace("开始添加结果集");
         var result = {
             key: key,
             blocks: [],
@@ -255,11 +255,9 @@ var ImageParser = (function () {
         }
         result.fit = width * height;
         if (noFit) {
-            Log.trace(result.key + "noFit");
         }
         else {
             results.push(result);
-            Log.trace(result.key + ":" + result.fit);
         }
     };
     return ImageParser;

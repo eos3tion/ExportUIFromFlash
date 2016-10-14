@@ -8,6 +8,7 @@
  */
 var Solution = (function () {
     function Solution() {
+        this.guid = 0;
         this.compCheckers = {};
         this.panelCheckers = {};
         this.imgParser = new ImageParser;
@@ -147,6 +148,51 @@ var Solution = (function () {
         return data;
     };
     /**
+     * 获取ScaleBitmap的数据
+     *
+     * @param {FlashElement} ele
+     * @param {FlashItem} item
+     *
+     * @memberOf Solution
+     */
+    Solution.prototype.getScaleBitmapData = function (item) {
+        var data = [];
+        var grid = item.scalingGrid;
+        if (!grid) {
+            Log.throwError("此控件没有设置九宫信息", item.name);
+            return;
+        }
+        var rect = item.scalingGridRect;
+        var timeline = item.timeline;
+        var layers = timeline.layers;
+        var llen = layers.length;
+        if (layers.length > 2) {
+            Log.throwError("九宫图片只能有一个图层", item.name);
+            return;
+        }
+        var layer = null;
+        layer = layers[0];
+        if (layer.frames.length > 1) {
+            Log.throwError("九宫图片只能为1帧", item.name);
+            return;
+        }
+        var elements = layer.frames[0].elements;
+        if (elements.length > 1) {
+            Log.throwError("九宫元件引导层只能引用一张位图", item.name);
+            return;
+        }
+        var ele = elements[0];
+        if (ele.elementType === "instance" && ele.instanceType === "bitmap") {
+            data[0] = this.getElementData(ele);
+            var gx = Math.round(rect.left);
+            var gy = Math.round(rect.top);
+            var gr = Math.round(rect.right);
+            var gb = Math.round(rect.bottom);
+            data[1] = [gx, gy, gr - gx, gb - gy];
+        }
+        return data;
+    };
+    /**
      * 获取元素数据
      *
      * @param {FlashElement}    ele 元素
@@ -181,6 +227,13 @@ var Solution = (function () {
                         data[2] = this.imgParser.bitmaps[lname].idx;
                         break;
                     case "symbol":
+                        if (item.linkageClassName == "ui.Rectangle") {
+                            data[0] = ExportType.Rectangle;
+                            if (data[1][0] == 0) {
+                                data[1][0] = "Rect" + (this.guid++);
+                            }
+                            break;
+                        }
                         data[3] = 0; // 默认为当前swf
                         // 引用数据
                         if (item.linkageImportForRS) {
@@ -208,9 +261,42 @@ var Solution = (function () {
                             }
                         }
                         else {
-                            // 无导出名的，直接当做子控件处理
-                            data[0] = ExportType.Container;
-                            data[2] = this.getPanelData(null, item);
+                            var other = true;
+                            // 对非共享导入，并且没有导出名的控件进行优化
+                            // 看看是否直接使用的位图
+                            // 必须为单层，单帧，并且里面只有一个位图对象
+                            var timeline = item.timeline;
+                            var layers = timeline.layers;
+                            var llen = layers.length;
+                            if (llen == 1) {
+                                var layer = layers[0];
+                                var frames_1 = layer.frames;
+                                var flen = frames_1.length;
+                                if (flen == 1) {
+                                    var subEle = frames_1[0].elements[0];
+                                    if (subEle && subEle.elementType === "instance" && subEle.instanceType === "bitmap") {
+                                        // 进行优化
+                                        // 如果有scale9信息，作为scale9的位图处理
+                                        var subItem = subEle.libraryItem;
+                                        if (item.scalingGrid) {
+                                            data[0] = ExportType.ScaleBmp;
+                                            data[2] = this.getScaleBitmapData(item);
+                                        }
+                                        else {
+                                            // 位图数据
+                                            data[0] = ExportType.Image;
+                                            // 位图使用库中索引号，并且图片不允许使用其他库的
+                                            data[2] = this.imgParser.bitmaps[subItem.name].idx;
+                                        }
+                                        other = false;
+                                    }
+                                }
+                            }
+                            if (other) {
+                                // 无导出名的，直接当做子控件处理
+                                data[0] = ExportType.Container;
+                                data[2] = this.getPanelData(null, item);
+                            }
                         }
                         break;
                     default:
@@ -245,21 +331,22 @@ var Solution = (function () {
             if (layer.layerType !== "normal") {
                 continue;
             }
-            var frames_1 = layer.frames;
-            var flen = frames_1.length;
+            var frames_2 = layer.frames;
+            var flen = frames_2.length;
             if (flen > 1) {
                 Log.throwError(name, "作为面板，帧数大于1");
             }
             if (!flen) {
                 continue;
             }
-            var frame = frames_1[0];
+            var frame = frames_2[0];
             var elements = frame.elements;
             var elen = elements.length;
             for (var ei = 0; ei < elen; ei++) {
                 var ele = elements[ei];
-                // fl.trace(JSON.stringify(ele));
-                depthEles.push(new DepthEleData(pi, ele.depth, this.getElementData(ele, name + "->" + "第" + i + "层")));
+                var dat = this.getElementData(ele, name + "->" + "第" + i + "层");
+                fl.trace("**************************\n" + JSON.stringify(dat) + "**************************\n");
+                depthEles.push(new DepthEleData(pi, ele.depth, dat));
             }
         }
         dom.exitEditMode();

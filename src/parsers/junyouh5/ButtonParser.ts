@@ -47,6 +47,23 @@ class ButtonParser extends ComWillCheck {
                         }
                     }
                 }
+            } else if (lname === "floor") { // 新增附加底层
+                let frame = layer.frames[0];
+                let elements = frame.elements;
+                let ele = elements[0];
+                if (ele && ele.elementType === "instance") {
+                    data[5] = solution.getElementData(ele);
+                }
+            } else if (lname === "ceil") { // 新增附加顶层，盖子
+                let frame = layer.frames[0];
+                let elements = frame.elements;
+                let ele = elements[0];
+                if (ele && ele.elementType === "instance") {
+                    if (data.length < 6) {
+                        data[5] = 0;
+                    }
+                    data[6] = solution.getElementData(ele);
+                }
             } else {
                 Log.throwError("不支持这种按钮：", item.name);
             }

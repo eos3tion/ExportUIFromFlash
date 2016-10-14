@@ -25,6 +25,8 @@ class Solution {
      */
     public generator: IPanelGenerator;
 
+    private guid: number = 0;
+
     constructor() {
         this.compCheckers = {};
         this.panelCheckers = {};
@@ -177,6 +179,52 @@ class Solution {
     }
 
     /**
+     * 获取ScaleBitmap的数据
+     * 
+     * @param {FlashElement} ele
+     * @param {FlashItem} item
+     * 
+     * @memberOf Solution
+     */
+    public getScaleBitmapData(item: FlashItem) {
+        let data = [];
+        let grid = item.scalingGrid;
+        if (!grid) {
+            Log.throwError("此控件没有设置九宫信息", item.name);
+            return;
+        }
+        let rect = item.scalingGridRect;
+        let timeline = item.timeline;
+        let layers = timeline.layers;
+        let llen = layers.length;
+        if (layers.length > 2) {
+            Log.throwError("九宫图片只能有一个图层", item.name);
+            return;
+        }
+        let layer = null;
+        layer = layers[0];
+        if (layer.frames.length > 1) {
+            Log.throwError("九宫图片只能为1帧", item.name);
+            return;
+        }
+        let elements = layer.frames[0].elements;
+        if (elements.length > 1) {
+            Log.throwError("九宫元件引导层只能引用一张位图", item.name);
+            return;
+        }
+        let ele = elements[0];
+        if (ele.elementType === "instance" && ele.instanceType === "bitmap") {
+            data[0] = this.getElementData(ele);
+            var gx = Math.round(rect.left);
+            var gy = Math.round(rect.top);
+            var gr = Math.round(rect.right);
+            var gb = Math.round(rect.bottom);
+            data[1] = [gx, gy, gr - gx, gb - gy];
+        }
+        return data;
+    }
+
+    /**
      * 获取元素数据
      *
      * @param {FlashElement}    ele 元素
@@ -210,6 +258,13 @@ class Solution {
                         data[2] = this.imgParser.bitmaps[lname].idx;
                         break;
                     case "symbol":
+                        if (item.linkageClassName == "ui.Rectangle") {//用于定位坐标
+                            data[0] = ExportType.Rectangle;
+                            if (data[1][0] == 0) {//没有名字，自动生成名字
+                                data[1][0] = "Rect" + (this.guid++);
+                            }
+                            break;
+                        }
                         data[3] = 0; // 默认为当前swf
                         // 引用数据
 
@@ -235,9 +290,45 @@ class Solution {
                                 Log.throwError(errPrefix + "->" + ele.name + "有导出名，但不是控件:" + lname);
                             }
                         } else {
-                            // 无导出名的，直接当做子控件处理
-                            data[0] = ExportType.Container;
-                            data[2] = this.getPanelData(null, item);
+                            let other = true;
+                            // 对非共享导入，并且没有导出名的控件进行优化
+                            // 看看是否直接使用的位图
+                            // 必须为单层，单帧，并且里面只有一个位图对象
+                            let timeline = item.timeline;
+                            let layers = timeline.layers;
+                            let llen = layers.length;
+                            if (llen == 1) {
+                                let layer = layers[0];
+                                let frames = layer.frames;
+                                let flen = frames.length;
+                                if (flen == 1) {
+                                    let subEle = frames[0].elements[0];
+                                    if (subEle && subEle.elementType === "instance" && subEle.instanceType === "bitmap") {
+                                        // 进行优化
+                                        // 如果有scale9信息，作为scale9的位图处理
+                                        let subItem = subEle.libraryItem;
+                                        if (item.scalingGrid) {
+                                            data[0] = ExportType.ScaleBmp;
+                                            data[2] = this.getScaleBitmapData(item);
+
+                                            //fl.trace("dddddddaaaa:" + JSON.stringify(data));
+                                        } else {
+                                            // 位图数据
+                                            data[0] = ExportType.Image;
+                                            // 位图使用库中索引号，并且图片不允许使用其他库的
+                                            data[2] = this.imgParser.bitmaps[subItem.name].idx;
+                                        }
+                                        other = false;
+                                    }
+                                }
+                            }
+
+
+                            if (other) {
+                                // 无导出名的，直接当做子控件处理
+                                data[0] = ExportType.Container;
+                                data[2] = this.getPanelData(null, item);
+                            }
                         }
                         break;
                     default:
@@ -289,8 +380,9 @@ class Solution {
             let elen = elements.length;
             for (let ei = 0; ei < elen; ei++) {
                 let ele = elements[ei];
-                // fl.trace(JSON.stringify(ele));
-                depthEles.push(new DepthEleData(pi, ele.depth, this.getElementData(ele, name + "->" + "第" + i + "层")));
+                let dat = this.getElementData(ele, name + "->" + "第" + i + "层");
+                fl.trace("**************************\n" + JSON.stringify(dat) + "**************************\n");
+                depthEles.push(new DepthEleData(pi, ele.depth, dat));
             }
         }
         dom.exitEditMode();

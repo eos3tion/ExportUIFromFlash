@@ -40,7 +40,7 @@ var JunyouH5Generator = (function () {
             var classInfo = { classes: {}, depends: [] };
             var classes = classInfo.classes;
             var createtime = new Date().format("yyyy-MM-dd HH:mm:ss");
-            if (panelName.indexOf("View") != -1 || panelName.indexOf("render") != -1) {
+            if (panelName.indexOf("View") != -1 || panelName.indexOf("Render") != -1) {
                 this.generateClass(this._containerTmp, panelName, pInfo, classInfo);
             }
             else {
@@ -67,13 +67,10 @@ var JunyouH5Generator = (function () {
             var mediatorOut = modFolder + "/" + mediatorName + ".ts";
             var flag = true;
             if (panelName.indexOf("Panel") != -1 || panelName.indexOf("Dele") != -1) {
-                // if (!FLfile.exists(mediatorOut)) {
-                //     FLfile.write(mediatorOut, str);
-                //     // flag = confirm("指定目录下，已经有：" + FLfile.uriToPlatformPath(mediatorOut) + "，是否要重新生成，并覆盖？");
-                // }
                 if (FLfile.exists(mediatorOut)) {
                     flag = confirm("指定目录下，已经有：" + FLfile.uriToPlatformPath(mediatorOut) + "，是否保留原先的代码？？？");
                     if (!flag) {
+                        FLfile.copy(mediatorOut, mediatorOut + ".bak"); //增加一个备份
                         FLfile.write(mediatorOut, str);
                     }
                 }
@@ -96,8 +93,18 @@ var JunyouH5Generator = (function () {
             var baseData = data[1];
             var instanceName = baseData[0];
             switch (type) {
+                case ExportType.Rectangle:
+                    pros.push("public " + instanceName + ": egret.Rectangle;");
+                    comps.push("this." + instanceName + " = new egret.Rectangle(" + baseData[1] + "," + baseData[2] + "," + baseData[3] + "," + baseData[4] + ");");
+                    break;
                 case ExportType.Image:
-                    comps.push("this.addChild(manager.createBitmapByData(this._key, " + JSON.stringify(data) + "));");
+                    //comps.push("this.addChild(manager.createBitmapByData(this._key, " + JSON.stringify(data) + "));");
+                    comps.push("dis = manager.createBitmapByData(this._key, " + JSON.stringify(data) + ");");
+                    comps.push("this.addChild(dis);");
+                    if (instanceName) {
+                        pros.push("public " + instanceName + ": egret.Bitmap;");
+                        comps.push("this." + instanceName + " = dis;");
+                    }
                     break;
                 case ExportType.Text:
                     comps.push("dis = manager.createTextFieldByData(this._key, " + JSON.stringify(data) + ");");
@@ -123,14 +130,26 @@ var JunyouH5Generator = (function () {
                     else {
                         var tp = instanceName.split("$")[0];
                         var tmpname = instanceName.split("$")[1];
-                        pros.push("public " + tmpname + ":egret.Sprite;");
                         var tmpd = data[2][0];
+                        if (tp == "con") {
+                            if (tmpd) {
+                                pros.push("public " + tmpname + ":egret.Rectangle;");
+                                comps.push("this." + tmpname + "=new egret.Rectangle();");
+                            }
+                            else {
+                                pros.push("public " + tmpname + ":egret.Sprite;");
+                                comps.push("this." + tmpname + "=new egret.Sprite();");
+                            }
+                        }
+                        else {
+                            pros.push("public " + tmpname + ":egret.Sprite;");
+                            comps.push("this." + tmpname + "=new egret.Sprite();");
+                        }
                         //tmpd[1][0]=tmpname;
                         if (tmpd) {
                             tmpd[1][1] = 0;
                             tmpd[1][2] = 0;
                         }
-                        comps.push("this." + tmpname + "=new egret.Sprite();");
                         if (tp != "con") {
                             if (tmpd) {
                                 comps.push("dis=manager.createBitmapByData(this._key, " + JSON.stringify(tmpd) + ");");
@@ -145,13 +164,18 @@ var JunyouH5Generator = (function () {
                         }
                         if (tp == "con") {
                             if (tmpd) {
-                                comps.push("this." + tmpname + ".graphics.clear();");
-                                comps.push("this." + tmpname + ".graphics.beginFill(0,0);");
-                                comps.push("this." + tmpname + ".graphics.drawRect(0,0," + data[1][3] + "," + data[1][4] + ");");
-                                comps.push("this." + tmpname + ".graphics.endFill();");
+                                comps.push("this." + tmpname + ".width=" + data[1][3] + ";");
+                                comps.push("this." + tmpname + ".height=" + data[1][4] + ";");
                             }
                         }
-                        comps.push("this.addChild(this." + tmpname + ");");
+                        if (tp == "con") {
+                            if (!tmpd) {
+                                comps.push("this.addChild(this." + tmpname + ");");
+                            }
+                        }
+                        else {
+                            comps.push("this.addChild(this." + tmpname + ");");
+                        }
                     }
                     break;
                 default:
@@ -190,7 +214,7 @@ var JunyouH5Generator = (function () {
         var properties = pros.join("\r\n\t");
         var cops = comps.join("\r\n\t\t");
         var classStr;
-        if (panelName.indexOf("View") != -1 || panelName.indexOf("render") != -1) {
+        if (panelName.indexOf("View") != -1 || panelName.indexOf("Render") != -1) {
             classStr = tempate.replace("@class@", "export class ")
                 .replace("@panelName@", panelName)
                 .replace("@properties@", properties)

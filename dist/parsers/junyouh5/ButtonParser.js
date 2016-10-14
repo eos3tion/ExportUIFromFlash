@@ -27,7 +27,7 @@ var ButtonParser = (function (_super) {
             var layer = layers[li];
             var lname = layer.name;
             // 默认无文本框
-            data[0] = 0;
+            //data[0] = 0;
             if (lname === "tf") {
                 var frame = layer.frames[0];
                 var elements = frame.elements;
@@ -52,6 +52,25 @@ var ButtonParser = (function (_super) {
                             data[fi + 1] = solution.getElementData(ele);
                         }
                     }
+                }
+            }
+            else if (lname === "floor") {
+                var frame = layer.frames[0];
+                var elements = frame.elements;
+                var ele = elements[0];
+                if (ele && ele.elementType === "instance") {
+                    data[5] = solution.getElementData(ele);
+                }
+            }
+            else if (lname === "ceil") {
+                var frame = layer.frames[0];
+                var elements = frame.elements;
+                var ele = elements[0];
+                if (ele && ele.elementType === "instance") {
+                    if (data.length < 6) {
+                        data[5] = 0;
+                    }
+                    data[6] = solution.getElementData(ele);
                 }
             }
             else {
