@@ -18,3 +18,4 @@
 ├dist\ 使用tsc的发布路径，目录结构同src，代码为生成后的js代码  
 ├templates\ 用于放代码生成器的代码模板  
 └typings\tsd.d.ts 中加了项目中用的脚本定义  
+
