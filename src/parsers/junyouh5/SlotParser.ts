@@ -9,7 +9,7 @@ class SlotParser extends ComWillCheck {
     constructor() {
         super(ExportType.Slot, /^ui[.](slot)/, null, "sui.Slot");
         this.parseHandler = this.slotParser;
-        
+
     }
     /**
      * 用于处理格位
@@ -47,23 +47,22 @@ class SlotParser extends ComWillCheck {
         let name;
         let frame;
         let elements;
-        let barWidth;
+        let e;
         // 遍历图层
         for (let i = 0; i < len; i++) {
             layer = layers[i];
-            frame = layer.frames[0];
-            elements = frame.elements;
-            let e = elements[0];
-            if (e) {
+            name = layer.name;
+            if (name) {
+                frame = layer.frames[0];
+                elements = frame.elements;
+                e = elements[0];
                 //文本
-                if (e.elementType === "text") {
+                if (name === "tf") {
                     data[1] = solution.getElementData(e);
                 }
                 // 底图 无底图时不处理
-                else if (e.elementType === "instance" && e.instanceType === "bitmap") {
-                    let bgData = solution.getElementData(e);
-                    data[2] = bgData;
-                    //alert(bgData);
+                else if (name === "bg") {
+                    data[2] = solution.getElementData(e);
                 }
             }
         }
