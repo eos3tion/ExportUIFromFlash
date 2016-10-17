@@ -17,11 +17,11 @@ class ButtonParser extends ComWillCheck {
         // 按钮必须1层或者2层
         // 层名字为label 放文本框或者留空
         // 层名字为bg 放3帧或者4帧图片
+        // 默认无文本框 
+        data[0] = 0; //赋值为0的目的是如果没有文本，会输出为undefined，字符串比0长
         for (let li = 0; li < llen; li++) {
             let layer = layers[li];
             let lname = layer.name;
-            // 默认无文本框
-            //data[0] = 0;
             if (lname === "tf") {
                 let frame = layer.frames[0];
                 let elements = frame.elements;
