@@ -37,7 +37,7 @@ class JunyouH5Generator implements IPanelGenerator {
      * 生成面板代码
      */
     generateOnePanel(className: string, pInfo: any[], size: number[]) {
-        let result = /^ui[.](.*?)[.](.*?(Panel|Dele|Render|View|"))$/.exec(className);
+        let result = /^ui[.](.*?)[.](.*?(Panel|Dele|Render|View))$/.exec(className);
         // /^ui[.](.*?)[.]((.*?)(Panel|Dele))$/.exec("ui.ShangCheng.ShangChengPanel")
         // ["ui.ShangCheng.ShangChengPanel", "ShangCheng", "ShangChengPanel", "ShangCheng", "Panel"]
         if (result) {
