@@ -43,4 +43,6 @@ class ExportType {
     public static ShareBmp = 12;
 
     public static Slot = 13;
+
+    public static AlertSkin = 15;
 }

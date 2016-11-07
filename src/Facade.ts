@@ -36,6 +36,8 @@ sol.regComChecker(new ProgressBarParser());
 sol.regComChecker(new ShareBitmapParser());
 //绑定格位
 sol.regComChecker(new SlotParser());
+//绑定提示框皮肤
+sol.regComChecker(new AlertSkinParser());
 
 // 加载代码生成器
 Script.runScript("generators/JunyouH5Generator");
