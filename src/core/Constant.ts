@@ -44,5 +44,4 @@ class ExportType {
 
     public static Slot = 13;
 
-    public static AlertSkin = 15;
 }
