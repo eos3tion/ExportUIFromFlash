@@ -9,14 +9,50 @@
 var Solution = (function () {
     function Solution() {
         this.guid = 0;
+        /**
+         * 装箱用的图片数据
+         *
+         * @private
+         * @type {ImageInfo[]}
+         * @memberOf Solution
+         */
+        this.blocks = [];
         this.compCheckers = {};
         this.panelCheckers = {};
         this.imgParser = new ImageParser;
         this.inlineCheckers();
     }
+    /**
+     * 添加位图到bitmaps中
+     *
+     * @param {FlashElement} ele
+     * @param {FlashItem} libItem
+     *
+     * @memberOf Solution
+     */
+    Solution.prototype.addImageToLib = function (ele, libItem) {
+        var bItem = ele.libraryItem;
+        var bname = bItem.name;
+        var bitmaps = this.imgParser.bitmaps;
+        var iii = bitmaps[bname];
+        if (!iii) {
+            iii = new ImageInfo();
+            iii.name = bname;
+            iii.libItem = bItem;
+            // 无法直接FlashItem大小，先将Item加入到舞台，选中获取大小，所以图片的宽度和高度通过element获取像素宽度和高度
+            iii.w = ele.hPixels; // 得到图片宽度
+            iii.h = ele.vPixels; // 得到图片高度
+            bitmaps[bname] = iii;
+            this.blocks.push(iii);
+        }
+        var aaa = iii.refs;
+        if (!~aaa.indexOf(libItem)) {
+            aaa.push(libItem);
+        }
+    };
     Solution.prototype.inlineCheckers = function () {
         // 面板处理器，使用Solution中的解决方案
-        this.regPanelChecker(new ComWillCheck(ExportType.Container, /^ui[.].*?[.].*?(Panel|Dele|Render|View)$/, this.getPanelData.bind(this)));
+        this.regPanelChecker(new ComWillCheck(2 /* Container */, /^ui[.].*?[.].*?(Panel|Dele|Render|View)$/, this.getPanelData.bind(this)));
     };
     /**
      * 注册控件检查器
@@ -35,7 +71,7 @@ var Solution = (function () {
     Solution.prototype.doCheck = function (item, checkers) {
         for (var ckey in checkers) {
             var checker = checkers[ckey];
-            if (checker.check(item)) {
+            if (checker.check(item, this)) {
                 checker.add(item, this.getItemSize(item));
                 break;
             }
@@ -44,12 +80,11 @@ var Solution = (function () {
     /**
      * 预检测，进行预检测
      */
-    Solution.prototype.preCheck = function () {
+    Solution.prototype.preCheck = function (blocks) {
         var items = lib.items;
-        var blocks = [];
         for (var i = 0; i < items.length; i++) {
             var item = items[i];
-            if (item.itemType === "movie clip") {
+            if (item.itemType === ItemType.MovieClip) {
                 // 只处理要导出的Item ，也处理导入，导入特殊处理
                 if (item.linkageClassName) {
                     // 检查输入元素，以供后续使用
@@ -57,11 +92,10 @@ var Solution = (function () {
                     // 检查面板
                     this.doCheck(item, this.panelCheckers);
                     // 检查图片
-                    this.imgParser.checkItem(item, blocks);
+                    this.imgParser.checkItem(item, blocks, this);
                 }
             }
         }
-        return blocks;
     };
     /**
      * 处理图片
@@ -147,6 +181,37 @@ var Solution = (function () {
         }
         return data;
     };
+    Solution.prototype.getScaleBitmapLayer = function (layers, item) {
+        if (item.$scale9Checked) {
+            return { layer: item.$scale9Layer };
+        }
+        var llen = layers.length;
+        var layer;
+        var error;
+        if (llen == 2) {
+            var flag = 0;
+            for (var i = 0; i < llen; i++) {
+                var tlayer = layers[i];
+                var lname = tlayer.name;
+                if (lname.substr(-4) == "_bmp") {
+                    flag |= 1;
+                    layer = tlayer;
+                }
+                if (lname.substr(-7) == "_slices") {
+                    flag |= 2;
+                }
+            }
+            if (flag != 3) {
+                error = "九宫图片不符合使用BitmapSlice9.jsfl处理的图片规范";
+            }
+        }
+        else if (llen == 1) {
+            layer = layers[0];
+        }
+        item.$scale9Checked = true;
+        item.$scale9Layer = layer;
+        return { layer: layer, error: error };
+    };
     /**
      * 获取ScaleBitmap的数据
      *
@@ -165,24 +230,27 @@ var Solution = (function () {
         var rect = item.scalingGridRect;
         var timeline = item.timeline;
         var layers = timeline.layers;
-        var llen = layers.length;
-        if (layers.length > 2) {
-            Log.throwError("九宫图片只能有一个图层", item.name);
+        var _a = this.getScaleBitmapLayer(layers, item), layer = _a.layer, error = _a.error;
+        if (!layer) {
+            Log.throwError("九宫图片的图层不符合要求", item.name);
             return;
         }
-        var layer = null;
-        layer = layers[0];
-        if (layer.frames.length > 1) {
+        if (error) {
+            Log.throwError(error, item.name);
+            return;
+        }
+        var frames = layer.frames;
+        if (frames.length > 1) {
             Log.throwError("九宫图片只能为1帧", item.name);
             return;
         }
-        var elements = layer.frames[0].elements;
+        var elements = frames[0].elements;
         if (elements.length > 1) {
             Log.throwError("九宫元件引导层只能引用一张位图", item.name);
             return;
         }
         var ele = elements[0];
-        if (ele.elementType === "instance" && ele.instanceType === "bitmap") {
+        if (ele.elementType === ElementType.Instance && ele.instanceType === InstanceType.Bitmap) {
             data[0] = this.getElementData(ele);
             var gx = Math.round(rect.left);
             var gy = Math.round(rect.top);
@@ -211,24 +279,24 @@ var Solution = (function () {
         // 处理基础数据
         data[1] = this.getEleBaseData(ele);
         switch (type) {
-            case "text":
-                data[0] = ExportType.Text;
+            case ElementType.Text:
+                data[0] = 1 /* Text */;
                 data[2] = this.getTextData(ele);
                 break;
-            case "instance":
+            case ElementType.Instance:
                 var itype = ele.instanceType;
                 var item = ele.libraryItem;
                 var lname = item.name;
                 switch (itype) {
-                    case "bitmap":
+                    case InstanceType.Bitmap:
                         // 位图数据
-                        data[0] = ExportType.Image;
+                        data[0] = 0 /* Image */;
                         // 位图使用库中索引号，并且图片不允许使用其他库的
                         data[2] = this.imgParser.bitmaps[lname].idx;
                         break;
-                    case "symbol":
+                    case InstanceType.Symbol:
                         if (item.linkageClassName == "ui.Rectangle") {
-                            data[0] = ExportType.Rectangle;
+                            data[0] = 14 /* Rectangle */;
                             if (data[1][0] == 0) {
                                 data[1][0] = "Rect" + (this.guid++);
                             }
@@ -262,47 +330,56 @@ var Solution = (function () {
                         }
                         else {
                             var other = true;
-                            // 对非共享导入，并且没有导出名的控件进行优化
-                            // 看看是否直接使用的位图
-                            // 必须为单层，单帧，并且里面只有一个位图对象
-                            var timeline = item.timeline;
-                            var layers = timeline.layers;
-                            var llen = layers.length;
-                            if (llen == 1) {
-                                var layer = layers[0];
-                                var frames_1 = layer.frames;
-                                var flen = frames_1.length;
-                                if (flen == 1) {
-                                    var subEle = frames_1[0].elements[0];
-                                    if (subEle && subEle.elementType === "instance" && subEle.instanceType === "bitmap") {
-                                        // 进行优化
-                                        // 如果有scale9信息，作为scale9的位图处理
-                                        var subItem = subEle.libraryItem;
-                                        if (item.scalingGrid) {
-                                            data[0] = ExportType.ScaleBmp;
-                                            data[2] = this.getScaleBitmapData(item);
-                                        }
-                                        else {
+                            if (item.$scale9Layer) {
+                                data[0] = 5 /* ScaleBmp */;
+                                data[2] = this.getScaleBitmapData(item);
+                                other = false;
+                            }
+                            else {
+                                // 对非共享导入，并且没有导出名的控件进行优化
+                                // 看看是否直接使用的位图
+                                // 必须为单层，单帧，并且里面只有一个位图对象
+                                var timeline = item.timeline;
+                                var layers = timeline.layers;
+                                var llen = layers.length;
+                                if (llen == 1) {
+                                    var layer = layers[0];
+                                    var frames_1 = layer.frames;
+                                    var flen = frames_1.length;
+                                    if (flen == 1) {
+                                        var subEle = frames_1[0].elements[0];
+                                        if (subEle && subEle.elementType === "instance" && subEle.instanceType === "bitmap") {
+                                            // 进行优化
+                                            // 如果有scale9信息，作为scale9的位图处理
+                                            var subItem = subEle.libraryItem;
+                                            // if (item.scalingGrid) {
+                                            //     data[0] = ExportType.ScaleBmp;
+                                            //     data[2] = this.getScaleBitmapData(item);
+                                            //     //fl.trace("dddddddaaaa:" + JSON.stringify(data));
+                                            // } else {
                                             // 位图数据
-                                            data[0] = ExportType.Image;
+                                            data[0] = 0 /* Image */;
                                             // 位图使用库中索引号，并且图片不允许使用其他库的
                                             data[2] = this.imgParser.bitmaps[subItem.name].idx;
+                                            // }
+                                            other = false;
                                         }
-                                        other = false;
                                     }
                                 }
                             }
                             if (other) {
                                 // 无导出名的，直接当做子控件处理
-                                data[0] = ExportType.Container;
+                                data[0] = 2 /* Container */;
                                 data[2] = this.getPanelData(null, item);
                             }
                         }
                         break;
                     default:
-                        Log.throwError(errPrefix + "->" + ele.name + "为不支持的实例类型(instanceType)：" + type);
+                        Log.throwError(errPrefix + "->" + ele.name + "为不支持的实例类型(instanceType)：" + itype);
                         break;
                 }
+                break;
+            case ElementType.Shape:
                 break;
             default:
                 Log.throwError(errPrefix + "->" + ele.name + "为不支持的元素类型(elementType):" + type);
@@ -328,7 +405,7 @@ var Solution = (function () {
         // 从最底层往上遍历
         for (var i = layers.length - 1; i >= 0; i--, pi++) {
             var layer = layers[i];
-            if (layer.layerType !== "normal") {
+            if (layer.layerType !== LayerType.Normal) {
                 continue;
             }
             var frames_2 = layer.frames;
@@ -416,7 +493,9 @@ var Solution = (function () {
      * 尝试运行
      */
     Solution.prototype.run = function () {
-        var blocks = this.preCheck();
+        var blocks = this.blocks;
+        blocks.length = 0;
+        this.preCheck(blocks);
         var imgData = this.solveImage(blocks);
         // 获取元件的数据
         var componentsData = this.getSolveData(this.compCheckers);

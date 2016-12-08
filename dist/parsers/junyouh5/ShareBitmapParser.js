@@ -6,7 +6,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 var ShareBitmapParser = (function (_super) {
     __extends(ShareBitmapParser, _super);
     function ShareBitmapParser() {
-        _super.call(this, ExportType.ShareBmp, /^bmd[.](share)/, null, "egret.Bitmap");
+        _super.call(this, 12 /* ShareBmp */, /^bmd[.](share)/, null, "egret.Bitmap");
         this.parseHandler = this.shareParser;
     }
     ShareBitmapParser.prototype.shareParser = function (checker, item, list, solution) {

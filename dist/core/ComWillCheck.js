@@ -25,8 +25,9 @@ var ComWillCheck = (function () {
      * 检查库中的Item是否可以放入当前控件
      *
      * @param {FlashItem} item 待检查的Item
+     * @param {Solution} solution 解决方案的引用
      */
-    ComWillCheck.prototype.check = function (item) {
+    ComWillCheck.prototype.check = function (item, solution) {
         var reg = this.reg;
         reg.lastIndex = 0;
         return reg.test(item.linkageClassName);

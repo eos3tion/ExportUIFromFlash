@@ -6,7 +6,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 var SlotBgParser = (function (_super) {
     __extends(SlotBgParser, _super);
     function SlotBgParser() {
-        _super.call(this, ExportType.SlotBg, /^bmd[.](slotbg)/, null, "egret.Bitmap");
+        _super.call(this, 11 /* SlotBg */, /^bmd[.](slotbg)/, null, "egret.Bitmap");
         this.parseHandler = this.slotBgParser;
     }
     SlotBgParser.prototype.slotBgParser = function (checker, item, list, solution) {

@@ -69,6 +69,22 @@ interface FlashItem {
      * 增加一个类型项
      */
     $key: number;
+
+    /**
+     * 是否做过Scale9检查
+     * 
+     * @type {boolean}
+     * @memberOf FlashItem
+     */
+    $scale9Checked: boolean;
+
+    /**
+     * scale9图层
+     * 
+     * @type {FlashLayer}
+     * @memberOf FlashItem
+     */
+    $scale9Layer: FlashLayer;
 }
 
 /**

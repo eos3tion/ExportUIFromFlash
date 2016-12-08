@@ -6,7 +6,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 var ButtonParser = (function (_super) {
     __extends(ButtonParser, _super);
     function ButtonParser() {
-        _super.call(this, ExportType.Button, /^ui[.](btn|tab|checkbox|radiobox)/, null, "sui.Button");
+        _super.call(this, 3 /* Button */, /^ui[.](btn|tab|checkbox|radiobox)/, null, "sui.Button");
         this.parseHandler = this.buttonParser;
     }
     /**
@@ -23,11 +23,11 @@ var ButtonParser = (function (_super) {
         // 按钮必须1层或者2层
         // 层名字为label 放文本框或者留空
         // 层名字为bg 放3帧或者4帧图片
+        // 默认无文本框 
+        data[0] = 0; //赋值为0的目的是如果没有文本，会输出为undefined，字符串比0长
         for (var li = 0; li < llen; li++) {
             var layer = layers[li];
             var lname = layer.name;
-            // 默认无文本框
-            //data[0] = 0;
             if (lname === "tf") {
                 var frame = layer.frames[0];
                 var elements = frame.elements;

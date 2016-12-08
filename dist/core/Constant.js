@@ -1,39 +1,69 @@
+var ItemType = {
+    Undefined: "undefined",
+    Component: "component",
+    MovieClip: "movie clip",
+    Graphic: "graphic",
+    Button: "button",
+    Folder: "folder",
+    Font: "font",
+    Sound: "sound",
+    Bitmap: "bitmap",
+    CompiledClip: "compiled clip",
+    Screen: "screen",
+    Video: "video"
+};
 /**
- * 导出类型标识
+ * 图层类型
  */
-var ExportType = (function () {
-    function ExportType() {
-    }
-    /*=======================基础控件======================= */
-    /**图片**/
-    ExportType.Image = 0;
-    /**文本框*/
-    ExportType.Text = 1;
-    /**复合容器**/
-    ExportType.Container = 2;
-    /****九宫图片 */
-    ExportType.ScaleBmp = 5;
+var LayerType = {
     /**
-     * 非可视对象
-     *
-     * @static
-     *
-     * @memberOf ExportType
+     * 普通层
      */
-    ExportType.Rectangle = 14;
-    /*=======================复杂控件======================= */
-    /**按钮 */
-    ExportType.Button = 3;
-    /**分页控件 */
-    ExportType.PageControll = 4;
-    ExportType.ArtText = 6;
-    ExportType.NumericStepper = 7;
-    ExportType.Slider = 8;
-    ExportType.Scroll = 9;
-    /**进度条**/
-    ExportType.ProgressBar = 10;
-    ExportType.SlotBg = 11;
-    ExportType.ShareBmp = 12;
-    ExportType.Slot = 13;
-    return ExportType;
-}());
+    Normal: "normal",
+    /**
+     * 引导层
+     */
+    Guide: "guide",
+    /**
+     * 被引导层
+     */
+    Guided: "guided",
+    /**
+     * 遮罩层
+     */
+    Mask: "mask",
+    /**
+     * 被遮罩的图层
+     */
+    Masked: "masked",
+    /**
+     * 文件夹
+     */
+    Folder: "folder"
+};
+var InstanceType = {
+    Symbol: "symbol",
+    Bitmap: "bitmap",
+    EmbeddedVideo: "embedded video",
+    LinkedVideo: "linked video",
+    Video: "video",
+    CompiledClip: "compiled clip"
+};
+var ElementType = {
+    /**
+     * Shape
+     */
+    Shape: "shape",
+    /**
+     * 文本框
+     */
+    Text: "text",
+    /**
+     * 实例
+     */
+    Instance: "instance",
+    /**
+     * 可扩展工具创建的对象
+     */
+    ShapeObj: "shapeObj"
+};

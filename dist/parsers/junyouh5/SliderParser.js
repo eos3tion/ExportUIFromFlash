@@ -6,7 +6,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 var SliderParser = (function (_super) {
     __extends(SliderParser, _super);
     function SliderParser() {
-        _super.call(this, ExportType.Slider, /^ui[.](slider)/, null, "sui.Slider");
+        _super.call(this, 8 /* Slider */, /^ui[.](slider)/, null, "sui.Slider");
         this.parseHandler = this.sliderParser;
     }
     SliderParser.prototype.sliderParser = function (checker, item, list, solution) {

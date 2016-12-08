@@ -223,15 +223,19 @@ class JunyouH5Generator implements IPanelGenerator {
                         let c = compCheckers[ctype];
                         if (c) {
                             let className = c.classNames[data[2]];
-                            // public createDisplayObject(uri:string,className:string,data:any):egret.DisplayObject
-                            comps.push("dis = manager.createDisplayObject(" + strKey + ", \"" + className + "\", " + JSON.stringify(baseData) + ");");
+                            if (className) {
+                                // public createDisplayObject(uri:string,className:string,data:any):egret.DisplayObject
+                                comps.push("dis = manager.createDisplayObject(" + strKey + ", \"" + className + "\", " + JSON.stringify(baseData) + ");");
+                            } else {
+                                comps.push(`dis = manager.createDisplayByElementData(${strKey}, ${JSON.stringify(data)});`);
+                            }
                             comps.push("this.addChild(dis);");
                             if (instanceName) {
                                 pros.push("public " + instanceName + ": " + c.componentName + ";");
                                 comps.push("this." + instanceName + " = dis;");
                             }
                         } else {
-                            Log.throwError("面板进行生成代码，无法找到类名:", JSON.stringify(data));
+                            Log.throwError("面板进行生成代码，无法找到类型:", JSON.stringify(data));
                         }
                     }
                     break;

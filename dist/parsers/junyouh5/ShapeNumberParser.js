@@ -9,7 +9,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 var ShapeNumberParser = (function (_super) {
     __extends(ShapeNumberParser, _super);
     function ShapeNumberParser() {
-        _super.call(this, ExportType.ArtText, /^bmd[.](arttext)/, null, "sui.ArtText");
+        _super.call(this, 6 /* ArtText */, /^bmd[.](arttext)/, null, "sui.ArtText");
         this.parseHandler = this.shapeNumberParser;
     }
     ShapeNumberParser.prototype.shapeNumberParser = function (checker, item, list, solution) {

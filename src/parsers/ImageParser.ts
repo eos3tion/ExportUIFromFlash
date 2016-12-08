@@ -21,7 +21,7 @@ class ImageParser {
      * @param {FlashItem} libItem 库中的Item
      * @param {ImageInfo[]} blocks 用于传出的ImageInfo对象
      */
-    public checkItem(libItem: FlashItem, blocks: ImageInfo[]) {
+    public checkItem(libItem: FlashItem, blocks: ImageInfo[], solution: Solution) {
         if (libItem.linkageImportForRS) {//原件是导入的，不检查 
             return;
         }
@@ -30,13 +30,34 @@ class ImageParser {
         let timeline = libItem.timeline;
         let layers = timeline.layers;
         let llen = layers.length;
+        if (llen == 2) {//层数有两层的做特殊检测
+            // BitmapSlice9.jsfl处理过的图片，做特殊处理
+            let {layer, error} = solution.getScaleBitmapLayer(layers, libItem);
+            if (layer) {
+                let flag = true;
+                let frames = layer.frames;
+                if (frames.length > 1) {
+                    Log.throwError("BitmapSlice9.jsfl处理的九宫图元件引导帧数多余一帧", libItem.name);
+                    return;
+                }
+                let elements = frames[0].elements;
+                if (elements.length > 1) {
+                    Log.throwError("BitmapSlice9.jsfl处理的九宫图元件引导层只能引用一张位图", libItem.name);
+                    return;
+                }
+                let ele = elements[0];
+                solution.addImageToLib(ele, libItem);
+                return;
+            }
+        }
         for (let li = 0; li < llen; li++) {
             let layer = layers[li];
             let ltype = layer.layerType;
-            if (ltype === "normal") { // 只处理普通层
-                let flen = layer.frames.length;
+            if (ltype === LayerType.Normal) { // 只处理普通层
+                let frames = layer.frames;
+                let flen = frames.length;
                 for (let fi = 0; fi < flen; fi++) {
-                    let frame = layer.frames[fi];
+                    let frame = frames[fi];
                     if (frame.startFrame !== fi) { // 非关键帧不处理
                         continue;
                     }
@@ -48,26 +69,11 @@ class ImageParser {
                         if (elementType === "instance") { // 实例对象
                             let instanceType = ele.instanceType;
                             if (instanceType === "bitmap") { // 如果是位图的实例，尝试导出
-                                let bItem = ele.libraryItem;
-                                let bname = bItem.name;
-                                let iii = this.bitmaps[bname];
-                                if (!iii) {
-                                    iii = new ImageInfo();
-                                    iii.name = bname;
-                                    iii.libItem = bItem;
-                                    iii.w = ele.hPixels; // 得到图片高度
-                                    iii.h = ele.vPixels; // 得到图片宽度
-                                    bitmaps[bname] = iii;
-                                    blocks.push(iii);
-                                }
-                                let aaa = iii.refs;
-                                if (!~aaa.indexOf(libItem)) {
-                                    aaa.push(libItem);
-                                }
+                                solution.addImageToLib(ele, libItem);
                             } else if (instanceType === "symbol") {
                                 let bItem = ele.libraryItem;
                                 if (!bItem.linkageClassName) {
-                                    this.checkItem(bItem, blocks);
+                                    this.checkItem(bItem, blocks, solution);
                                 }
                             }
                         }

@@ -13,7 +13,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 var SlotParser = (function (_super) {
     __extends(SlotParser, _super);
     function SlotParser() {
-        _super.call(this, ExportType.Slot, /^ui[.](slot)/, null, "sui.Slot");
+        _super.call(this, 13 /* Slot */, /^ui[.](slot)/, null, "sui.Slot");
         this.parseHandler = this.slotParser;
     }
     /**
@@ -50,21 +50,21 @@ var SlotParser = (function (_super) {
         var name;
         var frame;
         var elements;
-        var barWidth;
+        var e;
         // 遍历图层
         for (var i = 0; i < len; i++) {
             layer = layers[i];
-            frame = layer.frames[0];
-            elements = frame.elements;
-            var e = elements[0];
-            if (e) {
+            name = layer.name;
+            if (name) {
+                frame = layer.frames[0];
+                elements = frame.elements;
+                e = elements[0];
                 //文本
-                if (e.elementType === "text") {
+                if (name === "tf") {
                     data[1] = solution.getElementData(e);
                 }
-                else if (e.elementType === "instance" && e.instanceType === "bitmap") {
-                    var bgData = solution.getElementData(e);
-                    data[2] = bgData;
+                else if (name === "bg") {
+                    data[2] = solution.getElementData(e);
                 }
             }
         }

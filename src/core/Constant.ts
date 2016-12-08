@@ -1,16 +1,16 @@
 /**
  * 导出类型标识
  */
-class ExportType {
+const enum ExportType {
     /*=======================基础控件======================= */
     /**图片**/
-    public static Image = 0;
+    Image = 0,
     /**文本框*/
-    public static Text = 1;
+    Text = 1,
     /**复合容器**/
-    public static Container = 2;
+    Container = 2,
     /****九宫图片 */
-    public static ScaleBmp = 5;
+    ScaleBmp = 5,
     /**
      * 非可视对象
      * 
@@ -18,30 +18,103 @@ class ExportType {
      * 
      * @memberOf ExportType
      */
-    public static Rectangle = 14;
+    Rectangle = 14,
 
     /*=======================复杂控件======================= */
     /**按钮 */
-    public static Button = 3;
+    Button = 3,
 
     /**分页控件 */
 
-    public static PageControll = 4;
+    PageControll = 4,
 
-    public static ArtText = 6;
+    ArtText = 6,
 
-    public static NumericStepper = 7;
+    NumericStepper = 7,
 
-    public static Slider = 8;
+    Slider = 8,
 
-    public static Scroll = 9;
+    Scroll = 9,
     /**进度条**/
-    public static ProgressBar = 10;
+    ProgressBar = 10,
 
-    public static SlotBg = 11;
+    SlotBg = 11,
 
-    public static ShareBmp = 12;
+    ShareBmp = 12,
 
-    public static Slot = 13;
+    Slot = 13,
 
+}
+
+const ItemType = {
+    Undefined: "undefined",
+    Component: "component",
+    MovieClip: "movie clip",
+    Graphic: "graphic",
+    Button: "button",
+    Folder: "folder",
+    Font: "font",
+    Sound: "sound",
+    Bitmap: "bitmap",
+    CompiledClip: "compiled clip",
+    Screen: "screen",
+    Video: "video"
+}
+
+/**
+ * 图层类型
+ */
+const LayerType = {
+    /**
+     * 普通层
+     */
+    Normal: "normal",
+    /**
+     * 引导层
+     */
+    Guide: "guide",
+    /**
+     * 被引导层
+     */
+    Guided: "guided",
+    /**
+     * 遮罩层
+     */
+    Mask: "mask",
+    /**
+     * 被遮罩的图层
+     */
+    Masked: "masked",
+    /**
+     * 文件夹
+     */
+    Folder: "folder"
+}
+
+const InstanceType = {
+    Symbol: "symbol",
+    Bitmap: "bitmap",
+    EmbeddedVideo: "embedded video",
+    LinkedVideo: "linked video",
+    Video: "video",
+    CompiledClip: "compiled clip"
+}
+
+const ElementType = {
+    /**
+     * Shape
+     */
+    Shape: "shape",
+    /**
+     * 文本框
+     */
+    Text: "text",
+    /**
+     * 实例
+     */
+    Instance: "instance",
+    /**
+     * 可扩展工具创建的对象
+     */
+    ShapeObj: "shapeObj"
 }

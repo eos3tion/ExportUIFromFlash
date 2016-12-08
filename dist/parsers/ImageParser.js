@@ -13,7 +13,7 @@ var ImageParser = (function () {
      * @param {FlashItem} libItem 库中的Item
      * @param {ImageInfo[]} blocks 用于传出的ImageInfo对象
      */
-    ImageParser.prototype.checkItem = function (libItem, blocks) {
+    ImageParser.prototype.checkItem = function (libItem, blocks, solution) {
         if (libItem.linkageImportForRS) {
             return;
         }
@@ -22,13 +22,34 @@ var ImageParser = (function () {
         var timeline = libItem.timeline;
         var layers = timeline.layers;
         var llen = layers.length;
+        if (llen == 2) {
+            // BitmapSlice9.jsfl处理过的图片，做特殊处理
+            var _a = solution.getScaleBitmapLayer(layers, libItem), layer = _a.layer, error = _a.error;
+            if (layer) {
+                var flag = true;
+                var frames_1 = layer.frames;
+                if (frames_1.length > 1) {
+                    Log.throwError("BitmapSlice9.jsfl处理的九宫图元件引导帧数多余一帧", libItem.name);
+                    return;
+                }
+                var elements = frames_1[0].elements;
+                if (elements.length > 1) {
+                    Log.throwError("BitmapSlice9.jsfl处理的九宫图元件引导层只能引用一张位图", libItem.name);
+                    return;
+                }
+                var ele = elements[0];
+                solution.addImageToLib(ele, libItem);
+                return;
+            }
+        }
         for (var li = 0; li < llen; li++) {
             var layer = layers[li];
             var ltype = layer.layerType;
-            if (ltype === "normal") {
-                var flen = layer.frames.length;
+            if (ltype === LayerType.Normal) {
+                var frames_2 = layer.frames;
+                var flen = frames_2.length;
                 for (var fi = 0; fi < flen; fi++) {
-                    var frame = layer.frames[fi];
+                    var frame = frames_2[fi];
                     if (frame.startFrame !== fi) {
                         continue;
                     }
@@ -40,27 +61,12 @@ var ImageParser = (function () {
                         if (elementType === "instance") {
                             var instanceType = ele.instanceType;
                             if (instanceType === "bitmap") {
-                                var bItem = ele.libraryItem;
-                                var bname = bItem.name;
-                                var iii = this.bitmaps[bname];
-                                if (!iii) {
-                                    iii = new ImageInfo();
-                                    iii.name = bname;
-                                    iii.libItem = bItem;
-                                    iii.w = ele.hPixels; // 得到图片高度
-                                    iii.h = ele.vPixels; // 得到图片宽度
-                                    bitmaps[bname] = iii;
-                                    blocks.push(iii);
-                                }
-                                var aaa = iii.refs;
-                                if (!~aaa.indexOf(libItem)) {
-                                    aaa.push(libItem);
-                                }
+                                solution.addImageToLib(ele, libItem);
                             }
                             else if (instanceType === "symbol") {
                                 var bItem = ele.libraryItem;
                                 if (!bItem.linkageClassName) {
-                                    this.checkItem(bItem, blocks);
+                                    this.checkItem(bItem, blocks, solution);
                                 }
                             }
                         }
@@ -224,7 +230,7 @@ var ImageParser = (function () {
             Log.trace("装箱时，有Block没被装箱，请检查！", len, blocks.length);
             return;
         }
-        //Log.trace("开始添加结果集");
+        Log.trace("开始添加结果集");
         var result = {
             key: key,
             blocks: [],
@@ -255,9 +261,11 @@ var ImageParser = (function () {
         }
         result.fit = width * height;
         if (noFit) {
+            Log.trace(result.key + "noFit");
         }
         else {
             results.push(result);
+            Log.trace(result.key + ":" + result.fit);
         }
     };
     return ImageParser;

@@ -17,7 +17,7 @@ var JunyouH5Generator = (function () {
      * 生成面板代码
      */
     JunyouH5Generator.prototype.generateOnePanel = function (className, pInfo, size) {
-        var result = /^ui[.](.*?)[.](.*?(Panel|Dele|Render|View|"))$/.exec(className);
+        var result = /^ui[.](.*?)[.](.*?(Panel|Dele|Render|View))$/.exec(className);
         // /^ui[.](.*?)[.]((.*?)(Panel|Dele))$/.exec("ui.ShangCheng.ShangChengPanel")
         // ["ui.ShangCheng.ShangChengPanel", "ShangCheng", "ShangChengPanel", "ShangCheng", "Panel"]
         if (result) {
@@ -93,11 +93,11 @@ var JunyouH5Generator = (function () {
             var baseData = data[1];
             var instanceName = baseData[0];
             switch (type) {
-                case ExportType.Rectangle:
+                case 14 /* Rectangle */:
                     pros.push("public " + instanceName + ": egret.Rectangle;");
                     comps.push("this." + instanceName + " = new egret.Rectangle(" + baseData[1] + "," + baseData[2] + "," + baseData[3] + "," + baseData[4] + ");");
                     break;
-                case ExportType.Image:
+                case 0 /* Image */:
                     //comps.push("this.addChild(manager.createBitmapByData(this._key, " + JSON.stringify(data) + "));");
                     comps.push("dis = manager.createBitmapByData(this._key, " + JSON.stringify(data) + ");");
                     comps.push("this.addChild(dis);");
@@ -106,7 +106,7 @@ var JunyouH5Generator = (function () {
                         comps.push("this." + instanceName + " = dis;");
                     }
                     break;
-                case ExportType.Text:
+                case 1 /* Text */:
                     comps.push("dis = manager.createTextFieldByData(this._key, " + JSON.stringify(data) + ");");
                     comps.push("this.addChild(dis);");
                     if (instanceName) {
@@ -114,7 +114,7 @@ var JunyouH5Generator = (function () {
                         comps.push("this." + instanceName + " = dis;");
                     }
                     break;
-                case ExportType.Container:
+                case 2 /* Container */:
                     if (instanceName.indexOf("$") == -1) {
                         var cName = panelName + "_" + idx;
                         this.generateClass(this._containerTmp, cName, data[2], classInfo);
@@ -196,8 +196,13 @@ var JunyouH5Generator = (function () {
                         var c = compCheckers[ctype];
                         if (c) {
                             var className = c.classNames[data[2]];
-                            // public createDisplayObject(uri:string,className:string,data:any):egret.DisplayObject
-                            comps.push("dis = manager.createDisplayObject(" + strKey + ", \"" + className + "\", " + JSON.stringify(baseData) + ");");
+                            if (className) {
+                                // public createDisplayObject(uri:string,className:string,data:any):egret.DisplayObject
+                                comps.push("dis = manager.createDisplayObject(" + strKey + ", \"" + className + "\", " + JSON.stringify(baseData) + ");");
+                            }
+                            else {
+                                comps.push("dis = manager.createDisplayByElementData(" + strKey + ", " + JSON.stringify(data) + ");");
+                            }
                             comps.push("this.addChild(dis);");
                             if (instanceName) {
                                 pros.push("public " + instanceName + ": " + c.componentName + ";");
@@ -205,7 +210,7 @@ var JunyouH5Generator = (function () {
                             }
                         }
                         else {
-                            Log.throwError("面板进行生成代码，无法找到类名:", JSON.stringify(data));
+                            Log.throwError("面板进行生成代码，无法找到类型:", JSON.stringify(data));
                         }
                     }
                     break;

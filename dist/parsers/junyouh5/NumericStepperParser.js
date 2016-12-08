@@ -6,7 +6,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 var NumericStepperParser = (function (_super) {
     __extends(NumericStepperParser, _super);
     function NumericStepperParser() {
-        _super.call(this, ExportType.NumericStepper, /^ui[.](numstep)/, null, "sui.NumericStepper");
+        _super.call(this, 7 /* NumericStepper */, /^ui[.](numstep)/, null, "sui.NumericStepper");
         this.parseHandler = this.NumericStepperParser;
     }
     NumericStepperParser.prototype.NumericStepperParser = function (checker, item, list, solution) {
@@ -15,25 +15,39 @@ var NumericStepperParser = (function (_super) {
         var llen = layers.length;
         var data = [];
         list[item.$idx] = data;
+        for (var i = 0; i < llen; i++) {
+            data[i] = 0;
+        }
         // 遍历图层
         for (var i = 0; i < llen; i++) {
             var layer = layers[i];
             var frame = layer.frames[0];
             var elements = frame.elements;
-            var len = elements.length;
-            var ele = void 0;
-            if (len > 1) {
-                for (var i_1 = 0; i_1 < len; i_1++) {
-                    ele = elements[i_1];
-                    data[i_1 + 1] = solution.getElementData(ele);
-                }
+            if (elements.length == 0) {
+                continue;
             }
-            else {
-                ele = elements[0];
-                if (ele && ele.elementType == "text")
+            var ele = elements[0];
+            switch (layer.name) {
+                case "tf":
                     data[0] = solution.getElementData(ele);
-                else
-                    Log.throwError("数值设置器NumericStepper未设置文本，请确认", item.name);
+                    break;
+                case "bg":
+                    data[1] = solution.getElementData(ele);
+                    break;
+                case "min":
+                    data[2] = solution.getElementData(ele);
+                    break;
+                case "minus":
+                    data[3] = solution.getElementData(ele);
+                    break;
+                case "add":
+                    data[4] = solution.getElementData(ele);
+                    break;
+                case "max":
+                    data[5] = solution.getElementData(ele);
+                    break;
+                default:
+                    break;
             }
         }
     };
