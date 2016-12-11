@@ -13,8 +13,9 @@ var __extends = (this && this.__extends) || function (d, b) {
 var SlotParser = (function (_super) {
     __extends(SlotParser, _super);
     function SlotParser() {
-        _super.call(this, 13 /* Slot */, /^ui[.](slot)/, null, "sui.Slot");
-        this.parseHandler = this.slotParser;
+        var _this = _super.call(this, 13 /* Slot */, /^ui[.](slot)/, null, "sui.Slot") || this;
+        _this.parseHandler = _this.slotParser;
+        return _this;
     }
     /**
      * 用于处理格位

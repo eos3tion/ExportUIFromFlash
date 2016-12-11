@@ -6,8 +6,9 @@ var __extends = (this && this.__extends) || function (d, b) {
 var ScrollBarParser = (function (_super) {
     __extends(ScrollBarParser, _super);
     function ScrollBarParser() {
-        _super.call(this, 9 /* Scroll */, /^ui[.](scroll)/, null, "sui.ScrollBar");
-        this.parseHandler = this.scrollBarParser;
+        var _this = _super.call(this, 9 /* Scroll */, /^ui[.](scroll)/, null, "sui.ScrollBar") || this;
+        _this.parseHandler = _this.scrollBarParser;
+        return _this;
     }
     ScrollBarParser.prototype.scrollBarParser = function (checker, item, list, solution) {
         var timeline = item.timeline;

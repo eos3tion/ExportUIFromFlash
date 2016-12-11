@@ -6,8 +6,9 @@ var __extends = (this && this.__extends) || function (d, b) {
 var ScaleBitmapParser = (function (_super) {
     __extends(ScaleBitmapParser, _super);
     function ScaleBitmapParser() {
-        _super.call(this, 5 /* ScaleBmp */, /^bmd[.](scale9)/, null, "sui.ScaleBitmap");
-        this.parseHandler = this.scaleBitmapParser;
+        var _this = _super.call(this, 5 /* ScaleBmp */, /^bmd[.](scale9)/, null, "sui.ScaleBitmap") || this;
+        _this.parseHandler = _this.scaleBitmapParser;
+        return _this;
     }
     ScaleBitmapParser.prototype.scaleBitmapParser = function (checker, item, list, solution) {
         list[item.$idx] = solution.getScaleBitmapData(item);

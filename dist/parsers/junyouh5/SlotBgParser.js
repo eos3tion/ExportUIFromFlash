@@ -6,8 +6,9 @@ var __extends = (this && this.__extends) || function (d, b) {
 var SlotBgParser = (function (_super) {
     __extends(SlotBgParser, _super);
     function SlotBgParser() {
-        _super.call(this, 11 /* SlotBg */, /^bmd[.](slotbg)/, null, "egret.Bitmap");
-        this.parseHandler = this.slotBgParser;
+        var _this = _super.call(this, 11 /* SlotBg */, /^bmd[.](slotbg)/, null, "egret.Bitmap") || this;
+        _this.parseHandler = _this.slotBgParser;
+        return _this;
     }
     SlotBgParser.prototype.slotBgParser = function (checker, item, list, solution) {
         var timeline = item.timeline;

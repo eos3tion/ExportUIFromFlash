@@ -20,6 +20,11 @@ const enum ExportType {
      */
     Rectangle = 14,
 
+    /**
+     * 字库
+     */
+    ArtWord = 15,
+    
     /*=======================复杂控件======================= */
     /**按钮 */
     Button = 3,
@@ -43,6 +48,7 @@ const enum ExportType {
     ShareBmp = 12,
 
     Slot = 13,
+
 
 }
 

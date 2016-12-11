@@ -6,8 +6,9 @@ var __extends = (this && this.__extends) || function (d, b) {
 var ButtonParser = (function (_super) {
     __extends(ButtonParser, _super);
     function ButtonParser() {
-        _super.call(this, 3 /* Button */, /^ui[.](btn|tab|checkbox|radiobox)/, null, "sui.Button");
-        this.parseHandler = this.buttonParser;
+        var _this = _super.call(this, 3 /* Button */, /^ui[.](btn|tab|checkbox|radiobox)/, null, "sui.Button") || this;
+        _this.parseHandler = _this.buttonParser;
+        return _this;
     }
     /**
      * 用于处理按钮

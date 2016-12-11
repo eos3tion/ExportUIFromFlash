@@ -6,8 +6,9 @@ var __extends = (this && this.__extends) || function (d, b) {
 var ShareBitmapParser = (function (_super) {
     __extends(ShareBitmapParser, _super);
     function ShareBitmapParser() {
-        _super.call(this, 12 /* ShareBmp */, /^bmd[.](share)/, null, "egret.Bitmap");
-        this.parseHandler = this.shareParser;
+        var _this = _super.call(this, 12 /* ShareBmp */, /^bmd[.](share)/, null, "egret.Bitmap") || this;
+        _this.parseHandler = _this.shareParser;
+        return _this;
     }
     ShareBitmapParser.prototype.shareParser = function (checker, item, list, solution) {
         var timeline = item.timeline;

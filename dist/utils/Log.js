@@ -8,7 +8,7 @@ var Log = (function () {
     Log.throwError = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         var len = args.length;
         var str = "";
@@ -32,7 +32,7 @@ var Log = (function () {
     Log.trace = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         var len = args.length;
         var str = "";
@@ -52,7 +52,7 @@ var Log = (function () {
         var log = new Date().format("yyyy-MM-dd HH:mm:ss") + "========================================================\n" + this.log + "------------------------------------------------------\n\n\n";
         FLfile.write(cwd + fileName, log, "append");
     };
-    /**用于文本保存日志的数据 */
-    Log.log = "";
     return Log;
 }());
+/**用于文本保存日志的数据 */
+Log.log = "";

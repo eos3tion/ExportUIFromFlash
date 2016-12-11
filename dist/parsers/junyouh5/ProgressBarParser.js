@@ -13,8 +13,9 @@ var __extends = (this && this.__extends) || function (d, b) {
 var ProgressBarParser = (function (_super) {
     __extends(ProgressBarParser, _super);
     function ProgressBarParser() {
-        _super.call(this, 10 /* ProgressBar */, /^ui[.](progress)/, null, "sui.ProgressBar");
-        this.parseHandler = this.progressBarParser;
+        var _this = _super.call(this, 10 /* ProgressBar */, /^ui[.](progress)/, null, "sui.ProgressBar") || this;
+        _this.parseHandler = _this.progressBarParser;
+        return _this;
     }
     /**
      * 用于处理进度条

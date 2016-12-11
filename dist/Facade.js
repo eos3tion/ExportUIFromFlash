@@ -16,7 +16,7 @@ sol.regComChecker(new ScaleBitmapParser());
 sol.regComChecker(new ButtonParser());
 //绑定分页控件
 //sol.regComChecker(new PageControlerParser());
-sol.regComChecker(new ShapeNumberParser());
+sol.regComChecker(new ArtTextParser());
 sol.regComChecker(new NumericStepperParser());
 sol.regComChecker(new SliderParser());
 sol.regComChecker(new ScrollBarParser());

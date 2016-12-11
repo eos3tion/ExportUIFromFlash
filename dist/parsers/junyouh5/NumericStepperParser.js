@@ -6,8 +6,9 @@ var __extends = (this && this.__extends) || function (d, b) {
 var NumericStepperParser = (function (_super) {
     __extends(NumericStepperParser, _super);
     function NumericStepperParser() {
-        _super.call(this, 7 /* NumericStepper */, /^ui[.](numstep)/, null, "sui.NumericStepper");
-        this.parseHandler = this.NumericStepperParser;
+        var _this = _super.call(this, 7 /* NumericStepper */, /^ui[.](numstep)/, null, "sui.NumericStepper") || this;
+        _this.parseHandler = _this.NumericStepperParser;
+        return _this;
     }
     NumericStepperParser.prototype.NumericStepperParser = function (checker, item, list, solution) {
         var timeline = item.timeline;
