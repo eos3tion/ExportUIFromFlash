@@ -22,30 +22,29 @@ var ArtWordParser = (function (_super) {
         }
         var layer = layers[0];
         var lname = layer.name;
-        var tempkeys = [];
         var flen = layer.frames.length;
         var frame = layer.frames[0];
-        data[1] = 0;
         var elements = frame.elements;
         var elen = elements.length;
         for (var ei = 0; ei < elen; ei++) {
             var ele = elements[ei];
             var tempName = void 0;
             if (ele && ele.elementType === "instance" && ele.instanceType === "bitmap") {
-                data[ei + 1] = solution.getElementData(ele);
+                var dat = [];
+                dat[1] = solution.getBitmapIndex(ele.libraryItem);
+                data[ei] = dat;
                 tempName = ele.libraryItem.name;
                 tempName = tempName.substr(tempName.lastIndexOf("/") + 1);
                 tempName = tempName.split(".")[0];
                 var itn = +tempName;
                 if (tempName == itn) {
-                    tempkeys.push(itn);
+                    dat[0] = itn; //数值类型，优化，减少字符串输出
                 }
                 else {
-                    tempkeys.push(tempName);
+                    dat[0] = tempName;
                 }
             }
         }
-        data[0] = tempkeys;
     };
     return ArtWordParser;
 }(ComWillCheck));

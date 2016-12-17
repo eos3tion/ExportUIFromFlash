@@ -296,6 +296,15 @@ class Solution {
     }
 
     /**
+     * 获取位图的索引
+     * @param {FlashItem}  item 库中原件
+     */
+    public getBitmapIndex(item: FlashItem) {
+        let iii = this.imgParser.bitmaps[item.name];
+        return iii ? iii.idx : -1;
+    }
+
+    /**
      * 获取元素数据
      *
      * @param {FlashElement}    ele 元素
@@ -326,7 +335,7 @@ class Solution {
                         // 位图数据
                         data[0] = ExportType.Image;
                         // 位图使用库中索引号，并且图片不允许使用其他库的
-                        data[2] = this.imgParser.bitmaps[lname].idx;
+                        data[2] = this.getBitmapIndex(item);
                         break;
                     case InstanceType.Symbol:
                         if (item.linkageClassName == "ui.Rectangle") {//用于定位坐标
@@ -393,7 +402,7 @@ class Solution {
                                             // 位图数据
                                             data[0] = ExportType.Image;
                                             // 位图使用库中索引号，并且图片不允许使用其他库的
-                                            data[2] = this.imgParser.bitmaps[subItem.name].idx;
+                                            data[2] = this.getBitmapIndex(subItem);
                                             // }
                                             other = false;
                                         }

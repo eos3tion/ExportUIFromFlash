@@ -4,6 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
+ * 单字字库，数据必须为单个文字
  * ShapeNumberParser extends ComWillCheck
  */
 var ArtTextParser = (function (_super) {
@@ -35,15 +36,11 @@ var ArtTextParser = (function (_super) {
             var ele = elements[ei];
             var tempName = void 0;
             if (ele && ele.elementType === "instance" && ele.instanceType === "bitmap") {
-                data[ei + 1] = solution.getElementData(ele);
+                // 由于只需要位图的索引
+                data[ei + 1] = solution.getBitmapIndex(ele.libraryItem);
                 tempName = ele.libraryItem.name;
-                if (tempName.indexOf("/") != -1) {
-                    var arr = tempName.split("/");
-                    tempName = arr[arr.length - 1];
-                }
-                if (tempName.indexOf(".") != -1) {
-                    tempName = tempName.split(".")[0];
-                }
+                tempName = tempName.substr(tempName.lastIndexOf("/") + 1);
+                tempName = tempName.split(".")[0];
                 if (tempName.length > 1) {
                     Log.throwError("ArtText所引用的png的名字只能为单个字符", item.name, tempName);
                 }

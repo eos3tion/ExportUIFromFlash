@@ -27,8 +27,8 @@ class ArtWordParser extends ComWillCheck {
             let ele = elements[ei];
             let tempName: string;
             if (ele && ele.elementType === "instance" && ele.instanceType === "bitmap") {
-                let dat = solution.getElementData(ele);
-                //由于此类型dat[0]必为 0 (ExportType.Image) ，所以将dat的0号位用来记录文件名
+                let dat = [];
+                dat[1] = solution.getBitmapIndex(ele.libraryItem);
                 data[ei] = dat;
                 tempName = ele.libraryItem.name;
                 tempName = tempName.substr(tempName.lastIndexOf("/") + 1);
