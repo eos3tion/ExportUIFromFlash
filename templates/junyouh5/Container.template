@@ -20,7 +20,7 @@
     }
 
     protected bindComponents() {
-        var manager = sui.SuiResManager.getInstance();
+        var manager = singleton(sui.SuiResManager);
         var dis:any;
         @bindComponents@
     }
