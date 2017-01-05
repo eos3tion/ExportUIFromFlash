@@ -1,6 +1,6 @@
 class ArtWordParser extends ComWillCheck {
     constructor() {
-        super(ExportType.ArtText, /^bmd[.](artword)/, null, "sui.ArtWord");
+        super(ExportType.ArtWord, /^bmd[.](artword)/, null, "sui.ArtWord");
         this.parseHandler = this.parse;
     }
 
