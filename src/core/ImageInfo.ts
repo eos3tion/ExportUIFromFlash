@@ -31,6 +31,33 @@ class ImageInfo implements IBlock {
      * 装箱后得到的坐标
      */
     public fit: {x: number, y: number};
+
+    /**
+     * 是否含有透明通道
+     */
+    public ispng:boolean;
+
+    /**
+     * 导出的jpg品质
+     */
+    public quality:number;
+
+    /**
+     * 在suidata中的索引
+     * （只导出一张png时用，和lib没有关系）
+     */
+    public index:number;
+
+     /**
+     * 在suidata中的索引
+     * （拆分为png时用，和lib没有关系）
+     */
+    public pngindex:number;
+    /**
+     * 在suidata中的索引
+     * （拆分为jpg时用，和lib没有关系）
+     */
+    public jpgindex:number;
     /**
      * 获取图片的面积
      */
@@ -54,6 +81,11 @@ class ImageInfo implements IBlock {
         img.libItem = this.libItem;
         img.name = this.name;
         img.refs = this.refs;
+        img.ispng = this.ispng;
+        img.quality = this.quality;
+        img.index = this.index;
+        img.jpgindex = this.jpgindex;
+        img.pngindex = this.pngindex;
         let fit = this.fit;
         if (fit) {
             img.fit = { x: fit.x, y: fit.y };

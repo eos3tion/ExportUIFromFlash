@@ -9,6 +9,8 @@ var DATA_FILE = "s.json";
 // 导出的图片文件路径
 var PNG_FILE = "d.png";
 
+var JPG_FILE = "d.jpg";
+
 // 文件输出路径
 //D:\EgretProjects\UITest
 var cwd = fl.scriptURI;
@@ -16,11 +18,17 @@ cwd = cwd.substring(0, cwd.lastIndexOf("/") + 1);
 
 // 输出路径定义
 // 测试期间设置为cwd
-var outputBase = "file:///d|/EgretProjects/Test/skin/"; //cwd;
+var outputBase = "file:///d|/junyou2016/hqgh5/Client/skin/"; //cwd;
 // 模块前缀
 var moduleName = "junyou.hqg";
 // 代码输出根目录
-var classRoot = "file:///d|/EgretProjects/Test/src/junyou/hqg/modules/";
+var classRoot = "file:///d|/junyou2016/hqgh5/Client/src/huaqiangu/module/";
+
+//var outputBase = "file:///d|/H5/"; //cwd;
+// 模块前缀
+//var moduleName = "junyou.hqg";
+// 代码输出根目录
+//var classRoot = "file:///d|/H5/";
 
 
 // 输出目录

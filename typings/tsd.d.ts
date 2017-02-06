@@ -123,6 +123,11 @@ declare const DATA_FILE: string;
 declare const PNG_FILE: string;
 
 /**
+ * 导出的装箱的JPG名称
+ */
+declare const JPG_FILE: string;
+
+/**
  * 最终数据和纹理输出的目录
  * outputBase + flaname + "/"
  */

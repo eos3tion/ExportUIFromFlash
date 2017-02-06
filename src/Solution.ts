@@ -28,6 +28,11 @@ class Solution {
     private guid: number = 0;
 
     /**
+     * 是否是组合的一张图片
+     */
+    private iscompose: boolean;
+
+    /**
      * 装箱用的图片数据
      * 
      * @private
@@ -57,6 +62,7 @@ class Solution {
             iii.w = ele.hPixels; // 得到图片宽度
             iii.h = ele.vPixels; // 得到图片高度
             bitmaps[bname] = iii;
+            BitmapAlphaCheck.checkAlpha(ele, iii);
             this.blocks.push(iii);
         }
         let aaa = iii.refs;
@@ -335,7 +341,20 @@ class Solution {
                         // 位图数据
                         data[0] = ExportType.Image;
                         // 位图使用库中索引号，并且图片不允许使用其他库的
-                        data[2] = this.getBitmapIndex(item);
+                        let index = this.getBitmapIndex(item);
+                        data[2] = index;//在组合成一张png导出的情况下，lib里的索引和block.index一致
+                        if (!this.iscompose) {
+                            for (let block of this.blocks) {
+                                if (block.name == item.name) {
+                                    if (block.ispng) {
+                                        data[2] = block.pngindex;
+                                    } else {
+                                        data[2] = -1 - block.jpgindex;
+                                    }
+                                    break;
+                                }
+                            }
+                        }
                         break;
                     case InstanceType.Symbol:
                         if (item.linkageClassName == "ui.Rectangle") {//用于定位坐标
@@ -546,10 +565,27 @@ class Solution {
         blocks.length = 0;
         this.preCheck(blocks);
         let imgData = this.solveImage(blocks);
+        let pngs = imgData["png"];
+        let jpgs = imgData["jpg"];
+        if (pngs && jpgs) {
+            this.iscompose = false;
+        } else {
+            this.iscompose = true;
+        }
         // 获取元件的数据
         let componentsData = this.getSolveData(this.compCheckers);
+
         // 导出的数据
-        let exportData = [imgData, componentsData];
+        let exportData;
+        if (pngs && jpgs) {
+            exportData = [pngs, componentsData, jpgs];
+        } else if (pngs) {
+            exportData = [pngs, componentsData];
+        } else if (jpgs) {
+            exportData = [componentsData, jpgs];
+        } else {
+            exportData = [componentsData];
+        }
 
         FLfile.write(folder + DATA_FILE, JSON.stringify(exportData));
 
