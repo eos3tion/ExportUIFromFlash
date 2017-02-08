@@ -421,7 +421,26 @@ class Solution {
                                             // 位图数据
                                             data[0] = ExportType.Image;
                                             // 位图使用库中索引号，并且图片不允许使用其他库的
-                                            data[2] = this.getBitmapIndex(subItem);
+                                            // data[2] = this.getBitmapIndex(subItem);
+
+
+                                            // 位图使用库中索引号，并且图片不允许使用其他库的
+                                            let index = this.getBitmapIndex(subItem);
+                                            data[2] = index;//在组合成一张png导出的情况下，lib里的索引和block.index一致
+                                            if (!this.iscompose) {
+                                                for (let block of this.blocks) {
+                                                    if (block.name == subItem.name) {
+                                                        if (block.ispng) {
+                                                            data[2] = block.pngindex;
+                                                        } else {
+                                                            data[2] = -1 - block.jpgindex;
+                                                        }
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+
                                             // }
                                             other = false;
                                         }
