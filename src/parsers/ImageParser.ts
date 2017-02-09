@@ -160,11 +160,19 @@ class ImageParser {
                 for (let w = maxWidth; w <= total; w++) {
                     packer.setWidth(w);
                     Log.trace("正在使用宽度：", w);
-                    packingForSort(blocks, packer, results, "setWidth:" + w);
+                    let keyPre = "setWidth:" + w;
+                    if (packer.selfSorting) {
+                        this.doPacking(blocks, keyPre, packer, results);
+                    } else {
+                        packingForSort(blocks, packer, results, keyPre);
+                    }
                 }
-
             } else {
-                packingForSort(blocks, packer, results);
+                if (packer.selfSorting) {
+                    this.doPacking(blocks, "", packer, results);
+                } else {
+                    packingForSort(blocks, packer, results);
+                }
             }
             results.sort(function (a, b) {
                 return a.fit - b.fit;
