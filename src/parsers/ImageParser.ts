@@ -18,7 +18,7 @@ class ImageParser {
     // private tempComposeImgDatas: any;
 
     /**用于存储jpg png索引的临时数据 */
-    private tempIndexDic:{[index:string]:ImageInfo};
+    private tempIndexDic: { [index: string]: ImageInfo };
 
     constructor() {
         this.bitmaps = {};
@@ -217,10 +217,10 @@ class ImageParser {
 
         let raw = this.rawBlocks;
         let copy = this.tempIndexDic;
-        for(let key in copy){
+        for (let key in copy) {
             let c = copy[key];
-            for(let r of raw){
-                if(r.name == c.name){
+            for (let r of raw) {
+                if (r.name == c.name) {
                     r.index = c.index;
                     r.jpgindex = c.jpgindex;
                     r.pngindex = c.pngindex;
@@ -260,8 +260,8 @@ class ImageParser {
         for (let k = 0, len = result.length; k < len; k++) {
             let block = result[k];
             let kname = block.name;
-            let tmp  = this.tempIndexDic[kname];
-            if(!tmp){
+            let tmp = this.tempIndexDic[kname];
+            if (!tmp) {
                 tmp = <ImageInfo>{};
                 tmp.name = kname;
             }
@@ -279,6 +279,9 @@ class ImageParser {
                     jpgcount++;
                 }
             }
+            let item = block.libItem;
+            item.compressionType = "lossless";
+
             this.tempIndexDic[kname] = tmp;
 
             bitmaps[block.name] = block;
@@ -308,6 +311,8 @@ class ImageParser {
             Log.throwError("没有成功拼合图片");
         }
         let bitmap = ele.libraryItem;
+        bitmap.allowSmoothing = false;
+        bitmap.compressionType = "lossless";
 
         // 导出的文件路径
         let exname = folder + PNG_FILE;
@@ -321,7 +326,7 @@ class ImageParser {
 
             bitmap.exportToFile(exname);
         } else {
-            bitmap.exportToFile(exname, 80);
+            bitmap.exportToFile(exname, JPG_QUALITY);
         }
         if (iscompose) {
             this.imgDatas["compose"] = pngs;

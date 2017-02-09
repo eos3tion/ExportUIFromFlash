@@ -17,13 +17,16 @@ class BitmapAlphaCheck {
             }
         }
         let item = bitmap.libraryItem;
-        item.allowSmoothing = true;
-        if (ispng) {
-            item.compressionType = "lossless";//png
-        } else {
-            item.compressionType = "photo";//jpg
-            item.quality = 80;
-            img.quality = 80;
-        }
+        item.allowSmoothing = false;
+        // if(!ispng){
+        //     img.quality = 80;
+        // }
+        // if (ispng) {
+        //     item.compressionType = "lossless";//png
+        // } else {
+        //     item.compressionType = "photo";//jpg
+        //     item.quality = 80;
+        //     img.quality = 80;
+        // }
     }
 }
