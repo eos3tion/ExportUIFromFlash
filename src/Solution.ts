@@ -306,8 +306,18 @@ class Solution {
      * @param {FlashItem}  item 库中原件
      */
     public getBitmapIndex(item: FlashItem) {
-        let iii = this.imgParser.bitmaps[item.name];
-        return iii ? iii.idx : -1;
+
+        for (let block of this.blocks) {
+            if (block.name == item.name) {
+                if (block.ispng) {
+                    return block.pngindex;
+                } else {
+                    return -1 - block.jpgindex;
+                }
+            }
+        }
+        // let iii = this.imgParser.bitmaps[item.name];
+        return -1;
     }
 
     /**
@@ -343,18 +353,18 @@ class Solution {
                         // 位图使用库中索引号，并且图片不允许使用其他库的
                         let index = this.getBitmapIndex(item);
                         data[2] = index;//在组合成一张png导出的情况下，lib里的索引和block.index一致
-                        if (!this.iscompose) {
-                            for (let block of this.blocks) {
-                                if (block.name == item.name) {
-                                    if (block.ispng) {
-                                        data[2] = block.pngindex;
-                                    } else {
-                                        data[2] = -1 - block.jpgindex;
-                                    }
-                                    break;
-                                }
-                            }
-                        }
+                        // if (!this.iscompose) {
+                        //     for (let block of this.blocks) {
+                        //         if (block.name == item.name) {
+                        //             if (block.ispng) {
+                        //                 data[2] = block.pngindex;
+                        //             } else {
+                        //                 data[2] = -1 - block.jpgindex;
+                        //             }
+                        //             break;
+                        //         }
+                        //     }
+                        // }
                         break;
                     case InstanceType.Symbol:
                         if (item.linkageClassName == "ui.Rectangle") {//用于定位坐标
@@ -427,18 +437,18 @@ class Solution {
                                             // 位图使用库中索引号，并且图片不允许使用其他库的
                                             let index = this.getBitmapIndex(subItem);
                                             data[2] = index;//在组合成一张png导出的情况下，lib里的索引和block.index一致
-                                            if (!this.iscompose) {
-                                                for (let block of this.blocks) {
-                                                    if (block.name == subItem.name) {
-                                                        if (block.ispng) {
-                                                            data[2] = block.pngindex;
-                                                        } else {
-                                                            data[2] = -1 - block.jpgindex;
-                                                        }
-                                                        break;
-                                                    }
-                                                }
-                                            }
+                                            // if (!this.iscompose) {
+                                            //     for (let block of this.blocks) {
+                                            //         if (block.name == subItem.name) {
+                                            //             if (block.ispng) {
+                                            //                 data[2] = block.pngindex;
+                                            //             } else {
+                                            //                 data[2] = -1 - block.jpgindex;
+                                            //             }
+                                            //             break;
+                                            //         }
+                                            //     }
+                                            // }
 
 
                                             // }
