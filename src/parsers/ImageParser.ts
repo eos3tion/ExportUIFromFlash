@@ -18,7 +18,7 @@ class ImageParser {
     // private tempComposeImgDatas: any;
 
     /**用于存储jpg png索引的临时数据 */
-    private tempIndexDic:{[index:string]:ImageInfo};
+    private tempIndexDic: { [index: string]: ImageInfo };
 
     constructor() {
         this.bitmaps = {};
@@ -160,32 +160,11 @@ class ImageParser {
                 for (let w = maxWidth; w <= total; w++) {
                     packer.setWidth(w);
                     Log.trace("正在使用宽度：", w);
-                    this.doPacking(blocks, "setWidth:" + w, packer, results);
+                    packingForSort(blocks, packer, results, "setWidth:" + w);
                 }
 
             } else {
-                // 先打乱顺序
-                for (let ki = 0; ki < len; ki++) {
-                    let nb = this.idxHandler(ki, blocks);
-                    this.doPacking(nb, "areaI" + ki, packer, results);
-                }
-
-                // 使用基础排序尝试
-                let baseSorts = sort.baseSorts,
-                    bi = 0,
-                    blen = baseSorts.length;
-                for (; bi < blen; bi++) {
-                    let skey = baseSorts[bi];
-                    let sHandler = sort[skey];
-                    blocks.sort(sHandler);
-                    this.doPacking(blocks, skey, packer, results);
-                }
-
-                // 再来100次乱序
-                for (let t = 0; t < 100; t++) {
-                    blocks.sort(sort.random);
-                    this.doPacking(blocks, "random" + t, packer, results);
-                }
+                packingForSort(blocks, packer, results);
             }
             results.sort(function (a, b) {
                 return a.fit - b.fit;
@@ -217,10 +196,10 @@ class ImageParser {
 
         let raw = this.rawBlocks;
         let copy = this.tempIndexDic;
-        for(let key in copy){
+        for (let key in copy) {
             let c = copy[key];
-            for(let r of raw){
-                if(r.name == c.name){
+            for (let r of raw) {
+                if (r.name == c.name) {
                     r.index = c.index;
                     r.jpgindex = c.jpgindex;
                     r.pngindex = c.pngindex;
@@ -228,8 +207,31 @@ class ImageParser {
             }
         }
         return this.imgDatas;
+        function packingForSort(blocks: IBlock[], packer: IBlockPacker, results: Result[], keyPre = "") {
+            let len = blocks.length;
+            // 先打乱顺序
+            for (let ki = 0; ki < len; ki++) {
+                let nb = this.idxHandler(ki, blocks);
+                this.doPacking(nb, keyPre + "areaI" + ki, packer, results);
+            }
 
-        // return this.exportImage(result.blocks);
+            // 使用基础排序尝试
+            let baseSorts = sort.baseSorts,
+                bi = 0,
+                blen = baseSorts.length;
+            for (; bi < blen; bi++) {
+                let skey = baseSorts[bi];
+                let sHandler = sort[skey];
+                blocks.sort(sHandler);
+                this.doPacking(blocks, keyPre + skey, packer, results);
+            }
+
+            // 再来100次乱序
+            for (let t = 0; t < 100; t++) {
+                blocks.sort(sort.random);
+                this.doPacking(blocks, keyPre + "random" + t, packer, results);
+            }
+        }
     }
     /**
      * 将快信息导出成图片
@@ -260,8 +262,8 @@ class ImageParser {
         for (let k = 0, len = result.length; k < len; k++) {
             let block = result[k];
             let kname = block.name;
-            let tmp  = this.tempIndexDic[kname];
-            if(!tmp){
+            let tmp = this.tempIndexDic[kname];
+            if (!tmp) {
                 tmp = <ImageInfo>{};
                 tmp.name = kname;
             }
