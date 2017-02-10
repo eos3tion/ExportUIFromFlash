@@ -183,14 +183,14 @@ class ImageParser {
                         maxWidth = w;
                     }
                 }
-                total = Math.min(4000, total);
+                total = Math.min(Const.MaxSize, total);
                 //从最宽的一个 到总宽度的 进行遍历设置
                 for (let w = maxWidth; w <= total; w++) {
                     packer.setWidth(w);
                     Log.trace("正在使用宽度：", w);
                     let keyPre = "setWidth:" + w;
                     if (packer.selfSorting) {
-                        this.doPacking(blocks, keyPre, packer, results);
+                        this.doPacking(blocks, keyPre, packer, results, w);
                     } else {
                         packingForSort(blocks, packer, results, keyPre);
                     }
@@ -215,7 +215,12 @@ class ImageParser {
                     minRe = re;
                 }
             }
-            this.exportImage(minRe.blocks, ispng, iscompose);
+            let minBlocks = minRe.blocks;
+            if (!minBlocks && minRe.param) {
+                packer.setWidth(minRe.param);
+                minBlocks = packer.fit(blocks) as ImageInfo[];
+            }
+            this.exportImage(minBlocks, ispng, iscompose);
         }
         let bool = this.checkFileSize();
         let pngurl = folder + PNG_FILE;
@@ -326,6 +331,7 @@ class ImageParser {
                 }
             }
             let item = block.getLibItem();
+            item.allowSmoothing = false;
             item.compressionType = "lossless";
 
             this.tempIndexDic[kname] = tmp;
@@ -351,7 +357,7 @@ class ImageParser {
 
         /********将图片拼合，并导出********/
         dom.selectAll();
-        dom.convertSelectionToBitmap();
+        while (!dom.convertSelectionToBitmap());
         let ele = dom.selection[0];
         if (!ele) {
             Log.throwError("没有成功拼合图片");
@@ -369,30 +375,26 @@ class ImageParser {
             exname = folder + JPG_FILE;
         }
         if (ispng) {
-            bitmap.exportToFile(exname);
+            while (!bitmap.exportToFile(exname));
         } else {
-            bitmap.exportToFile(exname, JPG_QUALITY);
+            while (!bitmap.exportToFile(exname, JPG_QUALITY));
         }
+        const imgDatas = this.imgDatas;
         if (iscompose) {
-            this.imgDatas["compose"] = pngs;
+            imgDatas.compose = pngs;
         } else {
             if (pngs.length) {
-                this.imgDatas["png"] = pngs;
+                imgDatas.png = pngs;
             }
             if (jpgs.length) {
-                this.imgDatas["jpg"] = jpgs;
+                imgDatas.jpg = jpgs;
             }
         }
-        // if(pngs.length){
-        // this.imgDatas["png"] = pngs;
-        // }
-        // if(jpgs.length){
-        // this.imgDatas["jpg"] = jpgs;
-        // }
+
         // 删除临时文件
         // 图片导出之前，删除操作会失败，所以加了while
-        while (!lib.deleteItem(bitmap.name)) { }
-        while (!lib.deleteItem(tname)) { }
+        while (!lib.deleteItem(bitmap.name));
+        while (!lib.deleteItem(tname));
         if (ispng) {
             FLExternal.pngquant(exname);
         }
@@ -431,7 +433,7 @@ class ImageParser {
      * @param {IBlockPacker} packer 装箱算法
      * @param {Result[]} results 结果集合
      */
-    private doPacking(inputs: ImageInfo[], key: string, packer: IBlockPacker, results: Result[]) {
+    private doPacking(inputs: ImageInfo[], key: string, packer: IBlockPacker, results: Result[], param?: number) {
         let len = inputs.length;
         //alert(len);
         let blocks = <ImageInfo[]>packer.fit(inputs);
@@ -443,42 +445,47 @@ class ImageParser {
             return;
         }
         Log.trace("开始添加结果集");
-        let result: Result = {
-            key: key,
-            blocks: [],
-            fit: 0
-        };
-        let block: ImageInfo, n;
+
+        let reBlocks: ImageInfo[] = param == undefined && [];
         let noFit = false;
         let width = 0;
         let height = 0;
-        let rblocks = result.blocks;
-        for (n = 0; n < len; n++) {
-            block = blocks[n];
-            if (block.fit) {
-                rblocks.push(block.clone());
-                //fit += block.getArea();
-                let right = block.fit.x + block.w;
+        for (let n = 0; n < len; n++) {
+            let block = blocks[n];
+            let fit = block.fit;
+            if (fit) {
+                let right = fit.x + block.w;
                 if (right > width) {
                     width = right;
                 }
-                let bottom = block.fit.y + block.h;
+                let bottom = fit.y + block.h;
+                if (bottom > Const.MaxSize) {// 由于IBlockParser有设置width的参数，所以不做宽度超标判断，只做高度超标判断，宽度超标在设置宽度时候判断
+                    Log.trace("尺寸超标", bottom);
+                    noFit = true;
+                    break;
+                }
                 if (bottom > height) {
                     height = bottom;
+                }
+                if (reBlocks) {
+                    reBlocks.push(block.clone());
                 }
             } else {
                 noFit = true;
                 break;
             }
         }
-        if (width > 4000 || height > 4000) {
-            Log.trace("尺寸超标", width, height);
-            return;
-        }
-        result.fit = width * height;
         if (noFit) {
-            Log.trace(result.key + "noFit");
+            Log.trace(key + "noFit");
         } else {
+            let result: Result = {
+                key,
+                blocks: reBlocks,
+                width,
+                height,
+                fit: width * height,
+                param
+            };
             results.push(result);
             Log.trace(result.key + ":" + result.fit);
         }
@@ -495,6 +502,7 @@ class ImageParser {
         let jpgsize = FLfile.getSize(jpgfile);
         let composesize = FLfile.getSize(compose);
         let total = jpgsize + pngsize + 100;//100差不多为多一次http请求的字节数
+        Log.trace("组合图片的大小：", composesize, "拆分后，jpg大小：", jpgsize, "png大小：", pngsize);
         return total < composesize;
     }
 }
@@ -550,6 +558,17 @@ interface Result {
     key: string;
     blocks: ImageInfo[];
     fit: number;
+    width: number;
+    height: number;
+
+    /**
+     * 
+     * 参数
+     * @type {number}
+     * @memberOf Result
+    
+     */
+    param?: number
 };
 
 interface ImageIndexInfo {

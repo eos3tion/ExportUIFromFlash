@@ -2,6 +2,12 @@
  * 用于导入脚本
  * 注册检查器和处理器
  */
+let xml = XML(dom.exportPublishProfileString());
+/**
+ * 导出的JPG品质
+ */
+const JPG_QUALITY: number = (+xml.PublishJpegProperties.Quality) || 80;
+
 try {
     Script.runFolderScripts("utils");
     Script.runFolderScripts("core");
@@ -44,12 +50,6 @@ try {
     Script.runScript("generators/JunyouH5Generator");
     // 注册生成器
     sol.generator = new JunyouH5Generator(sol);
-
-    let xml = XML(dom.exportPublishProfileString());
-    /**
-     * 导出的JPG品质
-     */
-    const JPG_QUALITY: number = (+xml.PublishJpegProperties.Quality) || 80;
 
     sol.run();
     alert("执行完成");
