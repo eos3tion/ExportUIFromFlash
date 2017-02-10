@@ -129,6 +129,7 @@ class ImageParser {
          * 不拆分，直接做成一张png
          */
         let iscompose: boolean = false;
+        let self = this;
         for (let j = 0; j < 3; j++) {
             blocks = arr[j];
             if (!blocks.length) {
@@ -156,6 +157,7 @@ class ImageParser {
                         maxWidth = w;
                     }
                 }
+                total = Math.min(4000, total);
                 //从最宽的一个 到总宽度的 进行遍历设置
                 for (let w = maxWidth; w <= total; w++) {
                     packer.setWidth(w);
@@ -173,6 +175,10 @@ class ImageParser {
                 } else {
                     packingForSort(blocks, packer, results);
                 }
+            }
+            if (!results.length) {
+                Log.throwError("装箱操作，没有一个得到一个合法的结果");
+                return;
             }
             results.sort(function (a, b) {
                 return a.fit - b.fit;
@@ -215,12 +221,12 @@ class ImageParser {
             }
         }
         return this.imgDatas;
-        function packingForSort(blocks: IBlock[], packer: IBlockPacker, results: Result[], keyPre = "") {
+        function packingForSort(blocks: ImageInfo[], packer: IBlockPacker, results: Result[], keyPre = "") {
             let len = blocks.length;
             // 先打乱顺序
             for (let ki = 0; ki < len; ki++) {
-                let nb = this.idxHandler(ki, blocks);
-                this.doPacking(nb, keyPre + "areaI" + ki, packer, results);
+                let nb = self.idxHandler(ki, blocks);
+                self.doPacking(nb, keyPre + "areaI" + ki, packer, results);
             }
 
             // 使用基础排序尝试
@@ -231,13 +237,13 @@ class ImageParser {
                 let skey = baseSorts[bi];
                 let sHandler = sort[skey];
                 blocks.sort(sHandler);
-                this.doPacking(blocks, keyPre + skey, packer, results);
+                self.doPacking(blocks, keyPre + skey, packer, results);
             }
 
             // 再来100次乱序
             for (let t = 0; t < 100; t++) {
                 blocks.sort(sort.random);
-                this.doPacking(blocks, keyPre + "random" + t, packer, results);
+                self.doPacking(blocks, keyPre + "random" + t, packer, results);
             }
         }
     }
@@ -412,10 +418,11 @@ class ImageParser {
         let noFit = false;
         let width = 0;
         let height = 0;
+        let rblocks = result.blocks;
         for (n = 0; n < len; n++) {
             block = blocks[n];
             if (block.fit) {
-                result.blocks.push(block.clone());
+                rblocks.push(block.clone());
                 //fit += block.getArea();
                 let right = block.fit.x + block.w;
                 if (right > width) {
@@ -429,6 +436,10 @@ class ImageParser {
                 noFit = true;
                 break;
             }
+        }
+        if (width > 4000 || height > 4000) {
+            Log.trace("尺寸超标", width, height);
+            return;
         }
         result.fit = width * height;
         if (noFit) {
