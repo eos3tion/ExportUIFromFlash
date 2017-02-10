@@ -6,6 +6,15 @@
 interface IBlockPacker {
 
     /**
+     * 是否自行对块进行排序  
+     * 如果自行排序，则装箱时不会调用sort中的方法将block顺序打乱
+     * 
+     * @type {boolean}
+     * @memberOf IBlockPacker
+     */
+    selfSorting?: boolean;
+
+    /**
      * 
      * 如果是需要初始固定一个宽度的装箱处理器，装箱时，设置宽度
      * 固定高度或者宽度没有区别
