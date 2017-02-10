@@ -24,7 +24,7 @@ const enum ExportType {
      * 字库
      */
     ArtWord = 15,
-    
+
     /*=======================复杂控件======================= */
     /**按钮 */
     Button = 3,
@@ -50,6 +50,13 @@ const enum ExportType {
     Slot = 13,
 
 
+}
+
+const enum Const {
+    /**
+     * flash最大尺寸限制
+     */
+    MaxSize = 3999
 }
 
 const ItemType = {
