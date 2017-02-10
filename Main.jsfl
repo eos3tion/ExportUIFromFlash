@@ -11,6 +11,9 @@ var PNG_FILE = "d.png";
 
 var JPG_FILE = "d.jpg";
 
+//导出的JPG品质
+var JPG_QUALITY = 80;
+
 // 文件输出路径
 //D:\EgretProjects\UITest
 var cwd = fl.scriptURI;

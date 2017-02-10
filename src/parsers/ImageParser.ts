@@ -295,6 +295,9 @@ class ImageParser {
                     jpgcount++;
                 }
             }
+            let item = block.libItem;
+            item.compressionType = "lossless";
+
             this.tempIndexDic[kname] = tmp;
 
             bitmaps[block.name] = block;
@@ -324,6 +327,8 @@ class ImageParser {
             Log.throwError("没有成功拼合图片");
         }
         let bitmap = ele.libraryItem;
+        bitmap.allowSmoothing = false;
+        bitmap.compressionType = "lossless";
 
         // 导出的文件路径
         let exname = folder + PNG_FILE;
@@ -337,7 +342,7 @@ class ImageParser {
 
             bitmap.exportToFile(exname);
         } else {
-            bitmap.exportToFile(exname, 80);
+            bitmap.exportToFile(exname, JPG_QUALITY);
         }
         if (iscompose) {
             this.imgDatas["compose"] = pngs;

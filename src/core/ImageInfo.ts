@@ -38,11 +38,6 @@ class ImageInfo implements IBlock {
     public ispng:boolean;
 
     /**
-     * 导出的jpg品质
-     */
-    public quality:number;
-
-    /**
      * 在suidata中的索引
      * （只导出一张png时用，和lib没有关系）
      */

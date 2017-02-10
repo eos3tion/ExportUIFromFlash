@@ -137,6 +137,11 @@ declare const PNG_FILE: string;
 declare const JPG_FILE: string;
 
 /**
+ * 导出的JPG品质
+ */
+declare const JPG_QUALITY:number;
+
+/**
  * 最终数据和纹理输出的目录
  * outputBase + flaname + "/"
  */
