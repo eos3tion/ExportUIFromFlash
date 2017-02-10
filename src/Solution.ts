@@ -287,7 +287,10 @@ class Solution {
             return;
         }
         let ele = elements[0];
-        if (ele.elementType === ElementType.Instance && ele.instanceType === InstanceType.Bitmap) {
+        if (!ele) {
+            Log.throwError("此控件没有位图", item.name);
+        }
+        else if (ele.elementType === ElementType.Instance && ele.instanceType === InstanceType.Bitmap) {
             data[0] = this.getElementData(ele);
             var gx = Math.round(rect.left);
             var gy = Math.round(rect.top);
