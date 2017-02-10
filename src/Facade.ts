@@ -49,7 +49,7 @@ let xml = XML(dom.exportPublishProfileString());
 /**
  * 导出的JPG品质
  */
-const JPG_QUALITY: number = xml.PublishJpegProperties.Quality;
+const JPG_QUALITY: number = xml.PublishJpegProperties.Quality || 80;
 sol.run();
 
 alert("执行完成");
