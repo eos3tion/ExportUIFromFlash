@@ -5,6 +5,7 @@
 
 Script.runFolderScripts("utils");
 Script.runFolderScripts("core");
+Script.runFolderScripts("blockpacker");
 Script.runFolderScripts("parsers");
 Script.runScript("Solution");
 

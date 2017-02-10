@@ -138,7 +138,7 @@ class Solution {
      * @param {ImageInfo[]} blocks
      */
     private solveImage(blocks: ImageInfo[]) {
-        let packer = new GrowingPacker();
+        let packer = new BinPacker();
         return this.imgParser.parse(packer, blocks);
     }
 
