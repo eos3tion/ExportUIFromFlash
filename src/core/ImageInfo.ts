@@ -11,48 +11,102 @@ class ImageInfo implements IBlock {
      * 图片高度
      */
     public h: number;
-    /**
-     * 导出时，图片的索引号
-     */
-    public idx: number;
-    /**
-     * 图片在库中的名字
-     */
-    public name: string;
-    /**
-     * 库中对应的图片
-     */
-    public libItem: FlashBitmapItem;
-    /**
-     * 引用此图片的元件
-     */
-    public refs: FlashItem[] = [];
+
     /**
      * 装箱后得到的坐标
      */
-    public fit: {x: number, y: number};
+    public fit: { x: number, y: number };
 
+    private _data: ImageData;
+
+    constructor(data?: ImageData) {
+        this._data = data || <ImageData>{ refs: [] };
+    }
+
+    public setIdx(idx: number) {
+        this._data.idx = idx;
+    }
+
+    /**
+     * 导出时，图片的索引号
+     */
+    public getIdx() {
+        return this._data.idx;
+    }
+
+    /**
+     * 图片在库中的名字
+     */
+    public getName() {
+        return this._data.name;
+    }
+    /**
+     * 设置图片在库中的名字
+     */
+    public setName(value: string) {
+        this._data.name = value;
+    }
+
+
+    /**
+     * 设置库中对应的图片
+     */
+    public setLibItem(value: FlashBitmapItem) {
+        this._data.libItem = value;
+    }
+    /**
+     * 库中对应的图片
+     */
+    public getLibItem() {
+        return this._data.libItem;
+    }
+
+    /**
+     * 添加引用对象，用于调试
+     * 
+     * @param {FlashItem} libItem
+     */
+    public addRef(libItem: FlashItem) {
+        const refs = this._data.refs;
+        if (!~refs.indexOf(libItem)) {
+            refs.push(libItem);
+        }
+    }
+    /**
+     * 设置是否含有透明通道
+     */
+    public setIsPng(value: boolean) {
+        this._data.isPng = value;
+    }
     /**
      * 是否含有透明通道
      */
-    public ispng:boolean;
+    public getIsPng() {
+        return this._data.isPng;
+    }
 
     /**
-     * 在suidata中的索引
-     * （只导出一张png时用，和lib没有关系）
+     * 设置是否含有透明通道
      */
-    public index:number;
-
-     /**
-     * 在suidata中的索引
-     * （拆分为png时用，和lib没有关系）
-     */
-    public pngindex:number;
+    setIndexInfo(info: ImageIndexInfo) {
+        this._data.indexInfo = info;
+    }
     /**
-     * 在suidata中的索引
-     * （拆分为jpg时用，和lib没有关系）
+     * 是否含有透明通道
      */
-    public jpgindex:number;
+    getIndexInfo() {
+        return this._data.indexInfo;
+    }
+
+    public getIndex() {
+        const data = this._data;
+        const indexInfo = data.indexInfo;
+        if (data.isPng) {
+            return indexInfo.pngindex;
+        } else {
+            return -1 - indexInfo.jpgindex;
+        }
+    }
     /**
      * 获取图片的面积
      */
@@ -70,21 +124,42 @@ class ImageInfo implements IBlock {
      * 创建一份副本
      */
     public clone() {
-        let img = new ImageInfo();
+        let img = new ImageInfo(this._data);
         img.w = this.w;
         img.h = this.h;
-        img.libItem = this.libItem;
-        img.name = this.name;
-        img.refs = this.refs;
-        img.ispng = this.ispng;
-        img.quality = this.quality;
-        img.index = this.index;
-        img.jpgindex = this.jpgindex;
-        img.pngindex = this.pngindex;
         let fit = this.fit;
         if (fit) {
             img.fit = { x: fit.x, y: fit.y };
         }
         return img;
     }
+}
+
+interface ImageData {
+    /**
+     * 导出时，图片的索引号
+     */
+    idx: number;
+    /**
+     * 图片在库中的名字
+     */
+    name: string;
+    /**
+     * 库中对应的图片
+     */
+    libItem: FlashBitmapItem;
+    /**
+     * 引用此图片的元件
+     */
+    refs: FlashItem[];
+
+    /**
+     * 是否含有透明通道
+     */
+    isPng: boolean;
+
+    /**
+     * 索引信息
+     */
+    indexInfo: ImageIndexInfo;
 }

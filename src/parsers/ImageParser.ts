@@ -1,3 +1,29 @@
+interface ImageDatas {
+    /**
+     * jpg和png在一张图的数据
+     * 
+     * @type {number[][]}
+     * @memberOf ImageDatas
+     */
+    compose?: number[][];
+
+    /**
+     * jpg的图片的纹理数据
+     * 
+     * @type {number[][]}
+     * @memberOf ImageDatas
+     */
+    jpg?: number[][];
+
+    /**
+     * png的图片的纹理数据
+     * 
+     * @type {number[][]}
+     * @memberOf ImageDatas
+     */
+    png?: number[][];
+}
+
 /**
  * 对图片进行处理
  * 
@@ -11,14 +37,14 @@ class ImageParser {
     */
     public bitmaps: { [index: string]: ImageInfo };
 
-    private imgDatas: any;
+    private imgDatas: ImageDatas;
 
-    private rawBlocks;
+    private rawBlocks: ImageInfo[];
 
     // private tempComposeImgDatas: any;
 
     /**用于存储jpg png索引的临时数据 */
-    private tempIndexDic: { [index: string]: ImageInfo };
+    private tempIndexDic: { [index: string]: ImageIndexInfo };
 
     constructor() {
         this.bitmaps = {};
@@ -115,7 +141,7 @@ class ImageParser {
         let arr = [];
         for (let i = 0; i < len; i++) {
             let info = blocks[i];
-            if (info.ispng) {
+            if (info.getIsPng()) {
                 pngblocks.push(info);
             } else {
                 jpgblocks.push(info);
@@ -180,21 +206,26 @@ class ImageParser {
                 Log.throwError("装箱操作，没有一个得到一个合法的结果");
                 return;
             }
-            results.sort(function (a, b) {
-                return a.fit - b.fit;
-            });
             // 得到面积最小的结果
-            let result = results[0];
-            this.exportImage(result.blocks, ispng, iscompose);
+            let minRe: Result, min = Infinity;
+            for (let i = 0; i < results.length; i++) {
+                let re = results[i];
+                if (re.fit < min) {
+                    min = re.fit;
+                    minRe = re;
+                }
+            }
+            this.exportImage(minRe.blocks, ispng, iscompose);
         }
         let bool = this.checkFileSize();
         let pngurl = folder + PNG_FILE;
         let jpgurl = folder + JPG_FILE;
         let composeurl = folder + "compose" + PNG_FILE;
+        const imgDatas = this.imgDatas;
         if (bool) {
             //分开的更小,删除组合的
             FLfile.remove(composeurl);
-            delete this.imgDatas["compose"];
+            delete imgDatas.compose;
         } else {
 
             //删除多余的png jpg 保留组合的图片
@@ -203,24 +234,23 @@ class ImageParser {
             FLfile.copy(composeurl, pngurl);
             FLfile.remove(composeurl);
             // return this.tempComposeImgDatas;
-            this.imgDatas["png"] = this.imgDatas["compose"];
-            delete this.imgDatas["compose"];
-            delete this.imgDatas["jpg"];
+            imgDatas.png = imgDatas.compose;
+            delete imgDatas.compose;
+            delete imgDatas.jpg;
         }
 
         let raw = this.rawBlocks;
         let copy = this.tempIndexDic;
         for (let key in copy) {
             let c = copy[key];
+            const {name, index, jpgindex, pngindex} = c;
             for (let r of raw) {
-                if (r.name == c.name) {
-                    r.index = c.index;
-                    r.jpgindex = c.jpgindex;
-                    r.pngindex = c.pngindex;
+                if (r.getName() == name) {
+                    r.setIndexInfo(c);
                 }
             }
         }
-        return this.imgDatas;
+        return imgDatas;
         function packingForSort(blocks: ImageInfo[], packer: IBlockPacker, results: Result[], keyPre = "") {
             let len = blocks.length;
             // 先打乱顺序
@@ -269,23 +299,23 @@ class ImageParser {
         lib.editItem(tname);
 
         // 将info中数据放入这个
-        let pngcount: number = 0;
-        let jpgcount: number = 0;
-        let pngs = [];
-        let jpgs = [];
+        let pngcount = 0;
+        let jpgcount = 0;
+        let pngs: number[][] = [];
+        let jpgs: number[][] = [];
         for (let k = 0, len = result.length; k < len; k++) {
             let block = result[k];
-            let kname = block.name;
+            let kname = block.getName();
             let tmp = this.tempIndexDic[kname];
             if (!tmp) {
-                tmp = <ImageInfo>{};
+                tmp = <ImageIndexInfo>{};
                 tmp.name = kname;
             }
             if (iscompose) {
                 tmp.index = k;
                 pngs[k] = block.toExport();
             } else {
-                if (block.ispng) {
+                if (block.getIsPng()) {
                     tmp.pngindex = pngcount;
                     pngs[pngcount] = block.toExport();
                     pngcount++;
@@ -295,13 +325,13 @@ class ImageParser {
                     jpgcount++;
                 }
             }
-            let item = block.libItem;
+            let item = block.getLibItem();
             item.compressionType = "lossless";
 
             this.tempIndexDic[kname] = tmp;
 
-            bitmaps[block.name] = block;
-            block.idx = k;
+            bitmaps[kname] = block;
+            block.setIdx(k);
             let fit = block.fit;
             if (fit) {
                 let hw = block.w * 0.5;
@@ -310,7 +340,7 @@ class ImageParser {
                     x: fit.x + hw,
                     y: fit.y + hh
                 };
-                while (!lib.addItemToDocument(pos, block.name));
+                while (!lib.addItemToDocument(pos, kname));
                 dom.mouseClick(pos, false, true);
                 dom.setElementProperty("x", fit.x);
                 dom.setElementProperty("y", fit.y);
@@ -339,7 +369,6 @@ class ImageParser {
             exname = folder + JPG_FILE;
         }
         if (ispng) {
-
             bitmap.exportToFile(exname);
         } else {
             bitmap.exportToFile(exname, JPG_QUALITY);
@@ -465,7 +494,7 @@ class ImageParser {
         let pngsize = FLfile.getSize(pngfile);
         let jpgsize = FLfile.getSize(jpgfile);
         let composesize = FLfile.getSize(compose);
-        let total = jpgsize + pngsize + 100;
+        let total = jpgsize + pngsize + 100;//100差不多为多一次http请求的字节数
         return total < composesize;
     }
 }
@@ -522,3 +551,23 @@ interface Result {
     blocks: ImageInfo[];
     fit: number;
 };
+
+interface ImageIndexInfo {
+    name: string;
+    /**
+     * 在suidata中的索引
+     * （只导出一张png时用，和lib没有关系）
+     */
+    index: number;
+
+    /**
+    * 在suidata中的索引
+    * （拆分为png时用，和lib没有关系）
+    */
+    pngindex: number;
+    /**
+     * 在suidata中的索引
+     * （拆分为jpg时用，和lib没有关系）
+     */
+    jpgindex: number;
+}

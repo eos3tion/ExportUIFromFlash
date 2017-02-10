@@ -7,26 +7,17 @@ class BitmapAlphaCheck {
     public static checkAlpha(bitmap: FlashElement, img: ImageInfo) {
         let bits = bitmap.getBits().bits;
         let len = bits.length;
-        let ispng: boolean;
+        let ispng = false;
         //bits 按utf-16形式存储
         //解出来 gr ab 
         for (let i = 1; i < len; i += 2) {
             if ((bits.charCodeAt(i) & 0xff00) != 0xff00) {
-                ispng = img.ispng = true;
+                ispng = true;
                 break;
             }
         }
+        img.setIsPng(ispng);
         let item = bitmap.libraryItem;
         item.allowSmoothing = false;
-        // if(!ispng){
-        //     img.quality = 80;
-        // }
-        // if (ispng) {
-        //     item.compressionType = "lossless";//png
-        // } else {
-        //     item.compressionType = "photo";//jpg
-        //     item.quality = 80;
-        //     img.quality = 80;
-        // }
     }
 }

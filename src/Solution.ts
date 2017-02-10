@@ -56,8 +56,8 @@ class Solution {
         let iii = bitmaps[bname];
         if (!iii) {
             iii = new ImageInfo();
-            iii.name = bname;
-            iii.libItem = bItem;
+            iii.setName(bname);
+            iii.setLibItem(bItem);
             // 无法直接FlashItem大小，先将Item加入到舞台，选中获取大小，所以图片的宽度和高度通过element获取像素宽度和高度
             iii.w = ele.hPixels; // 得到图片宽度
             iii.h = ele.vPixels; // 得到图片高度
@@ -65,10 +65,7 @@ class Solution {
             BitmapAlphaCheck.checkAlpha(ele, iii);
             this.blocks.push(iii);
         }
-        let aaa = iii.refs;
-        if (!~aaa.indexOf(libItem)) {
-            aaa.push(libItem);
-        }
+        iii.addRef(libItem);
     }
 
     constructor() {
@@ -308,15 +305,11 @@ class Solution {
     public getBitmapIndex(item: FlashItem) {
         if (this.iscompose) {
             let iii = this.imgParser.bitmaps[item.name];
-            return iii?iii.idx:-1;
+            return iii ? iii.getIdx() : -1;
         } else {
             for (let block of this.blocks) {
-                if (block.name == item.name) {
-                    if (block.ispng) {
-                        return block.pngindex;
-                    } else {
-                        return -1 - block.jpgindex;
-                    }
+                if (block.getName() == item.name) {
+                    return block.getIndex();
                 }
             }
         }
@@ -581,17 +574,12 @@ class Solution {
         let componentsData = this.getSolveData(this.compCheckers);
 
         // 导出的数据
-        let exportData;
-        if (pngs && jpgs) {
-            exportData = [pngs, componentsData, jpgs];
-        } else if (pngs) {
-            exportData = [pngs, componentsData];
-        } else if (jpgs) {
-            exportData = [componentsData, jpgs];
-        } else {
-            exportData = [componentsData];
+        let exportData = [];
+        exportData[0] = pngs ? pngs : 0; //0 为了防止全部用jpg导出，0比null活着undefined节省字符串
+        exportData[1] = componentsData; //一定有组件数据
+        if (jpgs) {
+            exportData[2] = jpgs;
         }
-
         FLfile.write(folder + DATA_FILE, JSON.stringify(exportData));
 
         // 获取面板数据
