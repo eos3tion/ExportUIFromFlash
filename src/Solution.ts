@@ -179,7 +179,7 @@ class Solution {
             ename = ele.name;
         }
         // 处理基础数据
-        return [ename, ele.x, ele.y, ele.width, ele.height, ele.rotation];
+        return [ename, Math.round(ele.x), Math.round(ele.y), ele.width, ele.height, ele.rotation];
     }
 
     /**
