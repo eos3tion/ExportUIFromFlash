@@ -4,7 +4,7 @@
 * 生成时间：@createTime@
 * @private
 */
-@class@ @panelName@ extends egret.Sprite {
+@export@ class @panelName@ extends egret.Sprite {
 
 	public _key:string;
     @properties@

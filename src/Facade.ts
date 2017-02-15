@@ -47,9 +47,9 @@ try {
     sol.regComChecker(new ArtWordParser());
 
     // 加载代码生成器
-    Script.runScript("generators/JunyouH5Generator");
+    Script.runScript("generators/JunyouH5GeneratorV2");
     // 注册生成器
-    sol.generator = new JunyouH5Generator(sol);
+    sol.generator = new JunyouH5GeneratorV2(sol);
 
     sol.run();
     alert("执行完成");

@@ -1,0 +1,11 @@
+/**
+ * 由导出工具生成
+ * https://github.com/eos3tion/ExportUIFromFlash
+ * 生成时间：@createTime@
+ */
+export class @panelName@ extends sui.View {
+@properties@
+    constructor(){
+        super("@lib@","@className@");
+    }
+}

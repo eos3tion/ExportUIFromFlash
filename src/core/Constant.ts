@@ -21,6 +21,11 @@ const enum ExportType {
     Rectangle = 14,
 
     /**
+     * 空容器，可带大小
+     */
+    Sprite = 16,
+
+    /**
      * 字库
      */
     ArtWord = 15,

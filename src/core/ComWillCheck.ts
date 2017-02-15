@@ -32,7 +32,7 @@ class ComWillCheck {
     /**
      * 控件大小的数组
      */
-    public sizes: number[][] | number;
+    public sizes: SizeData[] | 0; //number[][] | number;
     /**
      * 当前索引
      */

@@ -1,0 +1,8 @@
+/**
+ * 由导出工具生成
+ * https://github.com/eos3tion/ExportUIFromFlash
+ * 生成时间：@createTime@
+ */
+interface @panelName@ extends egret.Sprite {
+@properties@
+}

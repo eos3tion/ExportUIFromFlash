@@ -11,6 +11,8 @@ var PNG_FILE = "d.png";
 
 var JPG_FILE = "d.jpg";
 
+var ExportPanelData = true;
+
 // 文件输出路径
 //D:\EgretProjects\UITest
 var cwd = fl.scriptURI;

@@ -136,6 +136,10 @@ declare const PNG_FILE: string;
  */
 declare const JPG_FILE: string;
 
+/**
+ * 是否导出面板数据
+ */
+declare const ExportPanelData: boolean;
 
 /**
  * 最终数据和纹理输出的目录
@@ -161,3 +165,132 @@ interface XMLContrustor {
 }
 
 declare const XML: XMLContrustor;
+
+
+/**
+ * 尺寸数据
+ * 
+ * @interface SizeData
+ */
+interface SizeData extends Array<number> {
+    /**
+     * x坐标
+     * 
+     * @type {number}
+     * @memberOf BaseData
+     */
+    0: number;
+    /**
+     * y坐标
+     * 
+     * @type {number}
+     * @memberOf BaseData
+     */
+    1: number;
+    /**
+     * width
+     * 
+     * @type {number}
+     * @memberOf BaseData
+     */
+    2: number;
+    /**
+     * height
+     * 
+     * @type {number}
+     * @memberOf BaseData
+     */
+    3: number;
+}
+
+/**
+ * 组件数据
+ * 
+ * @interface ComponentData
+ */
+interface ComponentData extends Array<any> {
+    /**
+     * 导出类型
+     * 
+     * @type {ExportType}
+     * @memberOf ComponentData
+     */
+    0: ExportType;
+
+    /**
+     * 基础数据
+     * 
+     * @type {BaseData}
+     * @memberOf ComponentData
+     */
+    1: BaseData | 0;
+
+    /**
+     * 组件数据
+     * 
+     * @type {any}
+     * @memberOf ComponentData
+     */
+    2: any;
+
+    /**
+     * 是否引用lib
+     * 如果没有此值或者0，则使用当前key  
+     * 1 使用 lib
+     * 其他字符串，则为 suiData的key
+     * @type {1|string}
+     * @memberOf ComponentData
+     */
+    3?: 0 | 1 | string;
+}
+
+/**
+ * 基础数据
+ * 
+ * @interface BaseData
+ */
+interface BaseData extends Array<any> {
+    /**
+     * 控件名称
+     * 如果是字符串则为控件名字
+     * 如果为 0 用于占位，减少JSON字符串输出
+     * @type {string | 0}
+     * @memberOf BaseData
+     */
+    0: string | 0;
+    /**
+     * x坐标
+     * 
+     * @type {number}
+     * @memberOf BaseData
+     */
+    1: number;
+    /**
+     * y坐标
+     * 
+     * @type {number}
+     * @memberOf BaseData
+     */
+    2: number;
+    /**
+     * width
+     * 
+     * @type {number}
+     * @memberOf BaseData
+     */
+    3: number;
+    /**
+     * height
+     * 
+     * @type {number}
+     * @memberOf BaseData
+     */
+    4: number;
+    /**
+     * rotation
+     * 
+     * @type {number}
+     * @memberOf BaseData
+     */
+    5: number;
+}

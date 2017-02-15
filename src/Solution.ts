@@ -165,7 +165,7 @@ class Solution {
      * 
      * @private
      * @param {FlashElement} ele 元素
-     * @returns {any[]} 导出的数据
+     * @returns {BaseData} 导出的数据
      *  0 元素名字，如果没有名字，用0
         1 x坐标
         2 y坐标
@@ -173,8 +173,8 @@ class Solution {
         4 高度
         5 旋转角度
      */
-    private getEleBaseData(ele: FlashElement): any[] {
-        let ename: string | number = 0;
+    private getEleBaseData(ele: FlashElement): BaseData {
+        let ename: string | 0 = 0;
         if (ele.name) {
             ename = ele.name;
         }
@@ -333,9 +333,9 @@ class Solution {
     public getElementData(ele: FlashElement, errPrefix: string = "") {
         //alert("getElementData:" + ele.name);
         let type = ele.elementType;
-        let data = [];
+        let data = [] as ComponentData;
         // 处理基础数据
-        data[1] = this.getEleBaseData(ele);
+        let baseData = data[1] = this.getEleBaseData(ele);
         switch (type) {
             case ElementType.Text: // 文本框特殊数据
                 data[0] = ExportType.Text;
@@ -354,14 +354,22 @@ class Solution {
                         data[2] = index;
                         break;
                     case InstanceType.Symbol:
-                        if (item.linkageClassName == "ui.Rectangle") {//用于定位坐标
+                        let linkageClassName = item.linkageClassName;
+                        if (linkageClassName == "ui.Rectangle") {//用于定位坐标
                             data[0] = ExportType.Rectangle;
-                            if (data[1][0] == 0) {//没有名字，自动生成名字
-                                data[1][0] = "Rect" + (this.guid++);
+                            if (baseData[0] == 0) {//没有名字，自动生成名字
+                                baseData[0] = "Rect" + (this.guid++);
+                            }
+                            break;
+                        } else if (linkageClassName == "ui.Sprite") {//用于定位的空容器
+                            data[0] = ExportType.Sprite;
+                            if (baseData[0] == 0) {//没有名字，自动生成名字
+                                baseData[0] = "Con" + (this.guid++);
                             }
                             break;
                         }
-                        data[3] = 0; // 默认为当前swf
+                        // data[3] = 0; // 0 可不进行设置， 默认为当前swf
+
                         // 引用数据
 
                         if (item.linkageImportForRS) { // 共享导入
@@ -513,24 +521,24 @@ class Solution {
      * @private
      * @param {{[index: number]: any[]}} panelsData
      */
-    private generatePanels(panelsData: { [index: number]: any[] }) {
+    private generatePanels(panelsData: { [index: number]: [SizeData, ComponentData] }) {
         let generator = this.generator;
         if (!generator) {
             alert("未配置代码生成器，将不生成代码");
             return;
         }
-        for (let type in panelsData) {
-            let pData = panelsData[type];
-            let panelsName = pData[0];
-            let panelsInfo = pData[1];
-            let panelsSize = pData[2];
-            let len = panelsName.length;
-            for (let i = 0; i < len; i++) {
-                let name: string = panelsName[i];
-                let pInfo: any[] = panelsInfo[i];
-                let sizeInfo: number[] = panelsSize[i];
-                generator.generateOnePanel(name, pInfo, sizeInfo);
-            }
+        for (let panelsName in panelsData) {
+            let pData = panelsData[panelsName];
+            // let panelsName = pData[0];
+            let pInfo = pData[1];
+            let sizeInfo = pData[0];
+            // let len = panelsName.length;
+            // for (let i = 0; i < len; i++) {
+            //     let name: string = panelsName[i];
+            //     let pInfo: any[] = panelsInfo[i];
+            //     let sizeInfo: number[] = panelsSize[i];
+            generator.generateOnePanel(panelsName, pInfo, sizeInfo);
+            // }
         }
     }
 
@@ -583,13 +591,37 @@ class Solution {
         if (jpgs) {
             exportData[2] = jpgs;
         }
-        FLfile.write(folder + DATA_FILE, JSON.stringify(exportData));
+
 
         // 获取面板数据
         let panelsData = this.getSolveData(this.panelCheckers);
+        let exPanelData = {};
+        for (let type in panelsData) {
+            let pData = panelsData[type];
+            let panelsName = pData[0];
+            let panelsInfo = pData[1];
+            let panelsSize = pData[2];
+            let len = panelsName.length;
+            for (let i = 0; i < len; i++) {
+                let name: string = panelsName[i];
+                let pInfo: any[] = panelsInfo[i];
+                let sizeInfo: number[] = panelsSize[i];
+                exPanelData[name] = [sizeInfo, pInfo];
+            }
+        }
 
         // 处理面板
-        this.generatePanels(panelsData);
+        this.generatePanels(exPanelData);
+
+        if (ExportPanelData) {
+            if (!exportData[2]) {
+                exportData[2] = 0;
+            }
+            exportData[3] = exPanelData;
+        }
+
+        FLfile.write(folder + DATA_FILE, JSON.stringify(exportData));
+
 
     }
 }

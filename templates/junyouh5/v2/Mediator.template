@@ -1,0 +1,19 @@
+/**
+ * 由导出工具生成
+ * https://github.com/eos3tion/ExportUIFromFlash
+ * 生成时间：@createTime@
+ */
+export class @mediatorName@ extends mvc.Mediator {
+	
+    public $view:@panelName@;
+
+    constructor() {
+        super("这里写模块ModuleID");
+    }
+
+    protected init() {
+        let v =  new sui.Panel() as @panelName@;
+        v.bind("@lib@","@className@"@otherDepends@);
+        this.view = v;
+    }
+}
