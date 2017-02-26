@@ -136,6 +136,7 @@ class ImageParser {
         if (!len) {//增加没有导出图片的情况
             return undefined;
         }
+        const self = this;
         let pngblocks: ImageInfo[] = [];
         let jpgblocks: ImageInfo[] = [];
         let arr = [];
@@ -147,30 +148,64 @@ class ImageParser {
                 jpgblocks.push(info);
             }
         }
-        arr[0] = pngblocks;
-        arr[1] = jpgblocks;
-        arr[2] = blocks;
-        let ispng: boolean = true;
-        /**
-         * 不拆分，直接做成一张png
-         */
-        let iscompose: boolean = false;
-        let self = this;
-        for (let j = 0; j < 3; j++) {
-            blocks = arr[j];
-            if (!blocks.length) {
-                continue;
-            }
-            len = blocks.length;
-            results = [];
-            if (j == 1) {
-                ispng = false;
+        const imgDatas = this.imgDatas;
+        let re = getResult(blocks, packer);
+        let {datas, bitmap} = getImage(re);
+        if (jpgblocks.length == 0) {//没有任何jpg
+            // 直接生成数据
+            this.exportPng(bitmap, folder + PNG_FILE);
+            imgDatas.png = datas;
+        } else {
+            let composeurl = folder + "compose" + PNG_FILE;
+            let pngurl = folder + PNG_FILE;
+            let jpgurl = folder + JPG_FILE;
+            this.exportPng(bitmap, composeurl);
+            let compose = datas;
+            re = getResult(pngblocks, packer);
+            let pngData = getImage(re);
+            this.exportPng(pngData.bitmap, pngurl);
+
+            re = getResult(jpgblocks, packer);
+            let jpgData = getImage(re, true);
+            this.exportJpg(jpgData.bitmap);
+
+            let pngsize = FLfile.getSize(pngurl);
+            let jpgsize = FLfile.getSize(jpgurl);
+            let composesize = FLfile.getSize(composeurl);
+            let total = jpgsize + pngsize + 100;//100差不多为多一次http请求的字节数
+            Log.trace("组合图片的大小：", composesize, "拆分后，jpg大小：", jpgsize, "png大小：", pngsize);
+            if (total < composesize) {
+                //分开的更小,删除组合的
+                FLfile.remove(composeurl);
+                FLfile.remove(composeurl + ".webp");
+                imgDatas.png = pngData.datas;
+                imgDatas.jpg = jpgData.datas;
             } else {
-                ispng = true;
+                FLfile.copy(composeurl, pngurl);
+                FLfile.copy(composeurl + ".webp", pngurl + ".webp");
+                //删除多余的png jpg 保留组合的图片
+                FLfile.remove(jpgurl);
+                FLfile.remove(jpgurl + ".webp");
+                FLfile.remove(folder + "j.png");
+
+                imgDatas.png = datas;
             }
-            if (j == 2) {
-                iscompose = true;
+        }
+
+        let raw = this.rawBlocks;
+        let copy = this.tempIndexDic;
+        for (let key in copy) {
+            let c = copy[key];
+            const {name, jpgindex, pngindex} = c;
+            for (let r of raw) {
+                if (r.getName() == name) {
+                    r.setIndexInfo(c);
+                }
             }
+        }
+
+        return imgDatas;
+        function getResult(blocks: ImageInfo[], packer: IBlockPacker) {
             if (typeof packer.setWidth == "function") {//需要预设大小的装箱处理解析器
                 //得到图片的最大宽度
                 let maxWidth = 0;
@@ -190,14 +225,14 @@ class ImageParser {
                     Log.trace("正在使用宽度：", w);
                     let keyPre = "setWidth:" + w;
                     if (packer.selfSorting) {
-                        this.doPacking(blocks, keyPre, packer, results, w);
+                        self.doPacking(blocks, keyPre, packer, results, w);
                     } else {
                         packingForSort(blocks, packer, results, keyPre);
                     }
                 }
             } else {
                 if (packer.selfSorting) {
-                    this.doPacking(blocks, "", packer, results);
+                    self.doPacking(blocks, "", packer, results);
                 } else {
                     packingForSort(blocks, packer, results);
                 }
@@ -220,42 +255,9 @@ class ImageParser {
                 packer.setWidth(minRe.param);
                 minBlocks = packer.fit(blocks) as ImageInfo[];
             }
-            this.exportImage(minBlocks, ispng, iscompose);
-        }
-        let bool = this.checkFileSize();
-        let pngurl = folder + PNG_FILE;
-        let jpgurl = folder + JPG_FILE;
-        let composeurl = folder + "compose" + PNG_FILE;
-        const imgDatas = this.imgDatas;
-        if (bool) {
-            //分开的更小,删除组合的
-            FLfile.remove(composeurl);
-            delete imgDatas.compose;
-        } else {
-
-            //删除多余的png jpg 保留组合的图片
-            FLfile.remove(pngurl);
-            FLfile.remove(jpgurl);
-            FLfile.copy(composeurl, pngurl);
-            FLfile.remove(composeurl);
-            // return this.tempComposeImgDatas;
-            imgDatas.png = imgDatas.compose;
-            delete imgDatas.compose;
-            delete imgDatas.jpg;
+            return minBlocks;
         }
 
-        let raw = this.rawBlocks;
-        let copy = this.tempIndexDic;
-        for (let key in copy) {
-            let c = copy[key];
-            const {name, index, jpgindex, pngindex} = c;
-            for (let r of raw) {
-                if (r.getName() == name) {
-                    r.setIndexInfo(c);
-                }
-            }
-        }
-        return imgDatas;
         function packingForSort(blocks: ImageInfo[], packer: IBlockPacker, results: Result[], keyPre = "") {
             let len = blocks.length;
             // 先打乱顺序
@@ -281,127 +283,96 @@ class ImageParser {
                 self.doPacking(blocks, keyPre + "random" + t, packer, results);
             }
         }
-    }
-    /**
-     * 将快信息导出成图片
-     * @param iscompose 是否不拆分直接导出成一张png
-     */
-    private exportImage(result: ImageInfo[], ispng: boolean, iscompose: boolean) {
-        let bitmaps = this.bitmaps;
 
-        // let imgDatas;
-        // if (iscompose) {
-        //     imgDatas = this.tempComposeImgDatas;
-        // } else {
-        //     imgDatas = this.imgDatas;
-        // }
-        let tname = "$$$temp";
-        if (lib.itemExists(tname)) {
-            lib.deleteItem(tname);
-        }
-        // 创建一个新的原件
-        lib.addNewItem("movie clip", tname);
-        lib.editItem(tname);
-
-        // 将info中数据放入这个
-        let pngcount = 0;
-        let jpgcount = 0;
-        let pngs: number[][] = [];
-        let jpgs: number[][] = [];
-        for (let k = 0, len = result.length; k < len; k++) {
-            let block = result[k];
-            let kname = block.getName();
-            let tmp = this.tempIndexDic[kname];
-            if (!tmp) {
-                tmp = <ImageIndexInfo>{};
-                tmp.name = kname;
+        /**
+         * 将快信息合成图片
+         * @param iscompose 是否不拆分直接导出成一张png
+         */
+        function getImage(result: ImageInfo[], isJpg?: boolean) {
+            let bitmaps = self.bitmaps;
+            const tempIndexDic = self.tempIndexDic;
+            let tname = "$$$temp";
+            if (lib.itemExists(tname)) {
+                lib.deleteItem(tname);
             }
-            if (iscompose) {
-                tmp.index = k;
-                pngs[k] = block.toExport();
-            } else {
-                if (block.getIsPng()) {
-                    tmp.pngindex = pngcount;
-                    pngs[pngcount] = block.toExport();
-                    pngcount++;
+            // 创建一个新的原件
+            lib.addNewItem("movie clip", tname);
+            lib.editItem(tname);
+
+            // 将info中数据放入这个
+            let datas: number[][] = [];
+            for (let k = 0, len = result.length; k < len; k++) {
+                let block = result[k];
+                let kname = block.getName();
+                let tmp = tempIndexDic[kname];
+                if (!tmp) {
+                    tmp = <ImageIndexInfo>{};
+                    tmp.name = kname;
+                    tempIndexDic[kname] = tmp;
+                }
+                if (isJpg) {
+                    tmp.jpgindex = k;
                 } else {
-                    tmp.jpgindex = jpgcount;
-                    jpgs[jpgcount] = block.toExport();
-                    jpgcount++;
+                    tmp.pngindex = k;
+                }
+                datas[k] = block.toExport();
+
+                let item = block.getLibItem();
+                item.allowSmoothing = false;
+                item.compressionType = "lossless";
+
+                bitmaps[kname] = block;
+                block.setIdx(k);
+                let fit = block.fit;
+                if (fit) {
+                    let hw = block.w * 0.5;
+                    let hh = block.h * 0.5;
+                    let pos = {
+                        x: fit.x + hw,
+                        y: fit.y + hh
+                    };
+                    while (!lib.addItemToDocument(pos, kname));
+                    dom.mouseClick(pos, false, true);
+                    dom.setElementProperty("x", fit.x);
+                    dom.setElementProperty("y", fit.y);
+                } else {
+                    Log.trace("noFit", JSON.stringify(block));
                 }
             }
-            let item = block.getLibItem();
-            item.allowSmoothing = false;
-            item.compressionType = "lossless";
 
-            this.tempIndexDic[kname] = tmp;
-
-            bitmaps[kname] = block;
-            block.setIdx(k);
-            let fit = block.fit;
-            if (fit) {
-                let hw = block.w * 0.5;
-                let hh = block.h * 0.5;
-                let pos = {
-                    x: fit.x + hw,
-                    y: fit.y + hh
-                };
-                while (!lib.addItemToDocument(pos, kname));
-                dom.mouseClick(pos, false, true);
-                dom.setElementProperty("x", fit.x);
-                dom.setElementProperty("y", fit.y);
-            } else {
-                Log.trace("noFit", JSON.stringify(block));
+            /********将图片拼合，并导出********/
+            dom.selectAll();
+            while (!dom.convertSelectionToBitmap());
+            let ele = dom.selection[0];
+            if (!ele) {
+                Log.throwError("没有成功拼合图片");
             }
-        }
+            let bitmap = ele.libraryItem;
+            bitmap.allowSmoothing = false;
+            bitmap.compressionType = "lossless";
 
-        /********将图片拼合，并导出********/
-        dom.selectAll();
-        while (!dom.convertSelectionToBitmap());
-        let ele = dom.selection[0];
-        if (!ele) {
-            Log.throwError("没有成功拼合图片");
+            while (!lib.deleteItem(tname));
+            return { datas, bitmap };
         }
-        let bitmap = ele.libraryItem;
-        bitmap.allowSmoothing = false;
-        bitmap.compressionType = "lossless";
-
-        // 导出的文件路径
-        let exname = folder + PNG_FILE;
-        if (iscompose) {
-            exname = folder + "compose" + PNG_FILE;
-        }
-        if (!ispng) {
-            exname = folder + JPG_FILE;
-        }
-        if (ispng) {
-            while (!bitmap.exportToFile(exname));
-        } else {
-            while (!bitmap.exportToFile(exname, JPG_QUALITY));
-        }
-        const imgDatas = this.imgDatas;
-        if (iscompose) {
-            imgDatas.compose = pngs;
-        } else {
-            if (pngs.length) {
-                imgDatas.png = pngs;
-            }
-            if (jpgs.length) {
-                imgDatas.jpg = jpgs;
-            }
-        }
-
-        // 删除临时文件
-        // 图片导出之前，删除操作会失败，所以加了while
-        while (!lib.deleteItem(bitmap.name));
-        while (!lib.deleteItem(tname));
-        if (ispng) {
-            FLExternal.pngquant(exname);
-        }
-
-        // 导出图片数据
-        // return imgDatas;
     }
+
+    private exportJpg(bitmap: FlashItem) {
+        let pngJ = folder + "j.png";
+        let jpg = folder + JPG_FILE;
+        while (!bitmap.exportToFile(pngJ));
+        FLExternal.cwebp(pngJ, jpg);
+        while (!bitmap.exportToFile(jpg, JPG_QUALITY));
+        while (!lib.deleteItem(bitmap.name));
+    }
+
+    private exportPng(bitmap: FlashItem, exname: string) {
+        while (!bitmap.exportToFile(exname));
+        FLExternal.cwebp(exname);
+        FLExternal.pngquant(exname);
+        while (!lib.deleteItem(bitmap.name));
+    }
+
+
 
     /**
      * 按指定索引，重新排列顺序
@@ -491,20 +462,7 @@ class ImageParser {
         }
     }
 
-    /** 比较拆分出来的图片和整张png的大小
-     *  拆分的较小则返回true
-    */
-    private checkFileSize() {
-        let pngfile = folder + PNG_FILE;
-        let jpgfile = folder + JPG_FILE;
-        let compose = folder + "compose" + PNG_FILE;
-        let pngsize = FLfile.getSize(pngfile);
-        let jpgsize = FLfile.getSize(jpgfile);
-        let composesize = FLfile.getSize(compose);
-        let total = jpgsize + pngsize + 100;//100差不多为多一次http请求的字节数
-        Log.trace("组合图片的大小：", composesize, "拆分后，jpg大小：", jpgsize, "png大小：", pngsize);
-        return total < composesize;
-    }
+
 }
 
 let sort = {
@@ -573,11 +531,11 @@ interface Result {
 
 interface ImageIndexInfo {
     name: string;
-    /**
-     * 在suidata中的索引
-     * （只导出一张png时用，和lib没有关系）
-     */
-    index: number;
+    // /**
+    //  * 在suidata中的索引
+    //  * （只导出一张png时用，和lib没有关系）
+    //  */
+    // index: number;
 
     /**
     * 在suidata中的索引
