@@ -102,6 +102,7 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
                     .replace(/@otherDepends@/g, otherDepends)
                     .replace(/@lib@/g, flaname)
                     .replace(/@className@/g, className)
+                    .replace(/\n/g, "\n\t")
                 + "\n}";
             let mediatorOut = modFolder + "/" + mediatorName + ".ts";
             let flag = true;
@@ -139,6 +140,9 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
                 case ExportType.Rectangle:
                     pros.push(`${ident}${instanceName}: egret.Rectangle;`);
                     break;
+                case ExportType.Sprite:
+                    pros.push(`${ident}${instanceName}: egret.Sprite;`);
+                    break;
                 case ExportType.Image:
                     pros.push(`${ident}${instanceName}: egret.Bitmap;`);
                     break;
@@ -146,27 +150,28 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
                     pros.push(`${ident}${instanceName}: egret.TextField;`);
                     break;
                 case ExportType.Container:
-                    if (instanceName.indexOf("$") == -1) {
-                        let cName = panelName + "_" + idx;
-                        this.generateClass(this._containerTmp, cName, data[2], classInfo);
-                        if (instanceName) {
-                            pros.push(`${instanceName}: cName;`);
-                        }
-                        idx++;
-                    } else {//弃用，由ui.Rectangel和ui.Sprite代替，单张图片也已经增加了检测功能
-                        let tp = instanceName.split("$")[0];
-                        let tmpname = instanceName.split("$")[1];
-                        let tmpd = data[2][0];
-                        if (tp == "con") {
-                            if (tmpd) {
-                                pros.push(`${ident}${tmpname}: egret.Rectangle;`);
-                            } else {
-                                pros.push(`${ident}${tmpname}: egret.Sprite;`);
-                            }
-                        } else {
-                            pros.push(`${ident}${tmpname}: egret.Sprite;`);
-                        }
-                    }
+                    pros.push(`${ident}${instanceName}: egret.Sprite;`);
+                    // if (instanceName.indexOf("$") == -1) {
+                    //     let cName = panelName + "_" + idx;
+                    //     this.generateClass(this._containerTmp, cName, data[2], classInfo);
+                    //     if (instanceName) {
+                    //         pros.push(`${instanceName}: cName;`);
+                    //     }
+                    //     idx++;
+                    // } else {//弃用，由ui.Rectangel和ui.Sprite代替，单张图片也已经增加了检测功能
+                    //     let tp = instanceName.split("$")[0];
+                    //     let tmpname = instanceName.split("$")[1];
+                    //     let tmpd = data[2][0];
+                    //     if (tp == "con") {
+                    //         if (tmpd) {
+                    //             pros.push(`${ident}${tmpname}: egret.Rectangle;`);
+                    //         } else {
+                    //             pros.push(`${ident}${tmpname}: egret.Sprite;`);
+                    //         }
+                    //     } else {
+                    //         pros.push(`${ident}${tmpname}: egret.Sprite;`);
+                    //     }
+                    // }
 
                     break;
                 default: // 控件
