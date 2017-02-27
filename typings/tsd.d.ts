@@ -122,6 +122,10 @@ declare const outputBase: string;
 declare const flaname: string;
 
 /**
+ * 默认字体
+ */
+declare const DefaultFonts: string;
+/**
  * 导出的数据JSON文件名称
  */
 declare const DATA_FILE: string;

@@ -55,5 +55,5 @@ try {
     alert("执行完成");
 } catch (e) {
     //输出未捕获的异常
-    fl.trace(e.stack)
+    fl.trace(e.message + "\n" + e.stack)
 }

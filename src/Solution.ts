@@ -193,7 +193,8 @@ class Solution {
         let data = [];
 
         data[0] = ["static", "dynamic", "input"].indexOf(ele.textType);
-        data[1] = ele.getTextAttr("face");
+        let face = ele.getTextAttr("face");
+        data[1] = face == DefaultFonts ? 0 : face;
         data[2] = ["left", "center", "right", "justify"].indexOf(ele.getTextAttr("alignment"));
         data[3] = ele.getTextAttr("fillColor");
         data[4] = +ele.getTextAttr("size");
@@ -306,17 +307,10 @@ class Solution {
      * @param {FlashItem}  item 库中原件
      */
     public getBitmapIndex(item: FlashItem) {
-        if (this.iscompose) {
-            let iii = this.imgParser.bitmaps[item.name];
-            return iii ? iii.getIdx() : -1;
-        } else {
-            for (let block of this.blocks) {
-                if (block.getName() == item.name) {
-                    return block.getIndex();
-                }
-            }
-        }
-        return -1;
+        // if (this.iscompose) {
+        let iii = this.imgParser.bitmaps[item.name];
+        Log.trace(item.name, this.iscompose, iii.getIdx(), iii.getIndex());
+        return iii ? (this.iscompose ? iii.getIdx() : iii.getIndex()) : -1;
     }
 
     /**
@@ -574,13 +568,13 @@ class Solution {
         blocks.length = 0;
         this.preCheck(blocks);
         let imgData = this.solveImage(blocks);
-        let pngs = imgData["png"];
-        let jpgs = imgData["jpg"];
-        if (pngs && jpgs) {
-            this.iscompose = false;
-        } else {
-            this.iscompose = true;
+        let pngs: number[][], jpgs: number[][];
+        if (imgData) {
+            pngs = imgData.png;
+            jpgs = imgData.jpg;
         }
+
+        this.iscompose = !pngs || !jpgs;
         // 获取元件的数据
         let componentsData = this.getSolveData(this.compCheckers);
 
