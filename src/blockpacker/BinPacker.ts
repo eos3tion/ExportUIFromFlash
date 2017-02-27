@@ -84,6 +84,9 @@ class BinPacker implements IBlockPacker {
                 if (fit) {
                     if (row > 0) {
                         let lastRow = rows[row - 1];
+                        if (!lastRow) {
+                            continue;
+                        }
                         lastRow.sort(sortX);
                         let res = this.findMinY(lastRow, bs);
                         if (!res) {
