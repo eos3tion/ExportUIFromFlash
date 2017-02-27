@@ -5,17 +5,12 @@ class FLExternal {
     * 使用pngquant优化输出的图片
     * @param {string} name 图片文件名
     */
-    public static pngquant(name: string) {     
+    public static pngquant(name: string) {
         let wcwd = FLfile.uriToPlatformPath(cwd);
         name = FLfile.uriToPlatformPath(name);
-        let path = wcwd + "\\exe";
-        let command = "cd /d " + path + "\n" + "pngquant.exe " + name + " -f --ext .png";
-        FLfile.write(wcwd + "tmp.bat", command);
-        FLfile.runCommandLine(wcwd + "tmp.bat");
-        // 删除临时文件
-        // FLfile.remove(wcwd + "tmp.bat");
-        Log.trace(wcwd + "tmp.bat");
+        let command = `${wcwd}exe\\pngquant.exe ${name} -f --ext .png`;
         Log.trace(command);
+        FLfile.runCommandLine(command);
     }
 
     /**
@@ -29,17 +24,12 @@ class FLExternal {
      * @memberOf FLExternal
      */
     public static cwebp(name: string, out?: string) {
-        out = out || name;
         let wcwd = FLfile.uriToPlatformPath(cwd);
-        let bin = wcwd + "\\exe\\cwebp.exe";
         name = FLfile.uriToPlatformPath(name);
+        out = out ? FLfile.uriToPlatformPath(out) : name;
         //对原始文件名增加webp后缀
-        let command = bin + " " + name + " -o " + out + ".webp\n";
-        FLfile.write(wcwd + "tmp.bat", command);
-        FLfile.runCommandLine(wcwd + "tmp.bat");
-        // 删除临时文件
-        // FLfile.remove(wcwd + "tmp.bat");
-        Log.trace(wcwd + "tmp.bat");
+        let command = `${wcwd}exe\\cwebp.exe ${name} -o ${out}.webp`;
         Log.trace(command);
+        FLfile.runCommandLine(command);
     }
 }
