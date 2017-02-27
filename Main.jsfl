@@ -18,6 +18,8 @@ var ExportPanelData = true;
 var cwd = fl.scriptURI;
 cwd = cwd.substring(0, cwd.lastIndexOf("/") + 1);
 
+var DefaultFonts = "微软雅黑";
+
 // 输出路径定义
 // 测试期间设置为cwd
 var outputBase = "file:///d|/junyou2016/hqgh5/Client/skin/"; //cwd;

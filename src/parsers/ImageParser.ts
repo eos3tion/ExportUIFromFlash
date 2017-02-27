@@ -64,7 +64,6 @@ class ImageParser {
         if (libItem.linkageImportForRS) {//原件是导入的，不检查 
             return;
         }
-        let bitmaps = this.bitmaps;
         // 遍历timeline
         let timeline = libItem.timeline;
         let layers = timeline.layers;
@@ -150,7 +149,8 @@ class ImageParser {
         }
         const imgDatas = this.imgDatas;
         let re = getResult(blocks, packer);
-        let {datas, bitmap} = getImage(re);
+        let {datas, bitmap} = getImage(re, "pngindex");
+        fl.trace("datas:\n" + JSON.stringify(datas));
         if (jpgblocks.length == 0) {//没有任何jpg
             // 直接生成数据
             this.exportPng(bitmap, folder + PNG_FILE);
@@ -160,16 +160,18 @@ class ImageParser {
             let pngurl = folder + PNG_FILE;
             let jpgurl = folder + JPG_FILE;
             this.exportPng(bitmap, composeurl);
-            let compose = datas;
-            re = getResult(pngblocks, packer);
-            let pngData = getImage(re);
-            this.exportPng(pngData.bitmap, pngurl);
+            let pngData, pngsize = 0;
+            if (pngblocks.length) {
+                re = getResult(pngblocks, packer);
+                pngData = getImage(re, "pngindex");
+                this.exportPng(pngData.bitmap, pngurl);
+                pngsize = FLfile.getSize(pngurl);
+            }
 
             re = getResult(jpgblocks, packer);
-            let jpgData = getImage(re, true);
+            let jpgData = getImage(re, "jpgindex");
             this.exportJpg(jpgData.bitmap);
 
-            let pngsize = FLfile.getSize(pngurl);
             let jpgsize = FLfile.getSize(jpgurl);
             let composesize = FLfile.getSize(composeurl);
             let total = jpgsize + pngsize + 100;//100差不多为多一次http请求的字节数
@@ -178,11 +180,16 @@ class ImageParser {
                 //分开的更小,删除组合的
                 FLfile.remove(composeurl);
                 FLfile.remove(composeurl + ".webp");
-                imgDatas.png = pngData.datas;
+                FLfile.remove(folder + "j.png");
+                imgDatas.png = pngData && pngData.datas;
                 imgDatas.jpg = jpgData.datas;
             } else {
+                FLfile.remove(pngurl);
+                FLfile.remove(pngurl + ".webp");
                 FLfile.copy(composeurl, pngurl);
                 FLfile.copy(composeurl + ".webp", pngurl + ".webp");
+                FLfile.remove(composeurl);
+                FLfile.remove(composeurl + ".webp");
                 //删除多余的png jpg 保留组合的图片
                 FLfile.remove(jpgurl);
                 FLfile.remove(jpgurl + ".webp");
@@ -194,13 +201,11 @@ class ImageParser {
 
         let raw = this.rawBlocks;
         let copy = this.tempIndexDic;
-        for (let key in copy) {
-            let c = copy[key];
-            const {name, jpgindex, pngindex} = c;
-            for (let r of raw) {
-                if (r.getName() == name) {
-                    r.setIndexInfo(c);
-                }
+
+        for (let r of raw) {
+            let c = copy[r.getName()];
+            if (c) {
+                r.setIndexInfo(c);
             }
         }
 
@@ -210,7 +215,7 @@ class ImageParser {
                 //得到图片的最大宽度
                 let maxWidth = 0;
                 let total = 0;
-                for (let i = 0; i < len; i++) {
+                for (let i = 0; i < blocks.length; i++) {
                     let block = blocks[i];
                     let w = block.w;
                     total += w;
@@ -222,7 +227,7 @@ class ImageParser {
                 //从最宽的一个 到总宽度的 进行遍历设置
                 for (let w = maxWidth; w <= total; w++) {
                     packer.setWidth(w);
-                    Log.trace("正在使用宽度：", w);
+                    //Log.trace("正在使用宽度：", w);
                     let keyPre = "setWidth:" + w;
                     if (packer.selfSorting) {
                         self.doPacking(blocks, keyPre, packer, results, w);
@@ -288,7 +293,7 @@ class ImageParser {
          * 将快信息合成图片
          * @param iscompose 是否不拆分直接导出成一张png
          */
-        function getImage(result: ImageInfo[], isJpg?: boolean) {
+        function getImage(result: ImageInfo[], key: "jpgindex" | "pngindex") {
             let bitmaps = self.bitmaps;
             const tempIndexDic = self.tempIndexDic;
             let tname = "$$$temp";
@@ -296,7 +301,7 @@ class ImageParser {
                 lib.deleteItem(tname);
             }
             // 创建一个新的原件
-            lib.addNewItem("movie clip", tname);
+            while (!lib.addNewItem("movie clip", tname));
             lib.editItem(tname);
 
             // 将info中数据放入这个
@@ -309,12 +314,9 @@ class ImageParser {
                     tmp = <ImageIndexInfo>{};
                     tmp.name = kname;
                     tempIndexDic[kname] = tmp;
+                    block.setIdx(k);
                 }
-                if (isJpg) {
-                    tmp.jpgindex = k;
-                } else {
-                    tmp.pngindex = k;
-                }
+                tmp[key] = k;
                 datas[k] = block.toExport();
 
                 let item = block.getLibItem();
@@ -322,7 +324,6 @@ class ImageParser {
                 item.compressionType = "lossless";
 
                 bitmaps[kname] = block;
-                block.setIdx(k);
                 let fit = block.fit;
                 if (fit) {
                     let hw = block.w * 0.5;
@@ -406,7 +407,6 @@ class ImageParser {
      */
     private doPacking(inputs: ImageInfo[], key: string, packer: IBlockPacker, results: Result[], param?: number) {
         let len = inputs.length;
-        //alert(len);
         let blocks = <ImageInfo[]>packer.fit(inputs);
         if (!blocks) {
             return;
@@ -415,8 +415,6 @@ class ImageParser {
             Log.trace("装箱时，有Block没被装箱，请检查！", len, blocks.length);
             return;
         }
-        Log.trace("开始添加结果集");
-
         let reBlocks: ImageInfo[] = param == undefined && [];
         let noFit = false;
         let width = 0;
@@ -458,7 +456,7 @@ class ImageParser {
                 param
             };
             results.push(result);
-            Log.trace(result.key + ":" + result.fit);
+            // Log.trace(result.key + ":" + result.fit);
         }
     }
 
