@@ -330,7 +330,7 @@ class Solution {
         let data = [] as ComponentData;
         // 处理基础数据
         let baseData = data[1] = this.getEleBaseData(ele);
-        switch (type) {
+        out: switch (type) {
             case ElementType.Text: // 文本框特殊数据
                 data[0] = ExportType.Text;
                 data[2] = this.getTextData(<FlashText>ele);
@@ -355,21 +355,21 @@ class Solution {
                                 if (baseData[0] == 0) {//没有名字，自动生成名字
                                     baseData[0] = "Rect" + (this.guid++);
                                 }
-                                break;
+                                break out;
                             }
                             case "ui.Sprite": {//用于定位的空容器
                                 data[0] = ExportType.Sprite;
                                 if (baseData[0] == 0) {//没有名字，自动生成名字
                                     baseData[0] = "Con" + (this.guid++);
                                 }
-                                break;
+                                break out;
                             }
                             case "ui.ImageLoader": {
                                 data[0] = ExportType.ImageLoader;
                                 if (baseData[0] == 0) {
                                     baseData[0] = "Img" + (this.guid++);
                                 }
-                                break;
+                                break out;
                             }
                         }
                         // data[3] = 0; // 0 可不进行设置， 默认为当前swf
