@@ -268,7 +268,7 @@ class Solution {
         let rect = item.scalingGridRect;
         let timeline = item.timeline;
         let layers = timeline.layers;
-        const {layer, error} = this.getScaleBitmapLayer(layers, item);
+        const { layer, error } = this.getScaleBitmapLayer(layers, item);
         if (!layer) {
             Log.throwError("九宫图片的图层不符合要求", item.name);
             return;
@@ -349,18 +349,28 @@ class Solution {
                         break;
                     case InstanceType.Symbol:
                         let linkageClassName = item.linkageClassName;
-                        if (linkageClassName == "ui.Rectangle") {//用于定位坐标
-                            data[0] = ExportType.Rectangle;
-                            if (baseData[0] == 0) {//没有名字，自动生成名字
-                                baseData[0] = "Rect" + (this.guid++);
+                        switch (item.linkageClassName) {
+                            case "ui.Rectangle": {//用于定位坐标
+                                data[0] = ExportType.Rectangle;
+                                if (baseData[0] == 0) {//没有名字，自动生成名字
+                                    baseData[0] = "Rect" + (this.guid++);
+                                }
+                                break;
                             }
-                            break;
-                        } else if (linkageClassName == "ui.Sprite") {//用于定位的空容器
-                            data[0] = ExportType.Sprite;
-                            if (baseData[0] == 0) {//没有名字，自动生成名字
-                                baseData[0] = "Con" + (this.guid++);
+                            case "ui.Sprite": {//用于定位的空容器
+                                data[0] = ExportType.Sprite;
+                                if (baseData[0] == 0) {//没有名字，自动生成名字
+                                    baseData[0] = "Con" + (this.guid++);
+                                }
+                                break;
                             }
-                            break;
+                            case "ui.ImageLoader": {
+                                data[0] = ExportType.ImageLoader;
+                                if (baseData[0] == 0) {
+                                    baseData[0] = "Img" + (this.guid++);
+                                }
+                                break;
+                            }
                         }
                         // data[3] = 0; // 0 可不进行设置， 默认为当前swf
 

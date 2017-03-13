@@ -143,6 +143,9 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
                 case ExportType.Sprite:
                     pros.push(`${ident}${instanceName}: egret.Sprite;`);
                     break;
+                case ExportType.ImageLoader:
+                    pros.push(`${ident}${instanceName}: sui.Image;`);
+                    break;
                 case ExportType.Image:
                     pros.push(`${ident}${instanceName}: egret.Bitmap;`);
                     break;
