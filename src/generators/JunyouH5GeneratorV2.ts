@@ -42,21 +42,35 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
         this._mediatorTmp = FileUtils.loadTemplate(prefix + "Mediator.template");
         this._viewTmp = FileUtils.loadTemplate(prefix + "View.template");
     }
+    private getPanelName(className: string) {
+        let result = this.parsePanelName(className);
+        if (result) {
+            return result.panelName;
+        }
+    }
 
+    private parsePanelName(className: string) {
+        let result = /^ui[.](.*?)[.](.*?(Panel|Dele|Render|View))$/.exec(className);
+        if (result) {
+            let module = result[1];
+            let panelName = result[2];
+            return { module, panelName };
+        }
+    }
     /**
      * 生成面板代码
      */
     generateOnePanel(className: string, pInfo: any[], size: number[]) {
-        let result = /^ui[.](.*?)[.](.*?(Panel|Dele|Render|View))$/.exec(className);
+        let result = this.parsePanelName(className);
         // /^ui[.](.*?)[.]((.*?)(Panel|Dele))$/.exec("ui.ShangCheng.ShangChengPanel")
         // ["ui.ShangCheng.ShangChengPanel", "ShangCheng", "ShangChengPanel", "ShangCheng", "Panel"]
         if (result) {
-            let mod = result[1];
+            let mod = result.module;
             let modFolder = classRoot + mod;
             if (!FLfile.exists(modFolder)) {
                 FLfile.createFolder(modFolder);
             }
-            let panelName = result[2];
+            let panelName = result.panelName;
             // data[0] ComponentType
             // data[1] BaseData
             // data[2] ComponentData
@@ -120,7 +134,7 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
                 }
             }
         } else {
-            Log.throwError("面板名字有误！", name);
+            Log.throwError("面板名字有误！", className);
         }
     }
 
@@ -185,12 +199,18 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
                         }
                     }
                     if (instanceName) {
-                        if (data[0] in compCheckers) {
-                            let ctype = data[0];
-                            let c = compCheckers[ctype];
+                        if (type in compCheckers) {
+                            let c = compCheckers[type];
                             if (c) {
                                 pros.push(`${ident}${instanceName}: ${c.componentName};`);
-
+                            } else {
+                                Log.throwError("面板进行生成代码，无法找到类型:", JSON.stringify(data));
+                            }
+                        } else if (type == ExportType.ExportedContainer) {
+                            let idx = data[2];
+                            let panelName = this._solution.panelNames[idx];
+                            if (panelName) {
+                                pros.push(`${ident}${instanceName}: ${this.getPanelName(panelName)};`);
                             } else {
                                 Log.throwError("面板进行生成代码，无法找到类型:", JSON.stringify(data));
                             }
@@ -207,7 +227,7 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
             classStr = tempate.replace("@export@", "");
         }
         classStr = classStr
-            .replace("@panelName@", panelName)
+            .replace(/@panelName@/g, panelName)
             .replace("@properties@", properties);
 
 

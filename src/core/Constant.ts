@@ -35,6 +35,11 @@ const enum ExportType {
      */
     ImageLoader = 17,
 
+    /**
+     * 会导出的复合容器
+     */
+    ExportedContainer = 18,
+
     /*=======================复杂控件======================= */
     /**按钮 */
     Button = 3,

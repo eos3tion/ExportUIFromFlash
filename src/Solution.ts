@@ -18,6 +18,23 @@ class Solution {
      */
     public panelCheckers: { [index: number]: ComWillCheck };
 
+    /**
+     * 引用的面板名字索引
+     * 
+     * @type {string[]}
+     */
+    public panelNames: string[] = [];
+
+    public addToPanelNames(name: string) {
+        let panelNames = this.panelNames;
+        let idx = panelNames.indexOf(name);
+        if (!~idx) {
+            idx = panelNames.length;
+            panelNames[idx] = name;
+        }
+        return idx;
+    }
+
     public imgParser: ImageParser;
 
     /**
@@ -179,7 +196,7 @@ class Solution {
             ename = ele.name;
         }
         // 处理基础数据
-        return [ename, Math.round(ele.x), Math.round(ele.y), ele.width, ele.height, ele.rotation];
+        return [ename, Math.round(ele.x), Math.round(ele.y), Math.round(ele.width), Math.round(ele.height), ele.rotation];
     }
 
     /**
@@ -388,14 +405,19 @@ class Solution {
                             }
                         }
                         // 检查是否有导出名
-                        if (item.linkageClassName) { // 有导出名，说明是控件或其他
+                        let className = item.linkageClassName;
+                        if (className) { // 有导出名，说明是控件或其他
                             // 得到控件索引
                             if (item.$key in this.compCheckers) {
                                 data[0] = this.compCheckers[item.$key].key;
                                 // 记录控件的索引
                                 data[2] = item.$idx;
                             } else {
-                                Log.throwError(errPrefix + "->" + ele.name + "有导出名，但不是控件:" + lname);
+                                data[0] = ExportType.ExportedContainer;
+                                // 记录控件的索引
+
+                                data[2] = this.addToPanelNames(className);
+                                //Log.throwError(errPrefix + "->" + ele.name + "有导出名，但不是控件:" + lname);
                             }
                         } else {
                             let other = true;
@@ -469,7 +491,7 @@ class Solution {
     private getPanelData(checker: ComWillCheck, item: FlashItem, list?: any[]) {
         //alert("getPanelData " + item.name)
         if (item.linkageImportForRS) {
-            return undefined;
+            return;
         }
         let timeline = item.timeline;
         let layers = timeline.layers;
@@ -517,6 +539,7 @@ class Solution {
             // 在 0 号位增加FlashItem的宽度和高度数据，方便在未加载到底图时候渲染
             list.push(depthEles);
         }
+        this.addToPanelNames(item.linkageClassName);
         return depthEles;
     }
     /**
@@ -525,22 +548,18 @@ class Solution {
      * @private
      * @param {{[index: number]: any[]}} panelsData
      */
-    private generatePanels(panelsData: { [index: number]: [SizeData, ComponentData] }) {
+    private generatePanels(panelsData: [number, SizeData, ComponentData][]) {
         let generator = this.generator;
         if (!generator) {
             alert("未配置代码生成器，将不生成代码");
             return;
         }
-        for (let panelsName in panelsData) {
-            let pData = panelsData[panelsName];
-            // let panelsName = pData[0];
-            let pInfo = pData[1];
-            let sizeInfo = pData[0];
-            // let len = panelsName.length;
-            // for (let i = 0; i < len; i++) {
-            //     let name: string = panelsName[i];
-            //     let pInfo: any[] = panelsInfo[i];
-            //     let sizeInfo: number[] = panelsSize[i];
+        let panelNames = this.panelNames;
+        for (let pData of panelsData) {
+            let idx = pData[0];
+            let panelsName = panelNames[idx];
+            let pInfo = pData[2];
+            let sizeInfo = pData[1];
             generator.generateOnePanel(panelsName, pInfo, sizeInfo);
             // }
         }
@@ -599,7 +618,8 @@ class Solution {
 
         // 获取面板数据
         let panelsData = this.getSolveData(this.panelCheckers);
-        let exPanelData = {};
+        let exPanelData = [];
+        let panelNames = this.panelNames;
         for (let type in panelsData) {
             let pData = panelsData[type];
             let panelsName = pData[0];
@@ -610,7 +630,7 @@ class Solution {
                 let name: string = panelsName[i];
                 let pInfo: any[] = panelsInfo[i];
                 let sizeInfo: number[] = panelsSize[i];
-                exPanelData[name] = [sizeInfo, pInfo];
+                exPanelData.push([panelNames.indexOf(name), sizeInfo, pInfo]);
             }
         }
 
@@ -622,6 +642,7 @@ class Solution {
                 exportData[2] = 0;
             }
             exportData[3] = exPanelData;
+            exportData[4] = panelNames;
         }
 
         FLfile.write(folder + DATA_FILE, JSON.stringify(exportData));
