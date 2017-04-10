@@ -291,10 +291,10 @@ interface BaseData extends Array<any> {
      */
     4: number;
     /**
-     * rotation
+     * 旋转角度/或者matrix的[a,b,c,d]四个值组成的数组
      * 
      * @type {number}
      * @memberOf BaseData
      */
-    5: number;
+    5: number | Array<number>;
 }

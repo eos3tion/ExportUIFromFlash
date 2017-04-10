@@ -178,25 +178,31 @@ class Solution {
     }
 
     /**
-     * 获取一个元素的基础数据
-     * 
-     * @private
-     * @param {FlashElement} ele 元素
-     * @returns {BaseData} 导出的数据
-     *  0 元素名字，如果没有名字，用0
-        1 x坐标
-        2 y坐标
-        3 宽度
-        4 高度
-        5 旋转角度
-     */
+   * 获取一个元素的基础数据
+   * 
+   * @private
+   * @param {FlashElement} ele 元素
+   * @returns {BaseData} 导出的数据
+   *  0 元素名字，如果没有名字，用0
+      1 x坐标
+      2 y坐标
+      3 宽度
+      4 高度
+      5 旋转角度/或者matrix的[a,b,c,d]四个值组成的数组
+   */
     private getEleBaseData(ele: FlashElement): BaseData {
         let ename: string | 0 = 0;
         if (ele.name) {
             ename = ele.name;
         }
+        let matrix = ele.matrix;
+        let result = ele.rotation as any;//用于兼容之前的数据
+        if (matrix.a != 1 || matrix.b != 0 || matrix.c != 0 || matrix.d != 1) {
+            //有进行过变形
+            result = [matrix.a, matrix.b, matrix.c, matrix.d];
+        }
         // 处理基础数据
-        return [ename, Math.round(ele.x), Math.round(ele.y), Math.round(ele.width), Math.round(ele.height), ele.rotation];
+        return [ename, Math.round(ele.x), Math.round(ele.y), ele.width, ele.height, result];
     }
 
     /**
@@ -372,6 +378,7 @@ class Solution {
                                 if (baseData[0] == 0) {//没有名字，自动生成名字
                                     baseData[0] = "Rect" + (this.guid++);
                                 }
+                                baseData[5] = 0;//不需要matrix信息
                                 break out;
                             }
                             case "ui.Sprite": {//用于定位的空容器
@@ -379,6 +386,7 @@ class Solution {
                                 if (baseData[0] == 0) {//没有名字，自动生成名字
                                     baseData[0] = "Con" + (this.guid++);
                                 }
+                                baseData[5] = 0;//不需要matrix信息
                                 break out;
                             }
                             case "ui.ImageLoader": {
@@ -386,6 +394,7 @@ class Solution {
                                 if (baseData[0] == 0) {
                                     baseData[0] = "Img" + (this.guid++);
                                 }
+                                baseData[5] = 0;//不需要matrix信息
                                 break out;
                             }
                         }
