@@ -357,6 +357,7 @@ class Solution {
             case ElementType.Text: // 文本框特殊数据
                 data[0] = ExportType.Text;
                 data[2] = this.getTextData(<FlashText>ele);
+                baseData[5] = 0;//不需要matrix信息
                 break;
             case ElementType.Instance: // 处理实例数据
                 let itype = ele.instanceType;
