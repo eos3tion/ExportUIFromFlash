@@ -479,6 +479,9 @@ class Solution {
                                 data[2] = this.getPanelData(null, item);
                             }
                         }
+                        if (data[0] == ExportType.ScaleBmp) {
+                            baseData[5] = ele.rotation;//不需要matrix信息
+                        }
                         break;
                     default:
                         Log.throwError(errPrefix + "->" + ele.name + "为不支持的实例类型(instanceType)：" + itype);
