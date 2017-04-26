@@ -25,7 +25,7 @@ class FLExternal {
      */
     public static cwebp(name: string, out?: string) {
         let wcwd = FLfile.uriToPlatformPath(cwd);
-        name = FLfile.uriToPlatformPath(name);
+        name = FLfile.uriToPlatformPath(out || name);
         out = out ? FLfile.uriToPlatformPath(out) : name;
         //对原始文件名增加webp后缀
         let command = `${wcwd}exe\\cwebp.exe ${name} -o ${out}.webp`;
