@@ -152,7 +152,12 @@ class Solution {
      * @param {ImageInfo[]} blocks
      */
     private solveImage(blocks: ImageInfo[]) {
-        let packer = new BinPacker();
+        let packer = new GrowingPacker();// new BinPacker();
+        let gap = typeof ImageGap == "number" ? ImageGap : 1;
+        if (gap < 0) {
+            gap = 1;
+        }
+        packer.gap = gap;
         return this.imgParser.parse(packer, blocks);
     }
 

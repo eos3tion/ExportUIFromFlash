@@ -10,7 +10,7 @@ class BinPacker implements IBlockPacker {
      * block间的间隔
      * @type {number}
      */
-    public gap: number = 0;
+    public gap = 0;
 
     private _pw: number;
 
@@ -60,7 +60,7 @@ class BinPacker implements IBlockPacker {
         while (true) {
             for (let i = 0; i < len; i++) {
                 let bs = to_package[i];
-                let fit: $BinPackageFit = undefined;
+                let fit: $BinPackageFit;
                 if (!(row & 1)) {//偶数行
                     let will = vx + bs.w;
                     if (will <= pw) {

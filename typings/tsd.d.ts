@@ -6,6 +6,14 @@
 interface IBlockPacker {
 
     /**
+     * 图片间隔
+     * 
+     * @type {number}
+     * @memberOf IBlockPacker
+     */
+    gap: number;
+
+    /**
      * 是否自行对块进行排序  
      * 如果自行排序，则装箱时不会调用sort中的方法将block顺序打乱
      * 
@@ -155,6 +163,12 @@ declare const folder: string;
  * 代码生成时，使用的模块名称的前缀
  */
 declare const moduleName: string;
+
+/**
+ * 图片间隔
+ * 默认使用1像素
+ */
+declare const ImageGap: number;
 
 /**
  * 代码输出根目录

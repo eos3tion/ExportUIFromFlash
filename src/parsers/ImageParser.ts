@@ -70,7 +70,7 @@ class ImageParser {
         let llen = layers.length;
         if (llen == 2) {//层数有两层的做特殊检测
             // BitmapSlice9.jsfl处理过的图片，做特殊处理
-            let {layer, error} = solution.getScaleBitmapLayer(layers, libItem);
+            let { layer, error } = solution.getScaleBitmapLayer(layers, libItem);
             if (layer) {
                 let flag = true;
                 let frames = layer.frames;
@@ -149,7 +149,7 @@ class ImageParser {
         }
         const imgDatas = this.imgDatas;
         let re = getResult(blocks, packer);
-        let {datas, bitmap} = getImage(re, "pngindex");
+        let { datas, bitmap } = getImage(re, "pngindex");
         fl.trace("datas:\n" + JSON.stringify(datas));
         if (jpgblocks.length == 0) {//没有任何jpg
             // 直接生成数据
@@ -361,6 +361,8 @@ class ImageParser {
         let pngJ = folder + "j.png";
         let jpg = folder + JPG_FILE;
         while (!bitmap.exportToFile(pngJ));
+        //保存原始图片，增加.raw后缀
+        FLfile.copy(pngJ, jpg + ".raw");
         FLExternal.cwebp(pngJ, jpg);
         while (!bitmap.exportToFile(jpg, JPG_QUALITY));
         while (!lib.deleteItem(bitmap.name));
@@ -368,6 +370,8 @@ class ImageParser {
 
     private exportPng(bitmap: FlashItem, exname: string) {
         while (!bitmap.exportToFile(exname));
+        //保存原始图片，增加.raw后缀
+        FLfile.copy(exname, exname + ".raw");
         FLExternal.cwebp(exname);
         FLExternal.pngquant(exname);
         while (!lib.deleteItem(bitmap.name));
