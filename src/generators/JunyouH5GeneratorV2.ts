@@ -106,7 +106,13 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
                 str += "\t" + classes[className].replace(/\n/g, "\n\t") + "\n";
             }
             str += "\n}";
-            FLfile.write(modFolder + "/" + panelName + ".ts", str.replace(/@createTime@/g, createtime));
+            // 检查是否有原始文件，并检查原始文件和当前文件的核心内容是否相同，如果相同，则不生成文件
+            let path = modFolder + "/" + panelName + ".ts";
+            if (checkCodeSame(path, str)) {
+                Log.trace(`${path}和新生成内容相同，无需生成！`);
+            } else {
+                FLfile.write(path, str.replace(/@createTime@/g, createtime));
+            }
             // 生成mediator
             let mediatorName = panelName + "Mediator";
             str = "module " + moduleName + " {\n" +
@@ -120,17 +126,20 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
                 + "\n}";
             let mediatorOut = modFolder + "/" + mediatorName + ".ts";
             let flag = true;
-
-            if (panelName.indexOf("Panel") != -1 || panelName.indexOf("Dele") != -1) {
-                if (FLfile.exists(mediatorOut)) {
-                    flag = confirm("指定目录下，已经有：" + FLfile.uriToPlatformPath(mediatorOut) + "，是否保留原先的代码？？？");
-                    if (!flag) {
-                        FLfile.copy(mediatorOut, mediatorOut + "_" + new Date().valueOf() + ".bak");//增加一个备份
+            if (checkCodeSame(mediatorOut, str)) {
+                Log.trace(`${mediatorOut}和新生成内容相同，无需生成！`);
+            } else {
+                if (panelName.indexOf("Panel") != -1 || panelName.indexOf("Dele") != -1) {
+                    if (FLfile.exists(mediatorOut)) {
+                        flag = confirm("指定目录下，已经有：" + FLfile.uriToPlatformPath(mediatorOut) + "，是否保留原先的代码？？？");
+                        if (!flag) {
+                            FLfile.copy(mediatorOut, mediatorOut + "_" + new Date().valueOf() + ".bak");//增加一个备份
+                            FLfile.write(mediatorOut, str);
+                        }
+                    }
+                    else {
                         FLfile.write(mediatorOut, str);
                     }
-                }
-                else {
-                    FLfile.write(mediatorOut, str);
                 }
             }
         } else {

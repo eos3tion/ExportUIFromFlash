@@ -8,7 +8,7 @@
  * @param length 要补的总长度
  * @return 补0之后的字符串
  */
-function zeroize(value: number|string , length: number = 2): string {
+function zeroize(value: number | string, length: number = 2): string {
     let str = "" + value;
     let zeros = "";
     for (let i = 0, len = length - str.length; i < len; i++) {
@@ -80,31 +80,31 @@ Date.prototype.format = function (mask) {
     });
 };
 if (!Function.prototype.bind) {
-  Function.prototype.bind = function(oThis) {
-    if (typeof this !== 'function') {
-      // closest thing possible to the ECMAScript 5
-      // internal IsCallable function
-      throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
-    }
+    Function.prototype.bind = function (oThis) {
+        if (typeof this !== 'function') {
+            // closest thing possible to the ECMAScript 5
+            // internal IsCallable function
+            throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
+        }
 
-    var aArgs   = Array.prototype.slice.call(arguments, 1),
-        fToBind = this,
-        fNOP    = function() {},
-        fBound  = function() {
-          return fToBind.apply(this instanceof fNOP
-                 ? this
-                 : oThis,
-                 aArgs.concat(Array.prototype.slice.call(arguments)));
-        };
+        var aArgs = Array.prototype.slice.call(arguments, 1),
+            fToBind = this,
+            fNOP = function () { },
+            fBound = function () {
+                return fToBind.apply(this instanceof fNOP
+                    ? this
+                    : oThis,
+                    aArgs.concat(Array.prototype.slice.call(arguments)));
+            };
 
-    if (this.prototype) {
-      // Function.prototype doesn't have a prototype property
-      fNOP.prototype = this.prototype; 
-    }
-    fBound.prototype = new fNOP();
+        if (this.prototype) {
+            // Function.prototype doesn't have a prototype property
+            fNOP.prototype = this.prototype;
+        }
+        fBound.prototype = new fNOP();
 
-    return fBound;
-  };
+        return fBound;
+    };
 }
 
 class Script {
@@ -118,12 +118,12 @@ class Script {
      * @param {string} file 文件相对路径
      */
     public static runScript(file: string) {
-        if ( file.substr(-3).toLowerCase() !== ".js" ){
+        if (file.substr(-3).toLowerCase() !== ".js") {
             file += ".js";
         }
         let path = this.getDist() + file;
         if (FLfile.exists(path)) {
-            fl.runScript( path );
+            fl.runScript(path);
         }
     }
 
@@ -133,7 +133,7 @@ class Script {
      * @param {string} path 文件夹相对路径
      */
     public static runFolderScripts(path) {
-        if (path.charAt(path.length - 1) !== "/"){
+        if (path.charAt(path.length - 1) !== "/") {
             path += "/";
         }
         let pathURI = this.getDist() + path;
@@ -143,4 +143,72 @@ class Script {
             fl.runScript(file);
         }
     }
+}
+
+/**
+ * 检查文件内容是否相同
+ * 
+ * @private
+ * @param {string} path         要检查的文件路径
+ * @param {string} content     新的内容
+ * @returns 
+ */
+function checkCodeSame(path: string, content: string) {
+    if (FLfile.exists(path)) {
+        let old = FLfile.read(path);
+        return minifyCode(old) == minifyCode(content);
+    }
+    return false;
+}
+/**
+ * 最小化代码，用于比较代码内容是否相同
+ * @param code 
+ */
+function minifyCode(code) {
+    var tokenizer = /"|(\/\*)|(\*\/)|(\/\/)|\n|\r/g,
+        in_string = false,
+        in_multiline_comment = false,
+        in_singleline_comment = false,
+        tmp, tmp2, new_str = [], ns = 0, from = 0, lc: string, rc: string;
+
+    tokenizer.lastIndex = 0;
+
+    while (tmp = tokenizer.exec(code)) {
+        lc = RegExp["$`"];
+        rc = RegExp["$'"];
+        if (!in_multiline_comment && !in_singleline_comment) {
+            tmp2 = lc.substring(from);
+            if (!in_string) {
+                tmp2 = tmp2.replace(/(\n|\r|\s)*/g, "");
+            }
+            new_str[ns++] = tmp2;
+        }
+        from = tokenizer.lastIndex;
+
+        if (tmp[0] == "\"" && !in_multiline_comment && !in_singleline_comment) {
+            tmp2 = lc.match(/(\\)*$/);
+            if (!in_string || !tmp2 || (tmp2[0].length % 2) == 0) {	// start of string with ", or unescaped " character found to end string
+                in_string = !in_string;
+            }
+            from--; // include " character in next catch
+            rc = code.substring(from);
+        }
+        else if (tmp[0] == "/*" && !in_string && !in_multiline_comment && !in_singleline_comment) {
+            in_multiline_comment = true;
+        }
+        else if (tmp[0] == "*/" && !in_string && in_multiline_comment && !in_singleline_comment) {
+            in_multiline_comment = false;
+        }
+        else if (tmp[0] == "//" && !in_string && !in_multiline_comment && !in_singleline_comment) {
+            in_singleline_comment = true;
+        }
+        else if ((tmp[0] == "\n" || tmp[0] == "\r") && !in_string && !in_multiline_comment && in_singleline_comment) {
+            in_singleline_comment = false;
+        }
+        else if (!in_multiline_comment && !in_singleline_comment && !(/\n|\r|\s/.test(tmp[0]))) {
+            new_str[ns++] = tmp[0];
+        }
+    }
+    new_str[ns++] = rc;
+    return new_str.join("");
 }
