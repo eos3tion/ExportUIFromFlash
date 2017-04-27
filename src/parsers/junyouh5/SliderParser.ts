@@ -1,6 +1,6 @@
 class SliderParser extends ComWillCheck{
     constructor(){
-        super(ExportType.Slider,/^ui[.](slider)/,null,"sui.Slider");
+        super(ExportType.Slider,/^ui[.](slider)/,null,"Slider");
         this.parseHandler = this.sliderParser;
     }
     

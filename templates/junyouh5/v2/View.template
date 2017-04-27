@@ -3,9 +3,9 @@
  * https://github.com/eos3tion/ExportUIFromFlash
  * 生成时间：@createTime@
  */
-export interface @panelName@ extends sui.View {
+export interface @panelName@ extends View {
 @properties@
 }
 export function @panelName@() {
-    return new sui.View("@lib@","@className@") as @panelName@;
+    return new View("@lib@","@className@") as @panelName@;
 }

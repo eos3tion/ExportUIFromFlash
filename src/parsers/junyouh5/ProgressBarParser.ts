@@ -7,7 +7,7 @@
  */
 class ProgressBarParser extends ComWillCheck {
     constructor() {
-        super(ExportType.ProgressBar, /^ui[.](progress)/, null, "sui.ProgressBar");
+        super(ExportType.ProgressBar, /^ui[.](progress)/, null, "ProgressBar");
         this.parseHandler = this.progressBarParser;
     }
     /**

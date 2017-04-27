@@ -3,6 +3,6 @@
  * https://github.com/eos3tion/ExportUIFromFlash
  * 生成时间：@createTime@
  */
-export interface @panelName@ extends sui.Panel {
+export interface @panelName@ extends Panel {
 @properties@
 }
