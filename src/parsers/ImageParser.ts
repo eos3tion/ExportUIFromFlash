@@ -362,7 +362,11 @@ class ImageParser {
         let jpg = folder + JPG_FILE;
         while (!bitmap.exportToFile(pngJ));
         //保存原始图片，增加.raw后缀
-        FLfile.copy(pngJ, jpg + ".raw");
+        let raw = jpg + ".raw";
+        if (FLfile.exists(raw)) {
+            FLfile.remove(raw);
+        }
+        FLfile.copy(pngJ, raw);
         FLExternal.cwebp(pngJ, jpg);
         while (!bitmap.exportToFile(jpg, JPG_QUALITY));
         while (!lib.deleteItem(bitmap.name));
@@ -371,7 +375,11 @@ class ImageParser {
     private exportPng(bitmap: FlashItem, exname: string) {
         while (!bitmap.exportToFile(exname));
         //保存原始图片，增加.raw后缀
-        FLfile.copy(exname, exname + ".raw");
+        let raw = exname + ".raw";
+        if (FLfile.exists(raw)) {
+            FLfile.remove(raw);
+        }
+        FLfile.copy(exname, raw);
         FLExternal.cwebp(exname);
         FLExternal.pngquant(exname);
         while (!lib.deleteItem(bitmap.name));
