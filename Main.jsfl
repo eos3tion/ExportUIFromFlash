@@ -22,17 +22,16 @@ var DefaultFonts = "微软雅黑";
 
 // 输出路径定义
 // 测试期间设置为cwd
-var outputBase = "file:///d|/junyou2016/hqgh5/Client/skin/"; //cwd;
+var outputBase = "file:///d|/junyou2016/hqgh5/Client/skin/";
 // 模块前缀
 var moduleName = "junyou.hqg";
 // 代码输出根目录
 var classRoot = "file:///d|/junyou2016/hqgh5/Client/src/huaqiangu/module/";
 
-//var outputBase = "file:///d|/H5/"; //cwd;
-// 模块前缀
-//var moduleName = "junyou.hqg";
-// 代码输出根目录
-//var classRoot = "file:///d|/H5/";
+/**
+ * 图片间隔
+ */
+var ImageGap = 1;
 
 
 // 输出目录
