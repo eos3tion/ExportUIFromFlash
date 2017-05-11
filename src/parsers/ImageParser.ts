@@ -282,8 +282,8 @@ class ImageParser {
                 self.doPacking(blocks, keyPre + skey, packer, results);
             }
 
-            // 再来100次乱序
-            for (let t = 0; t < 100; t++) {
+            // 再来1000次乱序
+            for (let t = 0; t < 1000; t++) {
                 blocks.sort(sort.random);
                 self.doPacking(blocks, keyPre + "random" + t, packer, results);
             }
