@@ -176,29 +176,11 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
                     pros.push(`${ident}${instanceName}: egret.TextField;`);
                     break;
                 case ExportType.Container:
-                    pros.push(`${ident}${instanceName}: egret.Sprite;`);
-                    // if (instanceName.indexOf("$") == -1) {
-                    //     let cName = panelName + "_" + idx;
-                    //     this.generateClass(this._containerTmp, cName, data[2], classInfo);
-                    //     if (instanceName) {
-                    //         pros.push(`${instanceName}: cName;`);
-                    //     }
-                    //     idx++;
-                    // } else {//弃用，由ui.Rectangel和ui.Sprite代替，单张图片也已经增加了检测功能
-                    //     let tp = instanceName.split("$")[0];
-                    //     let tmpname = instanceName.split("$")[1];
-                    //     let tmpd = data[2][0];
-                    //     if (tp == "con") {
-                    //         if (tmpd) {
-                    //             pros.push(`${ident}${tmpname}: egret.Rectangle;`);
-                    //         } else {
-                    //             pros.push(`${ident}${tmpname}: egret.Sprite;`);
-                    //         }
-                    //     } else {
-                    //         pros.push(`${ident}${tmpname}: egret.Sprite;`);
-                    //     }
-                    // }
-
+                    if (instanceName) {//匿名的不生成
+                        let cName = panelName + "_" + instanceName;
+                        this.generateClass(this._containerTmp, cName, data[2], classInfo);
+                        pros.push(`${ident}${instanceName}: ${cName};`);
+                    }
                     break;
                 default: // 控件
                     let strKey = data[3];
