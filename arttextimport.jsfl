@@ -66,6 +66,8 @@
             }
             lib.moveToFolder(folderName + "_source", folderContents[i]);
         }
+        //是否平铺位图，不平铺位图则直接让其叠在一起
+        var tileImage;
         if (has2char) {
             if (confirm("检查到图片有超过2个字的文件名，将使用字库(sui.ArtWord)方式导入，确认么？")) {
                 key = ExportKEY.ArtWord;
@@ -79,6 +81,9 @@
                 key = ExportKEY.ArtWord;
             }
         }
+        if (key == ExportKEY.ArtWord) {
+            tileImage = true;
+        }
 
         lib.selectItem(folderName);
 
@@ -89,13 +94,14 @@
         var frame = layers[0].frames[0];
         var elements = frame.elements;
 
-        var element0;
-        var element1;
-
-        for (var j = 1; j < elements.length; j++) {
-            element0 = elements[j - 1];
-            element1 = elements[j];
-            element1.x = element0.x + element0.width;
+        var element;
+        var ox = 0;
+        for (var j = 0; j < elements.length; j++) {
+            element = elements[j];
+            element.x = ox;
+            if (tileImage) {
+                ox += element0.width;
+            }
 
         }
 
