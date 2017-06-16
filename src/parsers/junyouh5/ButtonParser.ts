@@ -42,7 +42,7 @@ class ButtonParser extends ComWillCheck {
                     let elen = elements.length;
                     for (let ei = 0; ei < elen; ei++) {
                         let ele = elements[ei];
-                        if (ele && ele.elementType === "instance" && ele.instanceType === "bitmap") {
+                        if (ele && ele.elementType === "instance" && (ele.instanceType === "bitmap" || /^bmd[.]/.test(ele.libraryItem.linkageClassName))) {
                             data[fi + 1] = solution.getElementData(ele);
                         }
                     }
