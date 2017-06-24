@@ -8,6 +8,23 @@ let xml = XML(dom.exportPublishProfileString());
  */
 const JPG_QUALITY: number = (+xml.PublishJpegProperties.Quality) || 80;
 
+/**
+ * 当前处理的fla的名字
+ */
+var flaname = xml..flashFileName.toString().replace(".swf", "") || dom.name.replace(".fla", "");
+
+/**
+ * 最终数据和纹理输出的目录
+ * outputBase + flaname + "/"
+ */
+var folder = outputBase + flaname + "/";
+
+// 如果没有文件，创建输出路径
+if (!FLfile.exists(folder)) {
+    FLfile.createFolder(folder);
+}
+
+
 try {
     Script.runFolderScripts("utils");
     Script.runFolderScripts("core");

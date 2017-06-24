@@ -1,7 +1,7 @@
 ﻿// 定义全局对象
 var dom = fl.getDocumentDOM();
 var lib = dom.library;
-var flaname = dom.name.replace(".fla", "");
+
 // 日志路径
 var LOG_FILE = "log.txt";
 // 导出的数据
@@ -32,15 +32,6 @@ var classRoot = "file:///d|/junyou2016/hqgh5/Client/src/huaqiangu/module/";
  * 图片间隔
  */
 var ImageGap = 1;
-
-
-// 输出目录
-var folder = outputBase + flaname + "/";
-
-// 如果没有文件，创建输出路径
-if (!FLfile.exists(folder)) {
-    FLfile.createFolder(folder);
-}
 
 //扩展
 fl.runScript(cwd+"dist/ExtendProto.js");

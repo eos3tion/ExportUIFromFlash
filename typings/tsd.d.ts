@@ -125,11 +125,6 @@ declare const cwd: string;
 declare const outputBase: string;
 
 /**
- * 当前处理的fla的名字
- */
-declare const flaname: string;
-
-/**
  * 默认字体
  */
 declare const DefaultFonts: string;
@@ -152,12 +147,6 @@ declare const JPG_FILE: string;
  * 是否导出面板数据
  */
 declare const ExportPanelData: boolean;
-
-/**
- * 最终数据和纹理输出的目录
- * outputBase + flaname + "/"
- */
-declare const folder: string;
 
 /**
  * 代码生成时，使用的模块名称的前缀
