@@ -450,30 +450,24 @@ class Solution {
                                 let llen = layers.length;
                                 if (llen == 1) {
                                     let layer = layers[0];
-                                    let frames = layer.frames;
-                                    let flen = frames.length;
-                                    if (flen == 1) {
-                                        let subEle = frames[0].elements[0];
-                                        if (subEle && subEle.elementType === "instance" && subEle.instanceType === "bitmap") {
-                                            // 进行优化
-                                            // 如果有scale9信息，作为scale9的位图处理
-                                            let subItem = subEle.libraryItem;
-                                            // if (item.scalingGrid) {
-                                            //     data[0] = ExportType.ScaleBmp;
-                                            //     data[2] = this.getScaleBitmapData(item);
-
-                                            //     //fl.trace("dddddddaaaa:" + JSON.stringify(data));
-                                            // } else {
-                                            // 位图数据
-                                            data[0] = ExportType.Image;
-                                            // 位图使用库中索引号，并且图片不允许使用其他库的
-                                            // data[2] = this.getBitmapIndex(subItem);
-
-
-                                            // 位图使用库中索引号，并且图片不允许使用其他库的
-                                            let index = this.getBitmapIndex(subItem);
-                                            data[2] = index;
-                                            other = false;
+                                    if (layer.layerType != LayerType.Guide) {//不能为引导层
+                                        let frames = layer.frames;
+                                        let flen = frames.length;
+                                        if (flen == 1) {
+                                            let eles = frames[0].elements;
+                                            if (eles.length == 1) {//只有一个元素的时候，做此处理
+                                                let subEle = eles[0];
+                                                if (subEle && subEle.elementType === "instance" && subEle.instanceType === "bitmap") {
+                                                    // 进行优化
+                                                    // 如果有scale9信息，作为scale9的位图处理
+                                                    let subItem = subEle.libraryItem;
+                                                    data[0] = ExportType.Image;
+                                                    // 位图使用库中索引号，并且图片不允许使用其他库的
+                                                    let index = this.getBitmapIndex(subItem);
+                                                    data[2] = index;
+                                                    other = false;
+                                                }
+                                            }
                                         }
                                     }
                                 }
