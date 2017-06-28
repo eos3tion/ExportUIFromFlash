@@ -59,6 +59,7 @@
         var has2char;
         for (var i = 0; i < len; i++) {
             tempurl = folderContents[i];
+            fl.trace(i + ":" + tempurl + "\t" + folderuri + "/" + tempurl);
             dm.importFile(folderuri + "/" + tempurl);
             var fileName = tempurl.split(".")[0];
             if (fileName.length > 1) {
@@ -100,16 +101,16 @@
             element = elements[j];
             element.x = ox;
             if (tileImage) {
-                ox += element0.width;
+                ox += element.width;
             }
-
+            fl.trace(j);
         }
 
         item.linkageExportForAS = true;
         item.linkageClassName = "bmd." + key + "." + cameClassName(folderName);
 
         dm.exitEditMode();
-        fl.saveDocument(dm, isNew ? folderuri + "/" + folderName + ".fla" : undefined);
+        //fl.saveDocument(dm, isNew ? folderuri + "/" + folderName + ".fla" : undefined);
 
     }
 }
