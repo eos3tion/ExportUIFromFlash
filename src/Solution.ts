@@ -476,6 +476,7 @@ class Solution {
                                 // 无导出名的，直接当做子控件处理
                                 data[0] = ExportType.Container;
                                 data[2] = this.getPanelData(null, item);
+                                // Log.trace(item.name, JSON.stringify(data[2]));
                             }
                         }
                         if (data[0] == ExportType.ScaleBmp) {
@@ -501,8 +502,10 @@ class Solution {
 	 * 面板必须是单帧
 	 */
     private getPanelData(checker: ComWillCheck, item: FlashItem, list?: any[]) {
-        //alert("getPanelData " + item.name)
         if (item.linkageImportForRS) {
+            if (list) {
+                list[item.$idx] = 0;//用于占位，如果中间有面板是导入的，会占用面板名字，但是这种面板不会又数据，会导致后续索引错位
+            }
             return;
         }
         let timeline = item.timeline;
@@ -549,9 +552,10 @@ class Solution {
         });
         if (list) {
             // 在 0 号位增加FlashItem的宽度和高度数据，方便在未加载到底图时候渲染
-            list.push(depthEles);
+            list[item.$idx] = depthEles;
         }
         this.addToPanelNames(item.linkageClassName);
+        // Log.trace("getPanelData:", name, JSON.stringify(depthEles));
         return depthEles;
     }
     /**
@@ -572,8 +576,9 @@ class Solution {
             let panelsName = panelNames[idx];
             let pInfo = pData[2];
             let sizeInfo = pData[1];
-            generator.generateOnePanel(panelsName, pInfo, sizeInfo);
-            // }
+            if (pInfo) {//没有pInfo的是从外部导入的面板
+                generator.generateOnePanel(panelsName, pInfo, sizeInfo);
+            }
         }
     }
 
@@ -638,10 +643,12 @@ class Solution {
             let panelsInfo = pData[1];
             let panelsSize = pData[2];
             let len = panelsName.length;
+            // Log.trace("panelsData", panelsName, JSON.stringify(panelsInfo));
             for (let i = 0; i < len; i++) {
                 let name: string = panelsName[i];
                 let pInfo: any[] = panelsInfo[i];
                 let sizeInfo: number[] = panelsSize[i];
+                // Log.trace("exPanelData", name, JSON.stringify(pInfo), JSON.stringify(sizeInfo));
                 exPanelData.push([panelNames.indexOf(name), sizeInfo, pInfo]);
             }
         }

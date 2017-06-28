@@ -85,6 +85,7 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
             let classInfo = { classes: {}, depends: [] };
             let classes = classInfo.classes;
             let createtime = new Date().format("yyyy-MM-dd HH:mm:ss");
+            // Log.trace("开始处理：", panelName);
             if (panelName.indexOf("View") != -1 || panelName.indexOf("Render") != -1) {
                 this.generateClass(this._viewTmp, panelName, pInfo, classInfo);
             } else {
