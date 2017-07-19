@@ -243,6 +243,10 @@ class Solution {
                 }
             }
         }
+        let colorAlphaPercent = ele.colorAlphaPercent;
+        if (colorAlphaPercent != undefined && colorAlphaPercent != 100) {
+            data[9] = colorAlphaPercent;
+        }
         return data;
     }
 
