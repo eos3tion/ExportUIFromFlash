@@ -207,7 +207,12 @@ class Solution {
             result = [matrix.a, matrix.b, matrix.c, matrix.d];
         }
         // 处理基础数据
-        return [ename, Math.round(ele.x), Math.round(ele.y), ele.width, ele.height, result];
+        let data = [ename, Math.round(ele.x), Math.round(ele.y), ele.width, ele.height, result] as BaseData
+        let colorAlphaPercent = ele.colorAlphaPercent;
+        if (colorAlphaPercent != undefined && colorAlphaPercent != 100) {
+            data[6] = colorAlphaPercent / 100;
+        }
+        return data;
     }
 
     /**
@@ -242,10 +247,6 @@ class Solution {
                     break;
                 }
             }
-        }
-        let colorAlphaPercent = ele.colorAlphaPercent;
-        if (colorAlphaPercent != undefined && colorAlphaPercent != 100) {
-            data[9] = colorAlphaPercent;
         }
         return data;
     }
