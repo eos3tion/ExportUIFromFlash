@@ -138,7 +138,7 @@ class BinPacker implements IBlockPacker {
         if (row > 0) {
             let last = rows[row - 1];
             let current = rows[row];
-            let maxBottom = 0;
+            let minBottom = Infinity;
             /**
              * 最小x坐标的Block
              */
@@ -166,15 +166,15 @@ class BinPacker implements IBlockPacker {
                     minX = fit.x;
                     minXBlock = bin;
                 }
-                if (bottom > maxBottom) {
-                    maxBottom = bottom;
+                if (bottom < minBottom) {
+                    minBottom = bottom;
                 }
             }
             for (let i = 0; i < last.length; i++) {
                 let bin = last[i];
                 let fit = bin.fit;
                 let bottom = fit.y + bin.h;
-                if (bottom >= maxBottom) {
+                if (bottom >= minBottom) {
                     current.push(bin);
                     if (fit.x < minX) {
                         minX = fit.x;
