@@ -74,75 +74,75 @@ const enum Const {
     MaxSize = 3999
 }
 
-const ItemType = {
-    Undefined: "undefined",
-    Component: "component",
-    MovieClip: "movie clip",
-    Graphic: "graphic",
-    Button: "button",
-    Folder: "folder",
-    Font: "font",
-    Sound: "sound",
-    Bitmap: "bitmap",
-    CompiledClip: "compiled clip",
-    Screen: "screen",
-    Video: "video"
+const enum ItemType {
+    Undefined = "undefined",
+    Component = "component",
+    MovieClip = "movie clip",
+    Graphic = "graphic",
+    Button = "button",
+    Folder = "folder",
+    Font = "font",
+    Sound = "sound",
+    Bitmap = "bitmap",
+    CompiledClip = "compiled clip",
+    Screen = "screen",
+    Video = "video"
 }
 
 /**
  * 图层类型
  */
-const LayerType = {
+const enum LayerType {
     /**
      * 普通层
      */
-    Normal: "normal",
+    Normal = "normal",
     /**
      * 引导层
      */
-    Guide: "guide",
+    Guide = "guide",
     /**
      * 被引导层
      */
-    Guided: "guided",
+    Guided = "guided",
     /**
      * 遮罩层
      */
-    Mask: "mask",
+    Mask = "mask",
     /**
      * 被遮罩的图层
      */
-    Masked: "masked",
+    Masked = "masked",
     /**
      * 文件夹
      */
-    Folder: "folder"
+    Folder = "folder"
 }
 
-const InstanceType = {
-    Symbol: "symbol",
-    Bitmap: "bitmap",
-    EmbeddedVideo: "embedded video",
-    LinkedVideo: "linked video",
-    Video: "video",
-    CompiledClip: "compiled clip"
+const enum InstanceType {
+    Symbol = "symbol",
+    Bitmap = "bitmap",
+    EmbeddedVideo = "embedded video",
+    LinkedVideo = "linked video",
+    Video = "video",
+    CompiledClip = "compiled clip"
 }
 
-const ElementType = {
+const enum ElementType {
     /**
      * Shape
      */
-    Shape: "shape",
+    Shape = "shape",
     /**
      * 文本框
      */
-    Text: "text",
+    Text = "text",
     /**
      * 实例
      */
-    Instance: "instance",
+    Instance = "instance",
     /**
      * 可扩展工具创建的对象
      */
-    ShapeObj: "shapeObj"
+    ShapeObj = "shapeObj"
 }
