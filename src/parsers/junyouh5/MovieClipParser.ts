@@ -112,10 +112,20 @@ class MovieClipParser extends ComWillCheck {
         }
 
         let fds = data[1] = [];
+        let lastFrameDatas: { 0: number, 1: any[] };
         for (let i = 0; i < flen; i++) {
-            fds[i] = framesData[i] || 0;//用0填充非关键帧
+            let frameData = framesData[i];
+            if (frameData) {
+                lastFrameDatas = [1, frameData];
+                fds.push(lastFrameDatas);
+            } else {
+                if (lastFrameDatas) {
+                    lastFrameDatas[0]++;
+                }
+            }
         }
-
+        //原始的总帧数
+        data[2] = flen;
         Log.trace(JSON.stringify(data));
     }
 }
