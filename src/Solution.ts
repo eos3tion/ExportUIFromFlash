@@ -195,7 +195,7 @@ class Solution {
       4 高度
       5 旋转角度/或者matrix的[a,b,c,d]四个值组成的数组
    */
-    private getEleBaseData(ele: FlashElement): BaseData {
+    public getEleBaseData(ele: FlashElement): BaseData {
         let ename: string | 0 = 0;
         if (ele.name) {
             ename = ele.name;
@@ -517,10 +517,9 @@ class Solution {
         let layers = timeline.layers;
         let name = item.name;
         let depthEles: DepthEleData[] = [];
-        let pi = 0;
         lib.editItem(name); // 坑爹的，不进入编辑模式，无法取得depth
         // 从最底层往上遍历
-        for (let i = layers.length - 1; i >= 0; i-- , pi++) {
+        for (let i = layers.length - 1, pi = 0; i >= 0; i-- , pi++) {
             let layer = layers[i];
             if (layer.layerType !== LayerType.Normal) { // 只允许使用普通层
                 continue;
@@ -540,7 +539,7 @@ class Solution {
             let elen = elements.length;
             for (let ei = 0; ei < elen; ei++) {
                 let ele = elements[ei];
-                let dat = this.getElementData(ele, name + "->" + "第" + i + "层");
+                let dat = this.getElementData(ele, `${name}->第${i}层，${ele.name}`);
                 fl.trace("**************************\n" + JSON.stringify(dat) + "**************************\n");
                 depthEles.push(new DepthEleData(pi, ele.depth, dat));
             }

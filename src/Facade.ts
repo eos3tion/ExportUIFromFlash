@@ -62,6 +62,8 @@ try {
     sol.regComChecker(new SlotParser());
     //艺术文字
     sol.regComChecker(new ArtWordParser());
+    //影片剪辑
+    sol.regComChecker(new MovieClipParser());
 
     // 加载代码生成器
     Script.runScript("generators/JunyouH5GeneratorV2");

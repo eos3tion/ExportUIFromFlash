@@ -1,0 +1,185 @@
+class MovieClipParser extends ComWillCheck {
+    constructor() {
+        super(ExportType.MovieClip, /^ui[.](mc)/, null, "MovieClip");
+        this.parseHandler = this.doParser;
+    }
+
+    private doParser(checker: ComWillCheck, item: FlashItem, list: any[], solution: Solution) {
+        let timeline = item.timeline;
+        let flen = timeline.frameCount;
+        let layers = timeline.layers;
+        let name = item.name;
+        let keyFrames = [] as number[];
+
+        //-----------------------------------------预处理----------------------------------------------
+        /**
+         * 元素的字典
+         * key      {string}   名字
+         * value   {FlashElement} 元素
+         */
+        let elesByName = {} as { [index: string]: FlashElement };
+        let mcDataByName = {} as { [index: string]: MCData };
+        let mcIdx = 0;
+        for (let fi = 0; fi < flen; fi++) {
+            for (let i = layers.length - 1, pi = 0; i >= 0; i-- , pi++) {//从下往上遍历
+                let layer = layers[i];
+                let frame = layer.frames[fi];
+                if (frame) {
+                    if (frame.startFrame == fi) {//只处理关键帧
+                        keyFrames.pushOnce(fi);
+                        //遍历元素，检查元素是否是之前就有的
+                        let elements = frame.elements;
+                        let elen = elements.length;
+                        for (let ei = 0; ei < elen; ei++) {
+                            let ele = elements[ei];
+                            let ename = ele.name;
+                            if (!ename) {//如果没有名字的，暂时不处理，后续到关键帧，当做新对象进行创建
+                                continue;
+                            }
+                            let oEle = elesByName[ename];
+                            if (oEle) {//有原始的元素
+                                let etype = ele.elementType;
+                                let oetype = oEle.elementType;
+                                if (etype != oetype || ele.libraryItem != oEle.libraryItem) {
+                                    Log.throwError(`同一个元件中，子元件使用了相同的名字[${ename}]，但是没有使用相同的实例`);
+                                }
+                            } else {
+                                //第一次出现，创建第一次出现的数据
+                                mcDataByName[ename] = { first: fi, mcIdx: mcIdx++, data: solution.getEleBaseData(ele) };
+                                elesByName[ename] = ele;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        let framesData = {} as { [index: number]: DepthEleData[] };
+        //开始遍历关键帧
+        let keyflen = keyFrames.length;
+        let llen = layers.length - 1;
+        for (let i = 0; i < keyflen; i++) {
+            let fi = keyFrames[i];
+            let frameData = framesData[fi] = [] as DepthEleData[];
+            for (let i = llen, pi = 0; i >= 0; i-- , pi++) {//从下往上遍历
+                let layer = layers[i];
+                let frame = layer.frames[fi];
+                if (frame) {
+                    let elements = frame.elements;
+                    let elen = elements.length;
+                    for (let ei = 0; ei < elen; ei++) {
+                        let ele = elements[ei];
+                        let ename = ele.name;
+                        let eData = [] as MCEleRef | number;
+                        if (!ename) {
+                            eData[0] = -1;
+                            eData[1] = solution.getElementData(ele);
+                        } else {
+                            let mcData = mcDataByName[ename];
+                            //检查原始数据是否和当前数据一致
+                            let eleBaseData = solution.getEleBaseData(ele);
+                            if (checkArray(eleBaseData, mcData.data)) {
+                                eData = mcData.mcIdx;
+                            } else {
+                                eData[0] = mcData.mcIdx;
+                                eData[1] = eleBaseData;
+                            }
+                        }
+                        frameData.push(new DepthEleData(pi, ele.depth, eData));
+                    }
+                }
+            }
+            //重新排序
+            frameData.sort((a, b) => a.idx - b.idx);
+            frameData.forEach((item, idx) => {
+                frameData[idx] = item.data;
+            });
+        }
+        let data = [];
+        list[item.$idx] = data;
+        //得到总数据和关键帧数据
+        let eles = data[0] = [];
+        for (let name in elesByName) {
+            let ele = elesByName[name];
+            let mcData = mcDataByName[name];
+            let data = solution.getElementData(ele);
+            eles[mcData.mcIdx] = data;
+        }
+
+        let fds = data[1] = [];
+        for (let i = 0; i < flen; i++) {
+            fds[i] = framesData[i] || 0;//用0填充非关键帧
+        }
+
+        Log.trace(JSON.stringify(data));
+    }
+}
+
+function checkArray(a: any[], b: any[]) {
+    let alen = a.length;
+    let blen = b.length;
+    if (alen != blen) {
+        return false;
+    }
+    for (let i = 0; i < alen; i++) {
+        let aD = a[i];
+        let bD = b[i];
+        if (aD instanceof Array && bD instanceof Array) {
+            if (!checkArray(aD, bD)) {
+                return false;
+            }
+        } else {
+            if (aD !== bD) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+
+interface MCData {
+    /**
+     * 第一次出现的帧数
+     * 
+     * @type {number}
+     * @memberof FlashElement
+     */
+    first: number;
+
+    /**
+     * mc的索引
+     * 
+     * @type {number}
+     * @memberof FlashElement
+     */
+    mcIdx: number;
+
+    /**
+     * 初始数据
+     * 
+     * @type {BaseData}
+     * @memberof MDData
+     */
+    data: BaseData;
+}
+
+interface MCEleRef extends Array<any> {
+    /**
+     * mc的索引，
+     * 如果是-1，则新创建
+     * 
+     * @type {number}
+     * @memberof MCEleRef
+     */
+    0: number;
+
+    /**
+     * 变更的数据 或者完整的组件数据
+     * 
+     * @type {(BaseData | ComponentData)}
+     * @memberof MCEleRef
+     */
+    1?: BaseData | ComponentData;
+}

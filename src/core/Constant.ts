@@ -40,6 +40,11 @@ const enum ExportType {
      */
     ExportedContainer = 18,
 
+    /**
+     * 影片剪辑
+     */
+    MovieClip = 19,
+
     /*=======================复杂控件======================= */
     /**按钮 */
     Button = 3,
