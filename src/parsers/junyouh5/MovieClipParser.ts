@@ -124,8 +124,6 @@ class MovieClipParser extends ComWillCheck {
                 }
             }
         }
-        //原始的总帧数
-        data[2] = flen;
         Log.trace(JSON.stringify(data));
     }
 }
