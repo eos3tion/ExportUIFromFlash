@@ -64,7 +64,7 @@ interface IBlock {
 interface GrowingPacker extends IBlockPacker { }
 
 interface GrowingPackerConstructor {
-    new (): GrowingPacker;
+    new(): GrowingPacker;
 }
 
 /**
@@ -300,4 +300,12 @@ interface BaseData extends Array<any> {
      * @memberOf BaseData
      */
     5: number | Array<number>;
+
+    /**
+     * alpha
+     * 
+     * @type {number}
+     * @memberof BaseData
+     */
+    6?: number;
 }
