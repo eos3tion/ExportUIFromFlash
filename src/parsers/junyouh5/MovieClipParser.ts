@@ -106,6 +106,10 @@ class MovieClipParser extends ComWillCheck {
             let data = solution.getElementData(ele);
             eles[mcData.mcIdx] = data;
         }
+        //如果没数据，则使用0进行填充
+        if (eles.length == 0) {
+            data[0] = 0;
+        }
 
         let fds = data[1] = [];
         for (let i = 0; i < flen; i++) {
