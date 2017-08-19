@@ -23,7 +23,6 @@ interface String {
      */
     substitute(...args): string;
 }
-
 /**
  * 替换字符串中{0}{1}{2}{a} {b}这样的数据，用obj对应key替换，或者是数组中对应key的数据替换
  */
@@ -49,6 +48,44 @@ String.prototype.substitute = function () {
     return this;
 };
 
+
+interface Array<T> {
+    /**
+     * 如果数组中没有要放入的对象，则将对象放入数组
+     * 
+     * @param {T} t 要放入的对象
+     * @returns {number} 放入的对象，在数组中的索引
+     * 
+     * @memberof Array
+     */
+    pushOnce(t: T): number;
+
+    /**
+    * 
+    * 删除某个数据
+    * @param {T} t
+    * @returns {boolean}   true 有这个数据并且删除成功
+    *                      false 没有这个数据
+    */
+    remove(t: T): boolean;
+}
+
+Array.prototype.pushOnce = function <T>(this: T[], t: T) {
+    let idx = this.indexOf(t);
+    if (!~idx) {
+        idx = this.length;
+        this[idx] = t;
+    }
+    return idx;
+}
+Array.prototype.remove = function <T>(this: T[], t: T) {
+    let idx = this.indexOf(t);
+    if (~idx) {
+        this.splice(idx, 1);
+        return true;
+    }
+    return false;
+}
 /****************************************扩展Date****************************************/
 interface Date {
     format(mask: string): string;
