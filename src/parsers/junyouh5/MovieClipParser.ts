@@ -49,7 +49,6 @@ class MovieClipParser extends ComWillCheck {
                                 elesByName[ename] = ele;
                             }
                         }
-                        break;
                     }
                 }
             }
@@ -77,6 +76,9 @@ class MovieClipParser extends ComWillCheck {
                             eData[1] = solution.getElementData(ele);
                         } else {
                             let mcData = mcDataByName[ename];
+                            if (!mcData) {
+                                Log.throwError(`mc中第${fi}帧原件有名字[${ename}]，但是没有数据`)
+                            }
                             //检查原始数据是否和当前数据一致
                             let eleBaseData = solution.getEleBaseData(ele);
                             if (checkArray(eleBaseData, mcData.data)) {
