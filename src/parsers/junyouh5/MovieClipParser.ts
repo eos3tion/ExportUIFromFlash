@@ -34,7 +34,7 @@ class MovieClipParser extends ComWillCheck {
                             let ele = elements[ei];
                             let ename = ele.name;
                             if (!ename) {//如果没有名字的，暂时不处理，后续到关键帧，当做新对象进行创建
-                                continue;
+                                ename = getEName(frame, i, pi);
                             }
                             let oEle = elesByName[ename];
                             if (oEle) {//有原始的元素
@@ -71,10 +71,16 @@ class MovieClipParser extends ComWillCheck {
                         let ele = elements[ei];
                         let ename = ele.name;
                         let eData = [] as MCEleRef | number;
+                        let flag = true;
                         if (!ename) {
-                            eData[0] = -1;
-                            eData[1] = solution.getElementData(ele);
-                        } else {
+                            ename = getEName(frame, i, pi);
+                            if (!mcDataByName[ename]) {
+                                eData[0] = -1;
+                                eData[1] = solution.getElementData(ele);
+                                flag = false;
+                            }
+                        }
+                        if (flag) {
                             let mcData = mcDataByName[ename];
                             if (!mcData) {
                                 Log.throwError(`mc中第${fi}帧原件有名字[${ename}]，但是没有数据`)
@@ -128,6 +134,18 @@ class MovieClipParser extends ComWillCheck {
         }
         Log.trace(JSON.stringify(data));
     }
+}
+
+/**
+ * 对没有名字的实例进行命名
+ * 
+ * @param {FlashFrame} frame
+ * @param {number} layerIndex 层索引
+ * @param {number} childIndex 层级上的子对象层级
+ * @returns 
+ */
+function getEName(frame: FlashFrame, layerIndex: number, childIndex: number) {
+    return `$noname_${frame.startFrame}_${layerIndex}_${childIndex}`;
 }
 
 function checkArray(a: any[], b: any[]) {
