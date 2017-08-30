@@ -309,3 +309,95 @@ interface BaseData extends Array<any> {
      */
     6?: number;
 }
+
+interface TextData extends Array<any> {
+    /**
+     * 
+     * ["static", "dynamic", "input"]的索引
+     * @type {number}
+     * @memberof TextData
+     */
+    0: number;
+
+    /**
+     * 字体，0为默认字体
+     * 
+     * @type {(string | 0)}
+     * @memberof TextData
+     */
+    1: string | 0;
+
+    /**
+     * align
+     *  ["left", "center", "right", "justify"] 的索引值
+     * @type {string}
+     * @memberof TextData
+     */
+    2: number;
+
+    /**
+     * 文字颜色
+     * 
+     * @type {string}
+     * @memberof TextData
+     */
+    3: string;
+
+    /**
+     * 字体大小
+     * 
+     * @type {number}
+     * @memberof TextData
+     */
+    4: number;
+
+    /**
+     * 行间距
+     * 
+     * @type {number}
+     * @memberof TextData
+     */
+    5: number;
+
+    /**
+     * 是否加粗
+     * 
+     * @type {number}
+     * @memberof TextData
+     */
+    6: boolean;
+
+    /**
+     * 是否为斜体
+     * 
+     * @type {boolean}
+     * @memberof TextData
+     */
+    7: boolean;
+
+    /**
+     * 描边数据
+     * 0 表示没有描边
+     * @type {(0 | TextStrokeData)}
+     * @memberof TextData
+     */
+    8: 0 | TextStrokeData
+}
+
+interface TextStrokeData extends Array<any> {
+    /**
+     * 描边颜色值
+     * 
+     * @type {string}
+     * @memberof TextStrokeData
+     */
+    0: string;
+
+    /**
+     * 描边宽度
+     * 
+     * @type {number}
+     * @memberof TextStrokeData
+     */
+    1: number;
+}

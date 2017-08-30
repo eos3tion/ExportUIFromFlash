@@ -1,10 +1,9 @@
 class MovieClipParser extends ComWillCheck {
     constructor() {
-        super(ExportType.MovieClip, /^ui[.](mc)/, null, "MovieClip");
-        this.parseHandler = this.doParser;
+        super(ExportType.MovieClip, /^ui[.](mc)[.]/, null, "MovieClip");
     }
 
-    private doParser(checker: ComWillCheck, item: FlashItem, list: any[], solution: Solution) {
+    doParser(item: FlashItem, solution: Solution) {
         let timeline = item.timeline;
         let flen = timeline.frameCount;
         let layers = timeline.layers;
@@ -88,7 +87,21 @@ class MovieClipParser extends ComWillCheck {
                             //检查原始数据是否和当前数据一致
                             let eleBaseData = solution.getEleBaseData(ele);
                             if (checkArray(eleBaseData, mcData.data)) {
-                                eData = mcData.mcIdx;
+                                //检查是否为文本框，如果是文本框，提取文本框属性
+                                if (ele.elementType == ElementType.Text) {
+                                    let textData = solution.getTextData(ele as FlashText);
+                                    let oEle = elesByName[ename];
+                                    let oTextData = solution.getTextData(oEle as FlashText);
+                                    if (checkArray(textData, oTextData)) {
+                                        eData = mcData.mcIdx;
+                                    } else {
+                                        eData[0] = mcData.mcIdx;
+                                        eData[1] = eleBaseData;
+                                        eData[2] = textData;
+                                    }
+                                } else {
+                                    eData = mcData.mcIdx;
+                                }
                             } else {
                                 eData[0] = mcData.mcIdx;
                                 eData[1] = eleBaseData;
@@ -105,7 +118,6 @@ class MovieClipParser extends ComWillCheck {
             });
         }
         let data = [];
-        list[item.$idx] = data;
         //得到总数据和关键帧数据
         let eles = data[0] = [];
         for (let name in elesByName) {
@@ -132,7 +144,7 @@ class MovieClipParser extends ComWillCheck {
                 }
             }
         }
-        Log.trace(JSON.stringify(data));
+        return data;
     }
 }
 
@@ -214,4 +226,12 @@ interface MCEleRef extends Array<any> {
      * @memberof MCEleRef
      */
     1?: BaseData | ComponentData;
+
+    /**
+     * 文本数据
+     * 
+     * @type {TextData}
+     * @memberof MCEleRef
+     */
+    2?: TextData;
 }

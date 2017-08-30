@@ -7,22 +7,20 @@
  */
 class ProgressBarParser extends ComWillCheck {
     constructor() {
-        super(ExportType.ProgressBar, /^ui[.](progress)/, null, "ProgressBar");
-        this.parseHandler = this.progressBarParser;
+        super(ExportType.ProgressBar, /^ui[.](progress)[.]/, null, "ProgressBar");
     }
     /**
      * 用于处理进度条
      * 支持3图层 txt bar bg
      * 支持2图层 txt bar
      */
-    private progressBarParser(checker: ComWillCheck, item: FlashItem, list: any[], solution: Solution) {
+    doParser(item: FlashItem, solution: Solution) {
         // 检查进度条的帧
         let timeline = item.timeline;
         // 多图层
         let layers = timeline.layers;
         let len = layers.length;
         let data = [];
-        list[item.$idx] = data;
 
         let layer;
         let name;
@@ -63,5 +61,6 @@ class ProgressBarParser extends ComWillCheck {
                 }
             }
         }
+        return data;
     }
 }

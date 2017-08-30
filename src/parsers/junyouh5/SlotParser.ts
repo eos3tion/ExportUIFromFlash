@@ -7,9 +7,7 @@
  */
 class SlotParser extends ComWillCheck {
     constructor() {
-        super(ExportType.Slot, /^ui[.](slot)/, null, "Slot");
-        this.parseHandler = this.slotParser;
-
+        super(ExportType.Slot, /^ui[.](slot)[.]/, null, "Slot");
     }
     /**
      * 用于处理格位
@@ -17,7 +15,7 @@ class SlotParser extends ComWillCheck {
      * 支持1图层 tf
      * 必须有九宫线
      */
-    private slotParser(checker: ComWillCheck, item: FlashItem, list: any[], solution: Solution) {
+    doParser(item: FlashItem, solution: Solution) {
         // 检查帧
         let timeline = item.timeline;
         // 多图层
@@ -34,28 +32,22 @@ class SlotParser extends ComWillCheck {
         }
 
         let data = [];
-        list[item.$idx] = data;
         //九宫信息
         let gridRect = item.scalingGridRect;
-        var gx = Math.round(gridRect.left);
-        var gy = Math.round(gridRect.top);
-        var gr = Math.round(gridRect.right);
-        var gb = Math.round(gridRect.bottom);
+        let gx = Math.round(gridRect.left);
+        let gy = Math.round(gridRect.top);
+        let gr = Math.round(gridRect.right);
+        let gb = Math.round(gridRect.bottom);
         data[0] = [gx, gy, gr - gx, gb - gy];
 
-        let layer;
-        let name;
-        let frame;
-        let elements;
-        let e;
         // 遍历图层
         for (let i = 0; i < len; i++) {
-            layer = layers[i];
-            name = layer.name;
+            let layer = layers[i];
+            let name = layer.name;
             if (name) {
-                frame = layer.frames[0];
-                elements = frame.elements;
-                e = elements[0];
+                let frame = layer.frames[0];
+                let elements = frame.elements;
+                let e = elements[0];
                 //文本
                 if (name === "tf") {
                     data[1] = solution.getElementData(e);
@@ -66,5 +58,6 @@ class SlotParser extends ComWillCheck {
                 }
             }
         }
+        return data;
     }
 }

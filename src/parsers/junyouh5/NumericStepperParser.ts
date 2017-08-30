@@ -1,25 +1,22 @@
 class NumericStepperParser extends ComWillCheck {
     constructor() {
-        super(ExportType.NumericStepper, /^ui[.](numstep)/, null, "NumericStepper");
-        this.parseHandler = this.NumericStepperParser;
+        super(ExportType.NumericStepper, /^ui[.](numstep)[.]/, null, "NumericStepper");
     }
 
-    private NumericStepperParser(checker: ComWillCheck, item: FlashItem, list: any[], solution: Solution) {
+    doParser(item: FlashItem, solution: Solution) {
         let timeline = item.timeline;
         let layers = timeline.layers;
         let llen = layers.length;
         let data = [];
-
-        list[item.$idx] = data;
-        for(let i=0;i<llen;i++){
-            data[i]=0;
+        for (let i = 0; i < llen; i++) {
+            data[i] = 0;
         }
         // 遍历图层
         for (let i = 0; i < llen; i++) {
             let layer = layers[i];
             let frame = layer.frames[0];
             let elements = frame.elements;
-            if(elements.length ==0){
+            if (elements.length == 0) {
                 continue;
             }
             let ele = elements[0];
@@ -45,7 +42,7 @@ class NumericStepperParser extends ComWillCheck {
                 default:
                     break;
             }
-            
+
             // if (len > 1)
             // {
             //     for (let i = 0; i < len; i++) {
@@ -61,5 +58,6 @@ class NumericStepperParser extends ComWillCheck {
             //         Log.throwError("数值设置器NumericStepper未设置文本，请确认", item.name);
             // }
         }
+        return data;
     }
 }

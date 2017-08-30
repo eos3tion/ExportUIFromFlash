@@ -152,7 +152,7 @@ class Solution {
      * @param {ImageInfo[]} blocks
      */
     private solveImage(blocks: ImageInfo[]) {
-        let packer = new BinPacker();
+        let packer = new GrowingPacker();
         let gap = typeof ImageGap == "number" ? ImageGap : 1;
         if (gap < 0) {
             gap = 1;
@@ -176,7 +176,7 @@ class Solution {
                 // 0 类名字的数组
                 // 1 对应索引的数据
                 data[ckey] = [checker.classNames, list, checker.sizes];
-                checker.forEach(checker.parseHandler, this, list);
+                checker.forEach(this, list);
             }
         }
         return data;
@@ -218,7 +218,7 @@ class Solution {
     /**
      * 获取文本数据
      */
-    private getTextData(ele: FlashText) {
+    public getTextData(ele: FlashText) {
         if (ele.textType === "static") {
             Log.throwError("不允许使用静态文本框");
         }
@@ -363,6 +363,7 @@ class Solution {
         let data = [] as ComponentData;
         // 处理基础数据
         let baseData = data[1] = this.getEleBaseData(ele);
+        let compCheckers = this.compCheckers;
         out: switch (type) {
             case ElementType.Text: // 文本框特殊数据
                 data[0] = ExportType.Text;
@@ -382,110 +383,115 @@ class Solution {
                         data[2] = index;
                         break;
                     case InstanceType.Symbol:
-                        let linkageClassName = item.linkageClassName;
-                        switch (item.linkageClassName) {
-                            case "ui.Rectangle": {//用于定位坐标
-                                data[0] = ExportType.Rectangle;
-                                if (baseData[0] == 0) {//没有名字，自动生成名字
-                                    baseData[0] = "Rect" + (this.guid++);
+                        {
+                            let linkageClassName = item.linkageClassName;
+                            switch (linkageClassName) {
+                                case "ui.Rectangle": {//用于定位坐标
+                                    data[0] = ExportType.Rectangle;
+                                    if (baseData[0] == 0) {//没有名字，自动生成名字
+                                        baseData[0] = "Rect" + (this.guid++);
+                                    }
+                                    baseData[5] = 0;//不需要matrix信息
+                                    break out;
                                 }
-                                baseData[5] = 0;//不需要matrix信息
-                                break out;
-                            }
-                            case "ui.Sprite": {//用于定位的空容器
-                                data[0] = ExportType.Sprite;
-                                if (baseData[0] == 0) {//没有名字，自动生成名字
-                                    baseData[0] = "Con" + (this.guid++);
+                                case "ui.Sprite": {//用于定位的空容器
+                                    data[0] = ExportType.Sprite;
+                                    if (baseData[0] == 0) {//没有名字，自动生成名字
+                                        baseData[0] = "Con" + (this.guid++);
+                                    }
+                                    baseData[5] = 0;//不需要matrix信息
+                                    break out;
                                 }
-                                baseData[5] = 0;//不需要matrix信息
-                                break out;
-                            }
-                            case "ui.ImageLoader": {
-                                data[0] = ExportType.ImageLoader;
-                                if (baseData[0] == 0) {
-                                    baseData[0] = "Img" + (this.guid++);
+                                case "ui.ImageLoader": {
+                                    data[0] = ExportType.ImageLoader;
+                                    if (baseData[0] == 0) {
+                                        baseData[0] = "Img" + (this.guid++);
+                                    }
+                                    baseData[5] = 0;//不需要matrix信息
+                                    break out;
                                 }
-                                baseData[5] = 0;//不需要matrix信息
-                                break out;
                             }
-                        }
-                        // data[3] = 0; // 0 可不进行设置， 默认为当前swf
+                            // data[3] = 0; // 0 可不进行设置， 默认为当前swf
 
-                        // 引用数据
+                            // 引用数据
 
-                        if (item.linkageImportForRS) { // 共享导入
-                            let iurl = item.linkageURL;
-                            if (iurl) { // 不像flash项目，使用lib.swf，只填写导入名称
-                                if (iurl === "lib") {
-                                    //alert(item.name + ":" + iurl + " １");
-                                    data[3] = 1;
+                            if (item.linkageImportForRS) { // 共享导入
+                                let iurl = item.linkageURL;
+                                if (iurl) { // 不像flash项目，使用lib.swf，只填写导入名称
+                                    if (iurl === "lib") {
+                                        //alert(item.name + ":" + iurl + " １");
+                                        data[3] = 1;
+                                    } else {
+                                        data[3] = iurl;
+                                    }
+                                }
+                            }
+                            // 检查是否有导出名
+                            if (linkageClassName) { // 有导出名，说明是控件或其他
+                                // 得到控件索引
+                                if (item.$key in compCheckers) {
+                                    data[0] = compCheckers[item.$key].key;
+                                    // 记录控件的索引
+                                    data[2] = item.$idx;
                                 } else {
-                                    data[3] = iurl;
-                                }
-                            }
-                        }
-                        // 检查是否有导出名
-                        let className = item.linkageClassName;
-                        if (className) { // 有导出名，说明是控件或其他
-                            // 得到控件索引
-                            if (item.$key in this.compCheckers) {
-                                data[0] = this.compCheckers[item.$key].key;
-                                // 记录控件的索引
-                                data[2] = item.$idx;
-                            } else {
-                                data[0] = ExportType.ExportedContainer;
-                                // 记录控件的索引
+                                    data[0] = ExportType.ExportedContainer;
+                                    // 记录控件的索引
 
-                                data[2] = this.addToPanelNames(className);
-                                //Log.throwError(errPrefix + "->" + ele.name + "有导出名，但不是控件:" + lname);
-                            }
-                        } else {
-                            let other = true;
-                            if (item.$scale9Layer) {
-                                data[0] = ExportType.ScaleBmp;
-                                data[2] = this.getScaleBitmapData(item);
-                                other = false;
-                            }
-                            else {
-                                // 对非共享导入，并且没有导出名的控件进行优化
-                                // 看看是否直接使用的位图
-                                // 必须为单层，单帧，并且里面只有一个位图对象
-                                let timeline = item.timeline;
-                                let layers = timeline.layers;
-                                let llen = layers.length;
-                                if (llen == 1) {
-                                    let layer = layers[0];
-                                    if (layer.layerType != LayerType.Guide) {//不能为引导层
-                                        let frames = layer.frames;
-                                        let flen = frames.length;
-                                        if (flen == 1) {
-                                            let eles = frames[0].elements;
-                                            if (eles.length == 1) {//只有一个元素的时候，做此处理
-                                                let subEle = eles[0];
-                                                if (subEle && subEle.elementType === "instance" && subEle.instanceType === "bitmap") {
-                                                    // 进行优化
-                                                    // 如果有scale9信息，作为scale9的位图处理
-                                                    let subItem = subEle.libraryItem;
-                                                    data[0] = ExportType.Image;
-                                                    // 位图使用库中索引号，并且图片不允许使用其他库的
-                                                    let index = this.getBitmapIndex(subItem);
-                                                    data[2] = index;
-                                                    other = false;
+                                    data[2] = this.addToPanelNames(linkageClassName);
+                                    //Log.throwError(errPrefix + "->" + ele.name + "有导出名，但不是控件:" + lname);
+                                }
+                            } else {
+                                let other = true;
+                                if (ele.symbolType == SymbolType.Button) {//没有导出名，并且是按钮，直接走MCButton
+                                    data[0] = ExportType.MCButton;
+                                    let checker = compCheckers[ExportType.MCButton];
+                                    data[2] = checker.parseHandler(item, this);
+                                    other = false;
+                                } else if (item.$scale9Layer) {
+                                    data[0] = ExportType.ScaleBmp;
+                                    data[2] = this.getScaleBitmapData(item);
+                                    other = false;
+                                } else {
+                                    // 对非共享导入，并且没有导出名的控件进行优化
+                                    // 看看是否直接使用的位图
+                                    // 必须为单层，单帧，并且里面只有一个位图对象
+                                    let timeline = item.timeline;
+                                    let layers = timeline.layers;
+                                    let llen = layers.length;
+                                    if (llen == 1) {
+                                        let layer = layers[0];
+                                        if (layer.layerType != LayerType.Guide) {//不能为引导层
+                                            let frames = layer.frames;
+                                            let flen = frames.length;
+                                            if (flen == 1) {
+                                                let eles = frames[0].elements;
+                                                if (eles.length == 1) {//只有一个元素的时候，做此处理
+                                                    let subEle = eles[0];
+                                                    if (subEle && subEle.elementType === "instance" && subEle.instanceType === "bitmap") {
+                                                        // 进行优化
+                                                        // 如果有scale9信息，作为scale9的位图处理
+                                                        let subItem = subEle.libraryItem;
+                                                        data[0] = ExportType.Image;
+                                                        // 位图使用库中索引号，并且图片不允许使用其他库的
+                                                        let index = this.getBitmapIndex(subItem);
+                                                        data[2] = index;
+                                                        other = false;
+                                                    }
                                                 }
                                             }
                                         }
                                     }
                                 }
+                                if (other) {
+                                    // 无导出名的，直接当做子控件处理
+                                    data[0] = ExportType.Container;
+                                    data[2] = this.getPanelData(item);
+                                    // Log.trace(item.name, JSON.stringify(data[2]));
+                                }
                             }
-                            if (other) {
-                                // 无导出名的，直接当做子控件处理
-                                data[0] = ExportType.Container;
-                                data[2] = this.getPanelData(null, item);
-                                // Log.trace(item.name, JSON.stringify(data[2]));
+                            if (data[0] == ExportType.ScaleBmp) {
+                                baseData[5] = ele.rotation;//不需要matrix信息
                             }
-                        }
-                        if (data[0] == ExportType.ScaleBmp) {
-                            baseData[5] = ele.rotation;//不需要matrix信息
                         }
                         break;
                     default:
@@ -506,12 +512,9 @@ class Solution {
 	 * 获取面板Panel/Dele的数据<br/>
 	 * 面板必须是单帧
 	 */
-    private getPanelData(checker: ComWillCheck, item: FlashItem, list?: any[]) {
+    private getPanelData(item: FlashItem) {
         if (item.linkageImportForRS) {
-            if (list) {
-                list[item.$idx] = 0;//用于占位，如果中间有面板是导入的，会占用面板名字，但是这种面板不会又数据，会导致后续索引错位
-            }
-            return;
+            return 0;//用于占位，如果中间有面板是导入的，会占用面板名字，但是这种面板不会又数据，会导致后续索引错位
         }
         let timeline = item.timeline;
         let layers = timeline.layers;
@@ -554,10 +557,6 @@ class Solution {
             //fl.trace("lllll:"+item.data.toString()+"|"+item.idx);
             depthEles[idx] = item.data;
         });
-        if (list) {
-            // 在 0 号位增加FlashItem的宽度和高度数据，方便在未加载到底图时候渲染
-            list[item.$idx] = depthEles;
-        }
         this.addToPanelNames(item.linkageClassName);
         // Log.trace("getPanelData:", name, JSON.stringify(depthEles));
         return depthEles;

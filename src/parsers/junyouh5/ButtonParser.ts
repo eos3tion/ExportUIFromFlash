@@ -1,18 +1,16 @@
 class ButtonParser extends ComWillCheck {
     constructor() {
-        super(ExportType.Button, /^ui[.](btn|tab|checkbox|radiobox)/, null, "Button");
-        this.parseHandler = this.buttonParser;
+        super(ExportType.Button, /^ui[.](btn|tab|checkbox|radiobox)[.]/, null, "Button");
     }
     /**
      * 用于处理按钮
      */
-    private buttonParser(checker: ComWillCheck, item: FlashItem, list: any[], solution: Solution) {
+    doParser(item: FlashItem, solution: Solution) {
         // 检查按钮的帧
         let timeline = item.timeline;
         let layers = timeline.layers;
         let llen = layers.length;
         let data = [];
-        list[item.$idx] = data;
         // 使用导出名作为key
         // 按钮必须1层或者2层
         // 层名字为label 放文本框或者留空
@@ -68,5 +66,6 @@ class ButtonParser extends ComWillCheck {
                 Log.throwError("不支持这种按钮：", item.name);
             }
         }
+        return data;
     }
 }

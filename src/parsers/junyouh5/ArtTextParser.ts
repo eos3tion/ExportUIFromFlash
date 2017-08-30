@@ -4,27 +4,23 @@
  */
 class ArtTextParser extends ComWillCheck {
     constructor() {
-        super(ExportType.ArtText, /^bmd[.](arttext)/, null, "ArtText");
-        this.parseHandler = this.shapeNumberParser;
+        super(ExportType.ArtText, /^bmd[.](arttext)[.]/, null, "ArtText");
     }
 
-    private shapeNumberParser(checker: ComWillCheck, item: FlashItem, list: any[], solution: Solution) {
+    doParser(item: FlashItem, solution: Solution) {
         let timeline = item.timeline;
         let layers = timeline.layers;
         let llen = layers.length;
-        let data = [];
-
-        list[item.$idx] = data;
 
         if (llen > 1) {
             Log.throwError("ArtText必须且只能有1个图层", item.name);
             return;
         }
-
+        let data = [];
         let layer = layers[0];
         let lname = layer.name;
 
-        let tempkey: string = "";
+        let tempkey = "";
         let flen = layer.frames.length;
 
         let frame = layer.frames[0];
@@ -50,5 +46,6 @@ class ArtTextParser extends ComWillCheck {
             }
         }
         data[0] = tempkey;
+        return data;
     }
 }

@@ -1,4 +1,4 @@
-interface ComWillCheckParser { (data: ComWillCheck, item: FlashItem, params: any[], solution: Solution): void; }
+interface ComWillCheckParser { (item: FlashItem, solution: Solution) }
 
 /**
  * 带检测的控件的数据
@@ -52,13 +52,15 @@ class ComWillCheck {
     constructor(key: number, reg: RegExp, parseHandler: ComWillCheckParser, componentName?: string) {
         this.key = key;
         this.reg = reg;
-        this.parseHandler = parseHandler;
+        this.parseHandler = parseHandler || this.doParser;
         this.dict = {};
         this.classNames = [];
         this.sizes = [];
         this.idx = 0;
         this.componentName = componentName;
     }
+
+    protected doParser?(item: FlashItem, solution: Solution): any;
 
     /**
      * 检查库中的Item是否可以放入当前控件
@@ -91,14 +93,17 @@ class ComWillCheck {
      * @param {Solution} solution
      * @param {any[]} [param] 处理函数的参数
      */
-    public forEach(handler: ComWillCheckParser, solution: Solution, param?: any[]) {
+    public forEach(solution: Solution, list?: any[]) {
         let dict = this.dict;
         for (let name in dict) {
             let item = dict[name];
-            //Log.trace("try parse "+item.name);
             if (!item.linkageImportForRS) {
-                //Log.trace("try parsing "+item.name);
-                handler(this, item, param, solution);
+                if (this.parseHandler) {
+                    let data = this.parseHandler(item, solution);
+                    if (data != undefined) {
+                        list[item.$idx] = data;
+                    }
+                }
             }
         }
     }

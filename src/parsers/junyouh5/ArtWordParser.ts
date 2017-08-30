@@ -1,22 +1,17 @@
 class ArtWordParser extends ComWillCheck {
     constructor() {
-        super(ExportType.ArtWord, /^bmd[.](artword)/, null, "ArtWord");
-        this.parseHandler = this.parse;
+        super(ExportType.ArtWord, /^bmd[.](artword)[.]/, null, "ArtWord");
     }
 
-    private parse(checker: ComWillCheck, item: FlashItem, list: any[], solution: Solution) {
+    doParser(item: FlashItem, solution: Solution) {
         let timeline = item.timeline;
         let layers = timeline.layers;
         let llen = layers.length;
-        let data = [];
-
-        list[item.$idx] = data;
-
         if (llen > 1) {
             Log.throwError("ArtText必须且只能有1个图层", item.name);
             return;
         }
-
+        let data = [];
         let layer = layers[0];
         let lname = layer.name;
         let flen = layer.frames.length;
@@ -41,5 +36,6 @@ class ArtWordParser extends ComWillCheck {
                 }
             }
         }
+        return data;
     }
 }

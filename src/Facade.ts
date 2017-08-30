@@ -64,7 +64,8 @@ try {
     sol.regComChecker(new ArtWordParser());
     //影片剪辑
     sol.regComChecker(new MovieClipParser());
-
+    //基于影片剪辑的按钮
+    sol.regComChecker(new ComWillCheck(ExportType.MCButton, /^ui[.](mcbtn)[.]/, MovieClipParser.prototype.doParser, "MCButton"))
     // 加载代码生成器
     Script.runScript("generators/JunyouH5GeneratorV2");
     // 注册生成器

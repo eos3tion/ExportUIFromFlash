@@ -40,10 +40,6 @@ const enum ExportType {
      */
     ExportedContainer = 18,
 
-    /**
-     * 影片剪辑
-     */
-    MovieClip = 19,
 
     /*=======================复杂控件======================= */
     /**按钮 */
@@ -69,6 +65,15 @@ const enum ExportType {
 
     Slot = 13,
 
+    /**
+     * 影片剪辑
+     */
+    MovieClip = 19,
+
+    /**
+     * 基于影片剪辑的按钮
+     */
+    MCButton = 20,
 
 }
 
@@ -93,7 +98,13 @@ const enum ItemType {
     Screen = "screen",
     Video = "video"
 }
+const enum SymbolType {
+    MovieClip = "movie clip",
 
+    Button = "button",
+
+    Graphic = "graphic"
+}
 /**
  * 图层类型
  */
