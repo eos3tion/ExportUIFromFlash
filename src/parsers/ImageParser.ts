@@ -343,17 +343,21 @@ class ImageParser {
 
             /********将图片拼合，并导出********/
             dom.selectAll();
-            while (!dom.convertSelectionToBitmap());
-            let ele = dom.selection[0];
-            if (!ele) {
-                Log.throwError("没有成功拼合图片");
-            }
-            let bitmap = ele.libraryItem;
-            bitmap.allowSmoothing = false;
-            bitmap.compressionType = "lossless";
+            if (dom.selection.length) {
+                while (!dom.convertSelectionToBitmap());
+                let ele = dom.selection[0];
+                if (!ele) {
+                    Log.throwError("没有成功拼合图片");
+                }
+                let bitmap = ele.libraryItem;
+                bitmap.allowSmoothing = false;
+                bitmap.compressionType = "lossless";
 
-            while (!lib.deleteItem(tname));
-            return { datas, bitmap };
+                while (!lib.deleteItem(tname));
+                return { datas, bitmap };
+            } else {
+                Log.throwError(key, "没有任何元素");
+            }
         }
     }
 
