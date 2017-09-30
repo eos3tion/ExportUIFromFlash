@@ -297,7 +297,7 @@ class ImageParser {
             let bitmaps = self.bitmaps;
             const tempIndexDic = self.tempIndexDic;
             let tname = "$$$temp";
-            if (lib.itemExists(tname)) {
+            while (lib.itemExists(tname)) {
                 lib.deleteItem(tname);
             }
             // 创建一个新的原件

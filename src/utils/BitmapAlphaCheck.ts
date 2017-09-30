@@ -8,13 +8,17 @@ class BitmapAlphaCheck {
         let bits = bitmap.getBits().bits;
         let len = bits.length;
         let ispng = false;
-        //bits 按utf-16形式存储
-        //解出来 gr ab 
-        for (let i = 1; i < len; i += 2) {
-            if ((bits.charCodeAt(i) & 0xff00) != 0xff00) {
-                ispng = true;
-                break;
+        if (typeof checkJPG !== "undefined" && checkJPG) {
+            //bits 按utf-16形式存储
+            //解出来 gr ab 
+            for (let i = 1; i < len; i += 2) {
+                if ((bits.charCodeAt(i) & 0xff00) != 0xff00) {
+                    ispng = true;
+                    break;
+                }
             }
+        } else {
+            ispng = true;
         }
         img.setIsPng(ispng);
         let item = bitmap.libraryItem;

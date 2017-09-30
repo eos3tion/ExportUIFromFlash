@@ -163,6 +163,12 @@ declare const ImageGap: number;
  * 代码输出根目录
  */
 declare const classRoot: string;
+
+/**
+ * 是否检查jpg文件，将文件按jpg和png两种方式导出
+ */
+declare const checkJPG: boolean;
+
 interface XML {
 
 }
