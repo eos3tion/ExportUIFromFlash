@@ -332,7 +332,7 @@ class ImageParser {
                         x: fit.x + hw,
                         y: fit.y + hh
                     };
-                    while (!lib.addItemToDocument(pos, kname));
+                    lib.addItemToDocument(pos, kname);
                     dom.mouseClick(pos, false, true);
                     dom.setElementProperty("x", fit.x);
                     dom.setElementProperty("y", fit.y);
@@ -370,8 +370,8 @@ class ImageParser {
         if (FLfile.exists(raw)) {
             FLfile.remove(raw);
         }
-        FLfile.copy(pngJ, raw);
-        FLExternal.cwebp(pngJ, jpg);
+        while (!FLfile.copy(pngJ, raw));
+        FLExternal.cwebp(raw, jpg);
         while (!bitmap.exportToFile(jpg, JPG_QUALITY));
         while (!lib.deleteItem(bitmap.name));
     }
@@ -383,7 +383,7 @@ class ImageParser {
         if (FLfile.exists(raw)) {
             FLfile.remove(raw);
         }
-        FLfile.copy(exname, raw);
+        while (!FLfile.copy(exname, raw));
         FLExternal.cwebp(exname);
         FLExternal.pngquant(exname);
         while (!lib.deleteItem(bitmap.name));
@@ -461,7 +461,7 @@ class ImageParser {
             }
         }
         if (noFit) {
-            Log.trace(key + "noFit");
+            Log.log(key + "noFit");
         } else {
             let result: Result = {
                 key,
