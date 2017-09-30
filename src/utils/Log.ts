@@ -1,6 +1,6 @@
-class Log{
+class Log {
     /**用于文本保存日志的数据 */
-    private static log = "";
+    private static _log = "";
 
     /**
      * 让jsfl产生一个异常
@@ -12,7 +12,7 @@ class Log{
         for (let i = 0; i < len; i++) {
             str += args[i] + "\t";
         }
-        this.log += str;
+        this._log += str;
         try {
             throw new Error();
         } catch (e) {
@@ -27,13 +27,17 @@ class Log{
      * 并将输出写入日志
      */
     public static trace(...args) {
+        fl.trace(Log.log(...args));
+    }
+
+    public static log(...args) {
         let len = args.length;
         let str = "";
         for (let i = 0; i < len; i++) {
             str += args[i] + "\t";
         }
-        this.log += str + "\n";
-        fl.trace(str);
+        this._log += str + "\n";
+        return str;
     }
 
     /**
@@ -43,7 +47,7 @@ class Log{
      * @param {string} file (description)
      */
     public static output(fileName: string) {
-        let log = new Date().format("yyyy-MM-dd HH:mm:ss") + "========================================================\n" + this.log + "------------------------------------------------------\n\n\n";
+        let log = new Date().format("yyyy-MM-dd HH:mm:ss") + "========================================================\n" + this._log + "------------------------------------------------------\n\n\n";
         FLfile.write(cwd + fileName, log, "append");
     }
 }
