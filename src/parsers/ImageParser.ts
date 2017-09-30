@@ -258,7 +258,11 @@ class ImageParser {
             let minBlocks = minRe.blocks;
             if (!minBlocks && minRe.param) {
                 packer.setWidth(minRe.param);
-                minBlocks = packer.fit(blocks) as ImageInfo[];
+                let inBlock = [];
+                for (let i = 0; i < blocks.length; i++) {
+                    inBlock[i] = blocks[i].clone();
+                }
+                minBlocks = packer.fit(inBlock) as ImageInfo[];
             }
             return minBlocks;
         }
