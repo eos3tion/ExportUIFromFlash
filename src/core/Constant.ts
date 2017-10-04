@@ -162,3 +162,14 @@ const enum ElementType {
      */
     ShapeObj = "shapeObj"
 }
+
+const enum Extension {
+    Webp = ".webp",
+    Raw = ".raw",
+    Png = ".png",
+    Jpg = ".jpg",
+    /**
+     * 要导出JPG使用的原图
+     */
+    Jpng = "j.png",
+}

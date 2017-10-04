@@ -167,7 +167,17 @@ declare const classRoot: string;
 /**
  * 是否检查jpg文件，将文件按jpg和png两种方式导出
  */
-declare const checkJPG: boolean;
+declare let checkJPG: boolean;
+
+/**
+ * 是否导出webp格式，默认true
+ */
+declare let exportWebp: boolean;
+
+/**
+ * 是否导出原始图
+ */
+declare let exportRaw: boolean;
 
 interface XML {
 

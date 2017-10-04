@@ -8,7 +8,7 @@ class BitmapAlphaCheck {
         let bits = bitmap.getBits().bits;
         let len = bits.length;
         let ispng = false;
-        if (typeof checkJPG !== "undefined" && checkJPG) {
+        if (checkJPG) {
             //bits 按utf-16形式存储
             //解出来 gr ab 
             for (let i = 1; i < len; i += 2) {

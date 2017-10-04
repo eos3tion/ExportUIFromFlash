@@ -178,23 +178,18 @@ class ImageParser {
             Log.trace("组合图片的大小：", composesize, "拆分后，jpg大小：", jpgsize, "png大小：", pngsize);
             if (total < composesize) {
                 //分开的更小,删除组合的
-                FLfile.remove(composeurl);
-                FLfile.remove(composeurl + ".webp");
-                FLfile.remove(folder + "j.png");
+                this.removeImage(composeurl);
+                FLfile.remove(folder + Extension.Jpng);
                 imgDatas.png = pngData && pngData.datas;
                 imgDatas.jpg = jpgData.datas;
             } else {
-                FLfile.remove(pngurl);
-                FLfile.remove(pngurl + ".webp");
+                this.removeImage(pngurl);
                 FLfile.copy(composeurl, pngurl);
-                FLfile.copy(composeurl + ".webp", pngurl + ".webp");
-                FLfile.remove(composeurl);
-                FLfile.remove(composeurl + ".webp");
+                FLfile.copy(composeurl + Extension.Webp, pngurl + Extension.Webp);
+                this.removeImage(composeurl);
                 //删除多余的png jpg 保留组合的图片
-                FLfile.remove(jpgurl);
-                FLfile.remove(jpgurl + ".webp");
-                FLfile.remove(folder + "j.png");
-
+                this.removeImage(jpgurl);
+                FLfile.remove(folder + Extension.Jpng);
                 imgDatas.png = datas;
             }
         }
@@ -365,32 +360,54 @@ class ImageParser {
         }
     }
 
-    private exportJpg(bitmap: FlashItem) {
-        let pngJ = folder + "j.png";
-        let jpg = folder + JPG_FILE;
-        while (!bitmap.exportToFile(pngJ));
-        //保存原始图片，增加.raw后缀
-        let raw = jpg + ".raw";
-        if (FLfile.exists(raw)) {
-            FLfile.remove(raw);
+    private removeImage(name: string) {
+        FLfile.remove(name);
+        if (exportRaw) {
+            FLfile.remove(name + Extension.Raw);
         }
-        while (!FLfile.copy(pngJ, raw));
-        FLExternal.cwebp(raw, jpg);
-        while (!bitmap.exportToFile(jpg, JPG_QUALITY));
-        while (!lib.deleteItem(bitmap.name));
+        if (exportWebp) {
+            FLfile.remove(name + Extension.Webp);
+        }
+    }
+
+    private exportJpg(bitmap: FlashItem) {
+        let pngJ = folder + Extension.Jpng;
+        let jpg = folder + JPG_FILE;
+        this.exportImage(bitmap, pngJ);
+        this.exportRaw(pngJ, jpg);
+        if (exportWebp) {
+            FLExternal.cwebp(pngJ, jpg);
+        }
+        this.exportImage(bitmap, jpg, JPG_QUALITY);
+        lib.deleteItem(bitmap.name);
     }
 
     private exportPng(bitmap: FlashItem, exname: string) {
-        while (!bitmap.exportToFile(exname));
+        this.exportImage(bitmap, exname);
         //保存原始图片，增加.raw后缀
-        let raw = exname + ".raw";
-        if (FLfile.exists(raw)) {
-            FLfile.remove(raw);
+        this.exportRaw(exname);
+        if (exportWebp) {
+            FLExternal.cwebp(exname);
         }
-        while (!FLfile.copy(exname, raw));
-        FLExternal.cwebp(exname);
         FLExternal.pngquant(exname);
-        while (!lib.deleteItem(bitmap.name));
+        lib.deleteItem(bitmap.name);
+    }
+
+    private exportImage(bitmap: FlashItem, name: string, JpgQuality?: number) {
+        if (!bitmap.exportToFile(name)) {
+            return Log.throwError("导出", name, "失败");
+        }
+    }
+
+    private exportRaw(input: string, output?: string) {
+        //保存原始图片，增加.raw后缀
+        if (exportRaw) {
+            let raw = (output || input) + Extension.Raw;
+            if (FLfile.exists(raw)) {
+                FLfile.remove(raw);
+            }
+            FLfile.copy(input, raw);
+        }
     }
 
 
