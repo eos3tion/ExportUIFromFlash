@@ -19,6 +19,20 @@ var flaname = xml..flashFileName.toString().replace(".swf", "") || dom.name.repl
  */
 var folder = outputBase + flaname + "/";
 
+
+if (typeof exportWebp === "undefined") {
+    exportWebp = true;//默认为true
+}
+
+if (typeof exportRaw === "undefined") {
+    exportRaw = false;
+}
+
+if (typeof checkJPG === "undefined") {
+    checkJPG = false;
+}
+
+
 // 如果没有文件，创建输出路径
 if (!FLfile.exists(folder)) {
     FLfile.createFolder(folder);
