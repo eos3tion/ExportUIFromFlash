@@ -80,6 +80,8 @@ try {
     sol.regComChecker(new MovieClipParser());
     //基于影片剪辑的按钮
     sol.regComChecker(new ComWillCheck(ExportType.MCButton, /^ui[.](mcbtn)[.]/, MovieClipParser.prototype.doParser, "MCButton"))
+    //基于影片剪辑的ProgressBar
+    sol.regComChecker(new ComWillCheck(ExportType.MCButton, /^ui[.](mcprogress)[.]/, MovieClipParser.prototype.doParser, "MCProgress"))
     // 加载代码生成器
     Script.runScript("generators/JunyouH5GeneratorV2");
     // 注册生成器

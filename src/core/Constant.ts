@@ -75,6 +75,10 @@ const enum ExportType {
      */
     MCButton = 20,
 
+    /**
+     * MC版的进度条
+     */
+    MCProgress = 21,
 }
 
 const enum Const {
