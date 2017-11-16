@@ -17,6 +17,11 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
      */
     private _mediatorTmp: string;
 
+    /**
+     * yyhdMediator的模板
+     */
+    private _yyhdMediatorTmp: string;
+
 
     /**
      * View Render的模板
@@ -41,6 +46,7 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
         this._containerTmp = FileUtils.loadTemplate(prefix + "Container.template");
         this._mediatorTmp = FileUtils.loadTemplate(prefix + "Mediator.template");
         this._viewTmp = FileUtils.loadTemplate(prefix + "View.template");
+        this._yyhdMediatorTmp = FileUtils.loadTemplate(prefix + "YYHDMediator.template");
     }
     private getPanelName(className: string) {
         let result = this.parsePanelName(className);
@@ -115,9 +121,18 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
                 FLfile.write(path, str.replace(/@createTime@/g, createtime));
             }
             // 生成mediator
-            let mediatorName = panelName + "Mediator";
+            let mediatorName;
+            let tmp;
+            if (panelName.indexOf("YYHD") == -1) {
+                mediatorName = panelName + "Mediator";
+                tmp = this._mediatorTmp;
+            }
+            else {
+                mediatorName = panelName + "Mediator";
+                tmp = this._yyhdMediatorTmp;
+            }
             str = "module " + moduleName + " {\n" +
-                this._mediatorTmp.replace(/@mediatorName@/g, mediatorName)
+                tmp.replace(/@mediatorName@/g, mediatorName)
                     .replace(/@panelName@/g, panelName)
                     .replace(/@createTime@/g, createtime)
                     .replace(/@otherDepends@/g, otherDepends)
