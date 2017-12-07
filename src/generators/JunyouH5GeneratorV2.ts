@@ -56,11 +56,12 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
     }
 
     private parsePanelName(className: string) {
-        let result = /^ui[.](.*?)[.](.*?(Panel|Dele|Render|View))$/.exec(className);
+        let result = /^ui[.](.*?)[.]((.*?)(Panel|Dele|Render|View))$/.exec(className);
         if (result) {
             let module = result[1];
             let panelName = result[2];
-            return { module, panelName };
+            let shortName = result[3];
+            return { module, shortName, panelName };
         }
     }
     /**
@@ -121,14 +122,14 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
                 FLfile.write(path, str.replace(/@createTime@/g, createtime));
             }
             // 生成mediator
-            let mediatorName;
-            let tmp;
+            let tmp: string;
+            let mediatorName = useShortName ? result.shortName : panelName;
             if (panelName.indexOf("YYHD") == -1) {
-                mediatorName = panelName + "Mediator";
+                mediatorName = mediatorName + "Mediator";
                 tmp = this._mediatorTmp;
             }
             else {
-                mediatorName = panelName + "Mediator";
+                mediatorName = mediatorName + "Mediator";
                 tmp = this._yyhdMediatorTmp;
             }
             str = "module " + moduleName + " {\n" +

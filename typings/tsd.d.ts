@@ -160,6 +160,13 @@ declare const moduleName: string;
 declare const ImageGap: number;
 
 /**
+ * 是否使用短名称  
+ * XXXPanel  XXXDele
+ * 得到的 Mediator 为 XXXMediator
+ */
+declare var useShortName: boolean;
+
+/**
  * 代码输出根目录
  */
 declare const classRoot: string;

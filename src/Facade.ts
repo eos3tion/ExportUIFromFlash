@@ -8,6 +8,8 @@ let xml = XML(dom.exportPublishProfileString());
  */
 const JPG_QUALITY: number = (+xml.PublishJpegProperties.Quality) || 80;
 
+var useShortName: boolean;
+
 /**
  * 当前处理的fla的名字
  */
