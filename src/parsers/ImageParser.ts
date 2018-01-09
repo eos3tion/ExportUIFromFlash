@@ -362,7 +362,7 @@ class ImageParser {
 
     private removeImage(name: string) {
         FLfile.remove(name);
-        if (exportRaw) {
+        if (exportRaw || flaname == "lib") {//lib保存原始文件
             FLfile.remove(name + Extension.Raw);
         }
         if (exportWebp) {
@@ -401,7 +401,7 @@ class ImageParser {
 
     private exportRaw(input: string, output?: string) {
         //保存原始图片，增加.raw后缀
-        if (exportRaw) {
+        if (exportRaw || flaname == "lib") {//lib保存原始文件
             let raw = (output || input) + Extension.Raw;
             if (FLfile.exists(raw)) {
                 FLfile.remove(raw);
