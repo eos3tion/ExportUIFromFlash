@@ -117,9 +117,13 @@ class Solution {
     private doCheck(item: FlashItem, checkers: { [index: number]: ComWillCheck }) {
         for (let ckey in checkers) {
             let checker = checkers[ckey];
-            if (checker.check(item, this)) {
-                checker.add(item, this.getItemSize(item));
-                break;
+            let testKey = checker.check(item, this);
+            if (testKey != undefined) {
+                let tester = checkers[testKey];
+                if (tester) {
+                    tester.add(item, this.getItemSize(item));
+                    break;
+                }
             }
         }
     }
@@ -484,8 +488,15 @@ class Solution {
                                 }
                                 if (other) {
                                     // 无导出名的，直接当做子控件处理
-                                    data[0] = ExportType.Container;
-                                    data[2] = this.getPanelData(item);
+                                    let result = this.getPanelData(item, true);
+                                    if (result == -1) {
+                                        data[0] = ExportType.MovieClip;
+                                        let checker = compCheckers[ExportType.MovieClip];
+                                        data[2] = checker.parseHandler(item, this);
+                                    } else {
+                                        data[0] = ExportType.Container;
+                                        data[2] = result;
+                                    }
                                     // Log.trace(item.name, JSON.stringify(data[2]));
                                 }
                             }
@@ -512,7 +523,7 @@ class Solution {
 	 * 获取面板Panel/Dele的数据<br/>
 	 * 面板必须是单帧
 	 */
-    private getPanelData(item: FlashItem) {
+    private getPanelData(item: FlashItem, flag?: boolean) {
         if (item.linkageImportForRS) {
             return 0;//用于占位，如果中间有面板是导入的，会占用面板名字，但是这种面板不会又数据，会导致后续索引错位
         }
@@ -531,7 +542,9 @@ class Solution {
             let flen = frames.length;
 
             if (flen > 1) {
-                Log.throwError(name, "作为面板，帧数大于1");
+                !flag && Log.throwError(name, "作为面板，帧数大于1");
+                //作为mc处理
+                return -1;
             }
             if (!flen) { // 空层
                 continue;

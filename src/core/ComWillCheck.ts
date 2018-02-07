@@ -71,7 +71,10 @@ class ComWillCheck {
     public check(item: FlashItem, solution: Solution) {
         let reg = this.reg;
         reg.lastIndex = 0;
-        return reg.test(item.linkageClassName);
+        let flag = reg.test(item.linkageClassName);
+        if (flag) {
+            return this.key;
+        }
     }
     /**
      * 将Item放入库中存储

@@ -2,6 +2,18 @@ class ShareBitmapParser extends ComWillCheck {
     constructor() {
         super(ExportType.ShareBmp, /^bmd[.](share)[.]/, null, "egret.Bitmap");
     }
+    public check(item: FlashItem, solution: Solution) {
+        let reg = this.reg;
+        reg.lastIndex = 0;
+        let flag = reg.test(item.linkageClassName);
+        if (flag) {
+            if (item.scalingGrid) {
+                return ExportType.ScaleBmp;
+            } else {
+                return this.key;
+            }
+        }
+    }
 
     doParser(item: FlashItem, solution: Solution) {
         let timeline = item.timeline;
