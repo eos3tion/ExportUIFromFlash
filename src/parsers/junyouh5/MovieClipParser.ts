@@ -20,7 +20,7 @@ class MovieClipParser extends ComWillCheck {
         let mcDataByName = {} as { [index: string]: MCData };
         let mcIdx = 0;
         for (let fi = 0; fi < flen; fi++) {
-            for (let i = layers.length - 1, pi = 0; i >= 0; i-- , pi++) {//从下往上遍历
+            for (let i = layers.length - 1; i >= 0; i--) {//从下往上遍历
                 let layer = layers[i];
                 let frame = layer.frames[fi];
                 if (frame) {
@@ -33,7 +33,7 @@ class MovieClipParser extends ComWillCheck {
                             let ele = elements[ei];
                             let ename = ele.name;
                             if (!ename) {//如果没有名字的，暂时不处理，后续到关键帧，当做新对象进行创建
-                                ename = getEName(frame, i, pi);
+                                ename = getEName(frame, i, ei);
                             }
                             let oEle = elesByName[ename];
                             if (oEle) {//有原始的元素
@@ -72,7 +72,7 @@ class MovieClipParser extends ComWillCheck {
                         let eData = [] as MCEleRef | number;
                         let flag = true;
                         if (!ename) {
-                            ename = getEName(frame, i, pi);
+                            ename = getEName(frame, i, ei);
                             if (!mcDataByName[ename]) {
                                 eData[0] = -1;
                                 eData[1] = solution.getElementData(ele);
