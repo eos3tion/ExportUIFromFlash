@@ -139,7 +139,7 @@ const enum LayerType {
     Folder = "folder"
 }
 
-const enum InstanceType {
+const enum InsType {
     Symbol = "symbol",
     Bitmap = "bitmap",
     EmbeddedVideo = "embedded video",
@@ -176,4 +176,10 @@ const enum Extension {
      * 要导出JPG使用的原图
      */
     Jpng = "j.png",
+}
+
+const enum FilterName {
+    GlowFilter = "glowFilter",
+
+    AdjustColorFilter = "adjustColorFilter",
 }

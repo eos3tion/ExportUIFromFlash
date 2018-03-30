@@ -215,7 +215,18 @@ class Solution {
         let colorAlphaPercent = ele.colorAlphaPercent;
         if (colorAlphaPercent != undefined && colorAlphaPercent != 100) {
             data[6] = colorAlphaPercent / 100;
+        } else {
+            data[6] = 1;
         }
+        //ColorMatrixFilter
+        let filters = ele.filters;
+        if (filters) {
+            let filter = filters[0];
+            if (filter.name == FilterName.AdjustColorFilter) {
+                data[7] = [filter.brightness | 0, filter.contrast | 0, filter.saturation | 0, filter.hue | 0];
+            }
+        }
+
         return data;
     }
 
@@ -243,7 +254,7 @@ class Solution {
         let filters = ele.filters;
         if (filters) {
             for (let filter of filters) {
-                if (filter.name !== "glowFilter") {
+                if (filter.name !== FilterName.GlowFilter) {
                     alert("文本框只允许加一个滤镜，并且只处理GlowFilter，视为描边，当前加的滤镜为：" + filter.name + "，将被忽略");
                 } else {
                     // blurX 作为描边宽度
@@ -328,7 +339,7 @@ class Solution {
         if (!ele) {
             Log.throwError("此控件没有位图", item.name);
         }
-        else if (ele.elementType === ElementType.Instance && ele.instanceType === InstanceType.Bitmap) {
+        else if (ele.elementType === ElementType.Instance && ele.instanceType === InsType.Bitmap) {
             data[0] = this.getElementData(ele);
             var gx = Math.round(rect.left);
             var gy = Math.round(rect.top);
@@ -379,14 +390,14 @@ class Solution {
                 let item = ele.libraryItem;
                 let lname = item.name;
                 switch (itype) {
-                    case InstanceType.Bitmap:
+                    case InsType.Bitmap:
                         // 位图数据
                         data[0] = ExportType.Image;
                         // 位图使用库中索引号，并且图片不允许使用其他库的
                         let index = this.getBitmapIndex(item);
                         data[2] = index;
                         break;
-                    case InstanceType.Symbol:
+                    case InsType.Symbol:
                         {
                             let linkageClassName = item.linkageClassName;
                             switch (linkageClassName) {
