@@ -92,10 +92,12 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
             let classInfo = { classes: {}, depends: [] };
             let classes = classInfo.classes;
             let createtime = new Date().format("yyyy-MM-dd HH:mm:ss");
+            let dclar = "";
             // Log.trace("开始处理：", panelName);
             if (panelName.indexOf("View") != -1 || panelName.indexOf("Render") != -1) {
                 this.generateClass(this._viewTmp, panelName, pInfo, classInfo);
             } else {
+                dclar = "declare ";
                 this.generateClass(this._panelTmp, panelName, pInfo, classInfo);
             }
 
@@ -109,13 +111,14 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
                 .replace(/@otherDepends@/g, otherDepends)
                 .replace(/@lib@/g, flaname)
                 .replace(/@className@/g, className);
-            let str = "module " + moduleName + " {\n\t" + classStr.replace(/\n/g, "\n\t") + "\n";
+            let str = dclar + "namespace " + moduleName + " {\n\t" + classStr.replace(/\n/g, "\n\t") + "\n";
             for (let className in classes) {
                 str += "\t" + classes[className].replace(/\n/g, "\n\t") + "\n";
             }
             str += "\n}";
             // 检查是否有原始文件，并检查原始文件和当前文件的核心内容是否相同，如果相同，则不生成文件
-            let path = modFolder + "/" + panelName + ".ts";
+            let ext = dclar ? ".d.ts" : ".ts";
+            let path = modFolder + "/" + panelName + ext;
             if (checkCodeSame(path, str)) {
                 Log.trace(`${path}和新生成内容相同，无需生成！`);
             } else {
@@ -132,7 +135,7 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
                 mediatorName = mediatorName + "Mediator";
                 tmp = this._yyhdMediatorTmp;
             }
-            str = "module " + moduleName + " {\n" +
+            str = "namespace " + moduleName + " {\n" +
                 tmp.replace(/@mediatorName@/g, mediatorName)
                     .replace(/@panelName@/g, panelName)
                     .replace(/@createTime@/g, createtime)
