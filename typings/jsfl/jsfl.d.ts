@@ -537,6 +537,14 @@ interface FlashTextAttrs {
 
 interface FlashFLfile {
 	copy(fileURI: string, copyURI: string): boolean;
+	/**
+	 * 创建文件夹
+	 * 支持创建多级目录  
+	 * @example 
+	 * //e盘没有任何文件/文件夹
+	 * FLfile.createFolder(FLfile.platformPathToURI("e:/test/a/b/c/d")) //能成功创建目录
+	 * @param folderURI 
+	 */
 	createFolder(folderURI: string): boolean;
 	exists(fileURI: string): boolean;
 	getAttributes(fileOrFolderURI: string): string;

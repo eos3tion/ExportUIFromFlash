@@ -72,7 +72,8 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
         // /^ui[.](.*?)[.]((.*?)(Panel|Dele))$/.exec("ui.ShangCheng.ShangChengPanel")
         // ["ui.ShangCheng.ShangChengPanel", "ShangCheng", "ShangChengPanel", "ShangCheng", "Panel"]
         if (result) {
-            let mod = result.module;
+            let mod = result.module || "";
+            mod = mod.replace(".", "/");//用于支持多级目录
             let modFolder = classRoot + mod;
             if (!FLfile.exists(modFolder)) {
                 FLfile.createFolder(modFolder);
