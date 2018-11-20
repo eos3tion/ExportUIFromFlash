@@ -300,7 +300,7 @@ class ImageParser {
                 lib.deleteItem(tname);
             }
             // 创建一个新的原件
-            while (!lib.addNewItem("movie clip", tname));
+            lib.addNewItem("movie clip", tname);
             lib.editItem(tname);
 
             // 将info中数据放入这个
@@ -351,7 +351,6 @@ class ImageParser {
                 let bitmap = ele.libraryItem;
                 bitmap.allowSmoothing = false;
                 bitmap.compressionType = "lossless";
-
                 while (!lib.deleteItem(tname));
                 return { datas, bitmap };
             } else {
