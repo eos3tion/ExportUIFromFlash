@@ -375,7 +375,7 @@ class Solution {
     public getElementData(ele: FlashElement, errPrefix: string = "") {
         //alert("getElementData:" + ele.name);
         let type = ele.elementType;
-        let data = [] as ComponentData;
+        let data: ComponentData = [] as any;
         // 处理基础数据
         let baseData = data[1] = this.getEleBaseData(ele);
         let compCheckers = this.compCheckers;
@@ -403,7 +403,7 @@ class Solution {
                             switch (linkageClassName) {
                                 case "ui.Rectangle": {//用于定位坐标
                                     data[0] = ExportType.Rectangle;
-                                    if (baseData[0] == 0) {//没有名字，自动生成名字
+                                    if (isZero(baseData, 0)) {//没有名字，自动生成名字
                                         baseData[0] = "Rect" + (this.guid++);
                                     }
                                     baseData[5] = 0;//不需要matrix信息
@@ -411,7 +411,7 @@ class Solution {
                                 }
                                 case "ui.Sprite": {//用于定位的空容器
                                     data[0] = ExportType.Sprite;
-                                    if (baseData[0] == 0) {//没有名字，自动生成名字
+                                    if (isZero(baseData, 0)) {//没有名字，自动生成名字
                                         baseData[0] = "Con" + (this.guid++);
                                     }
                                     baseData[5] = 0;//不需要matrix信息
@@ -419,7 +419,7 @@ class Solution {
                                 }
                                 case "ui.ImageLoader": {
                                     data[0] = ExportType.ImageLoader;
-                                    if (baseData[0] == 0) {
+                                    if (isZero(baseData, 0)) {
                                         baseData[0] = "Img" + (this.guid++);
                                     }
                                     baseData[5] = 0;//不需要matrix信息
@@ -695,6 +695,10 @@ class Solution {
 
 
     }
+}
+
+function isZero(data: any, idx: number) {
+    return data[idx] == 0;
 }
 
 /**
