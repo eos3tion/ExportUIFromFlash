@@ -56,7 +56,7 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
     }
 
     private parsePanelName(className: string) {
-        let result = /^ui[.](.*?)[.]((.*?)(Panel|Dele|Render|View))$/.exec(className);
+        let result = /^ui[.](.*)[.]((.*?)(Panel|Dele|Render|View))$/.exec(className);
         if (result) {
             let module = result[1];
             let panelName = result[2];
@@ -73,7 +73,7 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
         // ["ui.ShangCheng.ShangChengPanel", "ShangCheng", "ShangChengPanel", "ShangCheng", "Panel"]
         if (result) {
             let mod = result.module || "";
-            mod = mod.replace(".", "/");//用于支持多级目录
+            mod = mod.replace(/[.]/g, "/");//用于支持多级目录
             let modFolder = classRoot + mod;
             if (!FLfile.exists(modFolder)) {
                 FLfile.createFolder(modFolder);
