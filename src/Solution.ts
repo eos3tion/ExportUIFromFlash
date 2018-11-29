@@ -25,6 +25,11 @@ class Solution {
      */
     public panelNames: string[] = [];
 
+    /**
+     * 基于MCParser处理的数据
+     */
+    mcComponents: MovieClipDict = {};
+
     public addToPanelNames(name: string) {
         let panelNames = this.panelNames;
         let idx = panelNames.indexOf(name);
@@ -179,8 +184,10 @@ class Solution {
                 let list = [];
                 // 0 类名字的数组
                 // 1 对应索引的数据
-                data[ckey] = [checker.classNames, list, checker.sizes];
+                let dat = [checker.classNames, list, checker.sizes];
+                data[ckey] = dat;
                 checker.forEach(this, list);
+                checker.list = list;
             }
         }
         return data;
@@ -388,7 +395,6 @@ class Solution {
             case ElementType.Instance: // 处理实例数据
                 let itype = ele.instanceType;
                 let item = ele.libraryItem;
-                let lname = item.name;
                 switch (itype) {
                     case InsType.Bitmap:
                         // 位图数据
@@ -443,17 +449,22 @@ class Solution {
                             }
                             // 检查是否有导出名
                             if (linkageClassName) { // 有导出名，说明是控件或其他
-                                // 得到控件索引
-                                if (item.$key in compCheckers) {
-                                    data[0] = compCheckers[item.$key].key;
-                                    // 记录控件的索引
-                                    data[2] = item.$idx;
+                                if (ele.symbolType == SymbolType.Button) {//如果是按钮，当按钮处理
+                                    data[0] = ExportType.MCButton;
+                                    data[2] = linkageClassName;//使用控件导出名作为数据
                                 } else {
-                                    data[0] = ExportType.ExportedContainer;
-                                    // 记录控件的索引
+                                    // 得到控件索引
+                                    if (item.$key in compCheckers) {
+                                        data[0] = compCheckers[item.$key].key;
+                                        // 记录控件的索引
+                                        data[2] = item.$idx;
+                                    } else {
+                                        data[0] = ExportType.ExportedContainer;
+                                        // 记录控件的索引
 
-                                    data[2] = this.addToPanelNames(linkageClassName);
-                                    //Log.throwError(errPrefix + "->" + ele.name + "有导出名，但不是控件:" + lname);
+                                        data[2] = this.addToPanelNames(linkageClassName);
+                                        //Log.throwError(errPrefix + "->" + ele.name + "有导出名，但不是控件:" + lname);
+                                    }
                                 }
                             } else {
                                 let other = true;
@@ -609,6 +620,16 @@ class Solution {
         }
     }
 
+    private genMCData() {
+        //输出MC数据
+        let generator = this.generator;
+        if (!generator) {
+            alert("未配置代码生成器，将不生成代码");
+            return;
+        }
+        generator.generateMCs(this.mcComponents, flaname);
+    }
+
     /**
      * 获取元件大小，方便在未加载到图片之前，先用绘图指令渲染一个底
      * 
@@ -651,6 +672,9 @@ class Solution {
         // 获取元件的数据
         let componentsData = this.getSolveData(this.compCheckers);
 
+        //处理基于MC的控件
+        this.genMCData();
+
         // 导出的数据
         let exportData = [];
         exportData[0] = pngs ? pngs : 0; //0 为了防止全部用jpg导出，0比null活着undefined节省字符串
@@ -692,8 +716,18 @@ class Solution {
         }
 
         FLfile.write(folder + DATA_FILE, JSON.stringify(exportData));
+        //重置checker中的list
+        this.resetCheckers(this.compCheckers, this.panelCheckers);
 
+    }
 
+    resetCheckers(...list: { [index: number]: ComWillCheck }[]) {
+        for (let checkers of list) {
+            for (let ckey in checkers) {
+                let checker = checkers[ckey];
+                checker.list = null;
+            }
+        }
     }
 }
 

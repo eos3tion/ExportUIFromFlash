@@ -41,6 +41,11 @@ class ComWillCheck {
      * 生成控件时的控件类名(控件有此值，面板没有)
      */
     public componentName: string;
+
+    /**
+     * 数据
+     */
+    list: any[];
     /**
      * Creates an instance of ComWillCheck.
      * 

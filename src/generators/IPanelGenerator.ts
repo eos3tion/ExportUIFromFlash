@@ -12,4 +12,6 @@ interface IPanelGenerator {
      @param {SizeData} sizes size大小
    */
   generateOnePanel(className: string, data: ComponentData, sizes: SizeData);
+
+  generateMCs(data: MovieClipDict, fileName: string);
 }
