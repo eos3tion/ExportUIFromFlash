@@ -214,7 +214,6 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
                     pros.push(`${ident}${instanceName}: egret.TextField;`);
                     break;
                 case ExportType.MCButton:
-                case ExportType.MCProgress:
                     this.sovleMCComponent(type, instanceName, data, pros, panelName, ident, classInfo);
                     break;
                 case ExportType.Container:
@@ -239,7 +238,7 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
                                     let idx = data[2];
                                     let dat = c.list[idx];
                                     //找到对应实例
-                                    let className = dat[2];
+                                    let className = dat && dat[2];
                                     if (className) {
                                         className = MovieClipParser.getMCClassName(className);
                                         pros.push(`${ident}${instanceName}: ${className};`);
@@ -294,11 +293,16 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
             classes[cName] = temp.replace("@mcName@", className).replace("@panelName@", cName);
             pros.push(`${ident}${instanceName}: ${cName};`);
         } else if (type == ExportType.MCButton) {//只有MCButton允许使用匿名MC
-            let cName = panelName + "_" + instanceName;
-            let temp = this._mcBtnTmp;
-            let className = panelName + "_" + instanceName + "_MC";
-            classes[cName] = temp.replace("@mcName@", className).replace("@panelName@", cName);
-            this.generateClass(this._mcBtnTmp, className, data[0], classInfo, ident);
+            let dat = data[2];
+            let cName: string;
+            if (dat && dat instanceof Array) {
+                cName = panelName + "_" + instanceName;
+                let className = panelName + "_" + instanceName + "_MC";
+                classes[cName] = this._mcBtnTmp.replace("@mcName@", className).replace("@panelName@", cName);
+                this.generateClass(this._mcTmp, className, dat[0], classInfo, ident);
+            } else {
+                cName = "MCButton";
+            }
             pros.push(`${ident}${instanceName}: ${cName};`);
         } else {
             Log.throwError("MCProgress数据有误，数据没有类名");
@@ -330,6 +334,9 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
 
         for (let className in classes) {
             str += "\t" + classes[className].replace(/\n/g, "\n\t") + "\n";
+        }
+        if (!str) {
+            return;
         }
         let ext = ".d.ts";
         let flaFolder = classRoot + "fla/";
