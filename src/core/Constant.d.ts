@@ -1,7 +1,7 @@
 /**
  * 导出类型标识
  */
-const enum ExportType {
+declare const enum ExportType {
     /*=======================基础控件======================= */
     /**图片**/
     Image = 0,
@@ -81,14 +81,14 @@ const enum ExportType {
     MCProgress = 21,
 }
 
-const enum Const {
+declare const enum Const {
     /**
      * flash最大尺寸限制
      */
     MaxSize = 3999
 }
 
-const enum ItemType {
+declare const enum ItemType {
     Undefined = "undefined",
     Component = "component",
     MovieClip = "movie clip",
@@ -102,7 +102,7 @@ const enum ItemType {
     Screen = "screen",
     Video = "video"
 }
-const enum SymbolType {
+declare const enum SymbolType {
     MovieClip = "movie clip",
 
     Button = "button",
@@ -112,7 +112,7 @@ const enum SymbolType {
 /**
  * 图层类型
  */
-const enum LayerType {
+declare const enum LayerType {
     /**
      * 普通层
      */
@@ -139,7 +139,7 @@ const enum LayerType {
     Folder = "folder"
 }
 
-const enum InsType {
+declare const enum InsType {
     Symbol = "symbol",
     Bitmap = "bitmap",
     EmbeddedVideo = "embedded video",
@@ -148,7 +148,7 @@ const enum InsType {
     CompiledClip = "compiled clip"
 }
 
-const enum ElementType {
+declare const enum ElementType {
     /**
      * Shape
      */
@@ -167,7 +167,7 @@ const enum ElementType {
     ShapeObj = "shapeObj"
 }
 
-const enum Extension {
+declare const enum Extension {
     Webp = ".webp",
     Raw = ".raw",
     Png = ".png",
@@ -178,7 +178,7 @@ const enum Extension {
     Jpng = "j.png",
 }
 
-const enum FilterName {
+declare const enum FilterName {
     GlowFilter = "glowFilter",
 
     AdjustColorFilter = "adjustColorFilter",

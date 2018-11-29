@@ -7,9 +7,7 @@ class MovieClipParser extends ComWillCheck {
         let timeline = item.timeline;
         let flen = timeline.frameCount;
         let layers = timeline.layers;
-        let name = item.name;
         let keyFrames = [] as number[];
-
         //-----------------------------------------预处理----------------------------------------------
         /**
          * 元素的字典
@@ -69,7 +67,7 @@ class MovieClipParser extends ComWillCheck {
                     for (let ei = 0; ei < elen; ei++) {
                         let ele = elements[ei];
                         let ename = ele.name;
-                        let eData = [] as MCEleRef | number;
+                        let eData: EleData = [] as any;
                         let flag = true;
                         if (!ename) {
                             ename = getEName(frame, i, ei);
@@ -144,7 +142,21 @@ class MovieClipParser extends ComWillCheck {
                 }
             }
         }
+        let linkageClassName = item.linkageClassName;
+        if (linkageClassName) {
+            data[2] = linkageClassName;
+        }
+        let className = MovieClipParser.getMCClassName(linkageClassName);
+        if (className) {
+            solution.mcComponents[className] = { data, type: this.key };
+        }
         return data;
+    }
+
+    static getMCClassName(linkageClassName: string) {
+        if (linkageClassName) {
+            return linkageClassName.replace(/[.]/g, "_");
+        }
     }
 }
 
@@ -209,6 +221,7 @@ interface MCData {
     data: BaseData;
 }
 
+declare type EleData = MCEleRef | number;
 interface MCEleRef extends Array<any> {
     /**
      * mc的索引，
@@ -235,3 +248,8 @@ interface MCEleRef extends Array<any> {
      */
     2?: TextData;
 }
+
+
+declare type MovieClipData = any;
+
+declare type MovieClipDict = { [className: string]: { data: MovieClipData, type: ExportType } };

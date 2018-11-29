@@ -30,6 +30,21 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
      * @type {string}
      */
     private _viewTmp: string;
+
+    /**
+     * MovieClip的模板
+     */
+    private _mcTmp: string;
+
+    /**
+     * MCButton的模板
+     */
+    private _mcBtnTmp: string;
+
+    /**
+     * MCProgress的模板
+     */
+    private _mcProgressTmp: string;
     /**
      * 解决方案
      */
@@ -47,6 +62,9 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
         this._mediatorTmp = FileUtils.loadTemplate(prefix + "Mediator.template");
         this._viewTmp = FileUtils.loadTemplate(prefix + "View.template");
         this._yyhdMediatorTmp = FileUtils.loadTemplate(prefix + "YYHDMediator.template");
+        this._mcBtnTmp = FileUtils.loadTemplate(prefix + "MCButton.template");
+        this._mcTmp = FileUtils.loadTemplate(prefix + "MovieClip.template");
+        this._mcProgressTmp = FileUtils.loadTemplate(prefix + "MCProgress.template");
     }
     private getPanelName(className: string) {
         let result = this.parsePanelName(className);
@@ -90,7 +108,7 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
             // [3, ["btn4", 103.5, 133.45, 79, 28, 0], 0, 0], 
             // [3, ["btn1", 24.5, 121.55, 79, 28, 0], 0, 0]]
             // template;
-            let classInfo = { classes: {}, depends: [] };
+            let classInfo = { classes: {}, depends: [] } as ClassInfo;
             let classes = classInfo.classes;
             let createtime = new Date().format("yyyy-MM-dd HH:mm:ss");
             let dclar = "";
@@ -106,7 +124,7 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
             if (classInfo.depends.length) {
                 otherDepends = ", " + classInfo.depends.join(", ");
             }
-            let classStr: string = classes[panelName];
+            let classStr = classes[panelName];
             delete classes[panelName];
             classStr = classStr.replace("@className@", className)
                 .replace(/@otherDepends@/g, otherDepends)
@@ -168,9 +186,8 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
         }
     }
 
-    private generateClass(tempate: string, panelName: string, pInfo: any[], classInfo: { classes: any, depends: any[] }, ident = "\t") {
+    private generateClass(tempate: string, panelName: string, pInfo: any[], classInfo: ClassInfo, ident = "\t") {
         let pros = [];
-        let idx = 0;
         let compCheckers = this._solution.compCheckers;
         for (let i = 0, len = pInfo.length; i < len; i++) {
             let data = pInfo[i];
@@ -196,6 +213,10 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
                 case ExportType.Text:
                     pros.push(`${ident}${instanceName}: egret.TextField;`);
                     break;
+                case ExportType.MCButton:
+                case ExportType.MCProgress:
+                    this.sovleMCComponent(type, instanceName, data, pros, panelName, ident, classInfo);
+                    break;
                 case ExportType.Container:
                     if (instanceName) {//匿名的不生成
                         let cName = panelName + "_" + instanceName;
@@ -214,10 +235,25 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
                         if (type in compCheckers) {
                             let c = compCheckers[type];
                             if (c) {
-                                pros.push(`${ident}${instanceName}: ${c.componentName};`);
+                                if (type == ExportType.MovieClip) {
+                                    let idx = data[2];
+                                    let dat = c.list[idx];
+                                    //找到对应实例
+                                    let className = dat[2];
+                                    if (className) {
+                                        className = MovieClipParser.getMCClassName(className);
+                                        pros.push(`${ident}${instanceName}: ${className};`);
+                                    } else {
+                                        Log.trace(`MovieClip数据有误，数据没有类名，instanceName:${instanceName},data:${JSON.stringify(data)}`);
+                                        pros.push(`${ident}${instanceName}: ${c.componentName};`);
+                                    }
+                                } else {
+                                    pros.push(`${ident}${instanceName}: ${c.componentName};`);
+                                }
                             } else {
                                 Log.throwError("面板进行生成代码，无法找到类型:", JSON.stringify(data));
                             }
+
                         } else if (type == ExportType.ExportedContainer) {
                             let idx = data[2];
                             let panelName = this._solution.panelNames[idx];
@@ -242,7 +278,77 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
             .replace(/@panelName@/g, panelName)
             .replace("@properties@", properties);
 
-
         classInfo.classes[panelName] = classStr;
     }
+
+    sovleMCComponent(type: ExportType, instanceName: string, data: any, pros: string[], panelName: string, ident: string, classInfo: ClassInfo) {
+        let dat = data[2];
+        let className: string;
+        if (typeof dat === "string") {
+            className = MovieClipParser.getMCClassName(dat);
+        }
+        let classes = classInfo.classes;
+        if (className) {
+            let temp = type == ExportType.MCButton ? this._mcBtnTmp : this._mcProgressTmp;
+            let cName = panelName + "_" + instanceName;
+            classes[cName] = temp.replace("@mcName@", className).replace("@panelName@", cName);
+            pros.push(`${ident}${instanceName}: ${cName};`);
+        } else if (type == ExportType.MCButton) {//只有MCButton允许使用匿名MC
+            let cName = panelName + "_" + instanceName;
+            let temp = this._mcBtnTmp;
+            let className = panelName + "_" + instanceName + "_MC";
+            classes[cName] = temp.replace("@mcName@", className).replace("@panelName@", cName);
+            this.generateClass(this._mcBtnTmp, className, data[0], classInfo, ident);
+            pros.push(`${ident}${instanceName}: ${cName};`);
+        } else {
+            Log.throwError("MCProgress数据有误，数据没有类名");
+        }
+    }
+
+    generateMCs(mcComponents: MovieClipDict, flaName: string) {
+        let classes = {};
+        let classInfo = { classes, depends: [] } as ClassInfo;
+        //生成MC对应类型文件
+        for (let className in mcComponents) {
+            let mcData = mcComponents[className];
+            let { data, type } = mcData;
+            let mcName: string;
+            switch (type) {
+                case ExportType.MCButton:
+                case ExportType.MCProgress:
+                    let tmp = type == ExportType.MCButton ? this._mcBtnTmp : this._mcProgressTmp;
+                    mcName = className + "_MC";
+                    classes[className] = tmp.replace("@mcName@", mcName).replace("@panelName@", className);
+                    break;
+                default:
+                    mcName = className;
+                    break;
+            }
+            this.generateClass(this._mcTmp, mcName, data[0], classInfo, "\t");
+        }
+        let str = "";
+
+        for (let className in classes) {
+            str += "\t" + classes[className].replace(/\n/g, "\n\t") + "\n";
+        }
+        let ext = ".d.ts";
+        let flaFolder = classRoot + "fla/";
+        if (!FLfile.exists(flaFolder)) {
+            FLfile.createFolder(flaFolder);
+        }
+        let path = flaFolder + flaName + ext;
+        str = "declare namespace " + moduleName + " {\n" +
+            str
+            + "\n}";
+        if (checkCodeSame(path, str)) {
+            Log.trace(`${path}和新生成内容相同，无需生成！`);
+        } else {
+            FLfile.write(path, str);
+        }
+    }
+}
+
+interface ClassInfo {
+    classes: any;
+    depends: any[]
 }
