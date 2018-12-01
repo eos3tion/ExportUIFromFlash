@@ -206,16 +206,18 @@ class Solution {
       4 高度
       5 旋转角度/或者matrix的[a,b,c,d]四个值组成的数组
    */
-    public getEleBaseData(ele: FlashElement): BaseData {
+    public getEleBaseData(ele: FlashElement, useRotation: boolean): BaseData {
         let ename: string | 0 = 0;
         if (ele.name) {
             ename = ele.name;
         }
         let matrix = ele.matrix;
         let result = ele.rotation as any;//用于兼容之前的数据
-        if (matrix.a != 1 || matrix.b != 0 || matrix.c != 0 || matrix.d != 1) {
-            //有进行过变形
-            result = [matrix.a, matrix.b, matrix.c, matrix.d];
+        if (!useRotation) {
+            if (matrix.a != 1 || matrix.b != 0 || matrix.c != 0 || matrix.d != 1) {
+                //有进行过变形
+                result = [matrix.a, matrix.b, matrix.c, matrix.d];
+            }
         }
         // 处理基础数据
         let data = [ename, Math.round(ele.x), Math.round(ele.y), ele.width, ele.height, result] as BaseData
@@ -384,13 +386,12 @@ class Solution {
         let type = ele.elementType;
         let data: ComponentData = [] as any;
         // 处理基础数据
-        let baseData = data[1] = this.getEleBaseData(ele);
+        let baseData = data[1] = this.getEleBaseData(ele, type == ElementType.Text);
         let compCheckers = this.compCheckers;
         out: switch (type) {
             case ElementType.Text: // 文本框特殊数据
                 data[0] = ExportType.Text;
                 data[2] = this.getTextData(<FlashText>ele);
-                baseData[5] = 0;//不需要matrix信息
                 break;
             case ElementType.Instance: // 处理实例数据
                 let itype = ele.instanceType;
