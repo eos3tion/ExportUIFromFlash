@@ -236,7 +236,8 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
                             if (c) {
                                 if (type == ExportType.MovieClip) {
                                     let idx = data[2];
-                                    let dat = c.list[idx];
+                                    let list = c.list;
+                                    let dat = list && list[idx];
                                     //找到对应实例
                                     let className = dat && dat[2];
                                     if (className) {
