@@ -142,13 +142,15 @@ class MovieClipParser extends ComWillCheck {
                 }
             }
         }
-        let linkageClassName = item.linkageClassName;
-        if (linkageClassName) {
-            data[2] = linkageClassName;
-        }
-        let className = MovieClipParser.getMCClassName(linkageClassName);
-        if (className) {
-            solution.mcComponents[className] = { data, type: this.key };
+        if (!item.linkageImportForRS) {//非导入的控件才做此处理
+            let linkageClassName = item.linkageClassName;
+            if (linkageClassName) {
+                data[2] = linkageClassName;
+            }
+            let className = MovieClipParser.getMCClassName(linkageClassName);
+            if (className) {
+                solution.mcComponents[className] = { data, type: this.key };
+            }
         }
         return data;
     }

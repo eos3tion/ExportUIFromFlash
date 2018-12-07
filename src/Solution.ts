@@ -206,7 +206,7 @@ class Solution {
       4 高度
       5 旋转角度/或者matrix的[a,b,c,d]四个值组成的数组
    */
-    public getEleBaseData(ele: FlashElement, useRotation: boolean): BaseData {
+    public getEleBaseData(ele: FlashElement, useRotation?: boolean): BaseData {
         let ename: string | 0 = 0;
         if (ele.name) {
             ename = ele.name;

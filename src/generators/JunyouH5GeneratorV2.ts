@@ -244,7 +244,6 @@ class JunyouH5GeneratorV2 implements IPanelGenerator {
                                         className = MovieClipParser.getMCClassName(className);
                                         pros.push(`${ident}${instanceName}: ${className};`);
                                     } else {
-                                        Log.trace(`MovieClip数据有误，数据没有类名，instanceName:${instanceName},data:${JSON.stringify(data)}`);
                                         pros.push(`${ident}${instanceName}: ${c.componentName};`);
                                     }
                                 } else {
