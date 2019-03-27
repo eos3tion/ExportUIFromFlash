@@ -36,8 +36,10 @@ class ShareBitmapParser extends ComWillCheck {
             return;
         }
         let ele = elements[0];
-        if (ele.elementType === "instance" && ele.instanceType === "bitmap") {
+        if (ele && ele.elementType === "instance" && ele.instanceType === "bitmap") {
             data[0] = solution.getElementData(ele);
+        } else {
+            return Log.throwError("sharebmp没有任何位图", item.name);
         }
         return data;
     }
