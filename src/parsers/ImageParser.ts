@@ -84,6 +84,10 @@ class ImageParser {
                     return;
                 }
                 let ele = elements[0];
+                if (!ele) {
+                    Log.throwError("BitmapSlice9.jsfl处理的九宫图元件有误，图片可能被误删", libItem.name);
+                    return;
+                }
                 solution.addImageToLib(ele, libItem);
                 return;
             }
