@@ -36,7 +36,10 @@ class ArtTextParser extends ComWillCheck {
                 data[ei + 1] = solution.getBitmapIndex(ele.libraryItem);
                 tempName = ele.libraryItem.name;
                 tempName = tempName.substr(tempName.lastIndexOf("/") + 1);
-                tempName = tempName.split(".")[0];
+                let idx = tempName.lastIndexOf(".");
+                if (idx > -1) {
+                    tempName = tempName.substring(0, idx);
+                }
                 if (tempName.length > 1) {
                     Log.throwError("ArtText所引用的png的名字只能为单个字符", item.name, tempName);
                 }
