@@ -56,16 +56,11 @@ try {
     //九宫元件
     sol.regComChecker(new ScaleBitmapParser());
 
-    // 绑定按钮
-    sol.regComChecker(new ButtonParser());
-    //绑定分页控件
-    //sol.regComChecker(new PageControlerParser());
-
     sol.regComChecker(new ArtTextParser());
 
     sol.regComChecker(new NumericStepperParser());
 
-    sol.regComChecker(new SliderParser());
+    sol.regComChecker(new ComWillCheck(ExportType.Slider, /^ui[.](slider)[.]/, MovieClipParser.prototype.doParser, "Slider"));
 
     sol.regComChecker(new ScrollBarParser());
 
