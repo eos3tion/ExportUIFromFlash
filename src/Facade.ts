@@ -13,7 +13,7 @@ var useShortName: boolean;
 /**
  * 当前处理的fla的名字
  */
-var flaname = xml..flashFileName.toString().replace(".swf", "") || dom.name.replace(".fla", "");
+var flaname = xml./** xml..flashFileName 这个为 e4x 规范的语法，后来被弃用，jsfl 可以使用 */.flashFileName.toString().replace(".swf", "") || dom.name.replace(".fla", "");
 
 /**
  * 最终数据和纹理输出的目录
