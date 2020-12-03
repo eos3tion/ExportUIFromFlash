@@ -30,6 +30,10 @@ if (typeof exportRaw === "undefined") {
     exportRaw = false;
 }
 
+if (typeof useRaw === "undefined") {
+    useRaw = false;
+}
+
 if (typeof checkJPG === "undefined") {
     checkJPG = false;
 }

@@ -387,12 +387,16 @@ class ImageParser {
 
     private exportPng(bitmap: FlashItem, exname: string) {
         this.exportImage(bitmap, exname);
-        //保存原始图片，增加.raw后缀
-        this.exportRaw(exname);
+        if (!useRaw) {
+            //保存原始图片，增加.raw后缀
+            this.exportRaw(exname);
+        }
         if (exportWebp) {
             FLExternal.cwebp(exname);
         }
-        FLExternal.pngquant(exname);
+        if (!useRaw) {
+            FLExternal.pngquant(exname);
+        }
         lib.deleteItem(bitmap.name);
     }
 

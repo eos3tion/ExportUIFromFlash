@@ -186,6 +186,11 @@ declare let exportWebp: boolean;
  */
 declare let exportRaw: boolean;
 
+/**
+ * 是否直接使用原始图
+ */
+declare let useRaw: boolean;
+
 interface XML {
 
 }
